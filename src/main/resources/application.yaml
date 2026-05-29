@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: monitor-forno
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/forno_monitor
+    username: postgres
+    password: tsX*WD7AMthXu8r^6fzs
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true

@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.database.model.Sessao;
+import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
+import com.rafael.monitor_forno.dto.SessaoResumoDTO;
 import com.rafael.monitor_forno.service.SessaoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,23 +21,25 @@ public class SessaoController {
     }
 
     @PostMapping("/iniciar")
-    public ResponseEntity<Sessao> criarSessao(){
+    public ResponseEntity<SessaoResumoDTO> criarSessao() {
 
-        Sessao sessao = sessaoService.iniciarSessao();
-        return new ResponseEntity<>(sessao, HttpStatus.CREATED);
+        SessaoResumoDTO sessao = sessaoService.iniciarSessao();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(sessao);
     }
 
     @PutMapping("/{id}/encerrar")
-    public ResponseEntity<Sessao> encerrarSessao(@PathVariable UUID id){
+    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id){
 
-        Sessao sessao = sessaoService.encerrarSessao(id);
+        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id);
 
         return ResponseEntity.ok(sessao);
 
     }
 
     @GetMapping
-    public ResponseEntity<List<Sessao>> pegarTodasSessoes() {
+    public ResponseEntity<List<SessaoResumoDTO>> pegarTodasSessoes() {
 
         return ResponseEntity.ok(
                 sessaoService.findAll()
@@ -44,11 +47,11 @@ public class SessaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sessao> pegarSessaoPorId(@PathVariable UUID id) {
+    public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id) {
 
-        Sessao sessao = sessaoService.findById(id);
-
-        return ResponseEntity.ok(sessao);
+        return ResponseEntity.ok(
+                sessaoService.findById(id)
+        );
 
     }
 

@@ -38,6 +38,12 @@ public class SessaoController {
 
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarSessao(@PathVariable UUID id) {
+        sessaoService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<SessaoResumoDTO>> pegarTodasSessoes() {
 

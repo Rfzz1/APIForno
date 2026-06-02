@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Evento;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
@@ -60,6 +61,17 @@ public class SessaoService {
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toDetalhesDTO(sessaoSalva);
+    }
+
+    public void deleteById(UUID id) {
+        Sessao sessao = sessaoRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Sessão não encontrada: " + id
+                        )
+                );
+
+        sessaoRepository.delete(sessao);
     }
 
     public List<SessaoResumoDTO> findAll() {

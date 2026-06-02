@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/temperaturas")
@@ -29,6 +30,12 @@ public class TemperaturaController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id) {
+        temperaturaService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

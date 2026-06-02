@@ -6,10 +6,13 @@ import com.rafael.monitor_forno.dto.EventoDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.exception.EstadoInvalidoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import jdk.jfr.Event;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EventoService {
@@ -34,11 +37,31 @@ public class EventoService {
         eventoRepository.save(evento);
     }
 
+    public void deleteById(UUID id) {
+
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Evento não encontrado"
+                        ));
+
+        eventoRepository.delete(evento);
+    }
+
     public List<EventoDTO> findAll() {
         return eventoRepository.findAll()
                 .stream()
                 .map(this::toEventoDTO)
                 .toList();
+    }
+
+    public EventoDTO findById(UUID id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException("Evento não encontrado: " + id)
+                );
+
+        return toEventoDTO(evento);
     }
 
     private EventoDTO toEventoDTO(Evento evento) {

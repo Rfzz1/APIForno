@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TemperaturaService {
@@ -39,6 +40,16 @@ public class TemperaturaService {
         temperaturaRepository.save(temperatura);
 
         return true;
+    }
+
+    public void deleteById(UUID id) {
+        Temperatura temperatura = temperaturaRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Temperatura não encontrada: " + id
+                        )
+                );
+        temperaturaRepository.delete(temperatura);
     }
 
     public List<TemperaturaDTO> findAll() {

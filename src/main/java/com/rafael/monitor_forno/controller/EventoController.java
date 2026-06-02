@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/eventos")
@@ -29,8 +30,22 @@ public class EventoController {
                 .build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvento(
+            @PathVariable UUID id) {
+
+        eventoService.deleteById(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
-    public ResponseEntity<List<EventoDTO>> getAllEventos() {
+    public ResponseEntity<?> getAllEventos(@RequestParam(required = false) UUID id) {
+
+        if (id != null) {
+            return ResponseEntity.ok(eventoService.findById(id));
+        }
+
         return ResponseEntity.ok(eventoService.findAll());
     }
 

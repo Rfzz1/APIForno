@@ -1,9 +1,12 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.config.JwtService;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
+import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
+import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,13 +19,22 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public void cadastrarUsuario(UserRequestDTO dto) {
+
+        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new CredencialJaCadastradaException(
+                    "Email já cadastrado"
+            );
+        }
+
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
@@ -54,7 +66,7 @@ public class UsuarioService {
             );
         }
 
-        return toUserResponseDTO(usuarioExsitente);
+        return toUserResponseDTO(usuarioRepository.save(usuarioExsitente));
     }
 
     public void deleteById(UUID id) {
@@ -72,6 +84,31 @@ public class UsuarioService {
                 .stream()
                 .map(this::toUserResponseDTO)
                 .toList();
+    }
+
+    public String login(String email, String senha) {
+
+        Usuario usuario = usuarioRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+
+        if (!passwordEncoder.matches(
+                senha,
+                usuario.getSenha()
+        )) {
+
+            throw new CredenciaisInvalidasException(
+                    "Email ou senha inválidos"
+            );
+        }
+
+        return jwtService.gerarToken(
+                usuario.getEmail()
+        );
     }
 
     public UserResponseDTO findById(UUID id) {

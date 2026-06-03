@@ -98,6 +98,7 @@ public class SessaoService {
                 .inicioSessao(sessao.getInicioSessao())
                 .fimSessao(sessao.getFimSessao())
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
+                .estadoSistema(sessao.getEstadoSistema())
                 .build();
     }
 
@@ -108,6 +109,7 @@ public class SessaoService {
                 .fimSessao(sessao.getFimSessao())
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .duracaoSegundos(sessao.getDuracaoSegundos())
+                .estadoSistema(sessao.getEstadoSistema())
                 .build();
     }
 }

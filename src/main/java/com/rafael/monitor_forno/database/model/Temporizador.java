@@ -6,27 +6,32 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "usuarios")
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class Usuario {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "temporizadores")
+public class Temporizador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
-    private String nome;
-
-    @Column(nullable = false, unique = true)
-    private String email;
+    private LocalDateTime criadoEm;
 
     @Column(nullable = false)
-    private LocalDate nascimento;
+    private LocalDateTime horarioFim;
 
     @Column(nullable = false)
-    private String senha;
+    private boolean executado;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
 }

@@ -1,6 +1,5 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
 import com.rafael.monitor_forno.service.UsuarioService;

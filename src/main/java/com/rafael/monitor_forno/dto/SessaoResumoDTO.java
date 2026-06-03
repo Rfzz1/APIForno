@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
 import com.rafael.monitor_forno.enums.estados.EstadoForno;
+import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,4 +19,5 @@ public class SessaoResumoDTO {
     private LocalDateTime inicioSessao;
     private LocalDateTime fimSessao;
     private EstadoForno estadoFornoFinal;
+    private EstadoSistema estadoSistema;
 }

@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.database.model;
 
 import com.rafael.monitor_forno.enums.estados.EstadoForno;
+import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.*;
@@ -27,4 +28,7 @@ public class Sessao {
 
     @Enumerated(EnumType.STRING)
     private EstadoForno estadoFornoFinal;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoSistema estadoSistema;
 }

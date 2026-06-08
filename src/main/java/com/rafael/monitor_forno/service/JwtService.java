@@ -1,4 +1,4 @@
-package com.rafael.monitor_forno.config;
+package com.rafael.monitor_forno.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

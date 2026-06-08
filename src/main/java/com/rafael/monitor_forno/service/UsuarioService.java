@@ -1,6 +1,5 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.config.JwtService;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.UserRequestDTO;

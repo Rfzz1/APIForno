@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.config;
 
+import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

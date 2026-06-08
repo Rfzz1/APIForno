@@ -2,11 +2,8 @@ package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Temperatura;
 import com.rafael.monitor_forno.database.repository.TemperaturaRepository;
-import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
-import com.rafael.monitor_forno.dto.SessaoResumoDTO;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
-import com.rafael.monitor_forno.exception.DataTemperaturaNaoEncontradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +59,7 @@ public class TemperaturaService {
     public TemperaturaDTO findByDate(LocalDateTime registradoEm) {
         Temperatura temperatura = temperaturaRepository.findByRegistradoEm(registradoEm)
                 .orElseThrow(
-                        () -> new DataTemperaturaNaoEncontradaException(
+                        () -> new RecursoNaoEncontradoException(
                                 "Data não encontrada: " + registradoEm
                         )
                 );

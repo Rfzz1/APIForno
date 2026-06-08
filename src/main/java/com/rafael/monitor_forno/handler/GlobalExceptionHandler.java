@@ -19,18 +19,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    @ExceptionHandler(TemperaturaInvalidaException.class)
-    public ResponseEntity<String> handleTemperaturaInvalida(TemperaturaInvalidaException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(DataTemperaturaNaoEncontradaException.class)
-    public ResponseEntity<String> handleDataNaoEncontrada(DataTemperaturaNaoEncontradaException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(EstadoInvalidoException.class)
-    public ResponseEntity<String> handleEstadoInvalido(EstadoInvalidoException ex) {
+    @ExceptionHandler(RecursoEmFormatoInvalido.class)
+    public ResponseEntity<String> handleRecursoEmFormatoInvalido(RecursoEmFormatoInvalido ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
     }
 

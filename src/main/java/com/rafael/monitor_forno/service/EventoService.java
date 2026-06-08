@@ -4,10 +4,8 @@ import com.rafael.monitor_forno.database.model.Evento;
 import com.rafael.monitor_forno.database.repository.EventoRepository;
 import com.rafael.monitor_forno.dto.EventoDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
-import com.rafael.monitor_forno.exception.EstadoInvalidoException;
+import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
-import jdk.jfr.Event;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +24,7 @@ public class EventoService {
     public void registrarEvento(EventoRequestDTO dto) {
 
         if (dto.getTipo() == null) {
-            throw new EstadoInvalidoException(
+            throw new RecursoEmFormatoInvalido(
                     "Tipo do evento não informado"
             );
         }

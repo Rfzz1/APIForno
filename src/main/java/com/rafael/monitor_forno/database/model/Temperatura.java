@@ -24,4 +24,8 @@ public class Temperatura {
     @Column(nullable = false)
     private LocalDateTime registradoEm;
 
+    @ManyToOne
+    @JoinColumn(name = "sessao_id")
+    private Sessao sessao;
+
 }

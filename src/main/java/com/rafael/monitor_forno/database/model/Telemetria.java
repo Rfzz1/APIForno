@@ -4,12 +4,20 @@ package com.rafael.monitor_forno.database.model;
 import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name="telemtetrias")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name="telemetrias")
 public class Telemetria {
 
     @Id

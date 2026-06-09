@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
 import com.rafael.monitor_forno.enums.estados.EstadoForno;
+import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import lombok.*;
 
 @Getter
@@ -16,7 +17,7 @@ public class TelemetriaRequestDTO {
 
     private EstadoForno estadoForno;
 
-    private String estadoSistema;
+    private EstadoSistema estadoSistema;
 
     private Long tempoLigadoMinutos;
 

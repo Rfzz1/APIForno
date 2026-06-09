@@ -16,4 +16,5 @@ public class UserRequestDTO {
     private String email;
     private LocalDate nascimento;
     private String senha;
+    private UUID sessaoId;
 }

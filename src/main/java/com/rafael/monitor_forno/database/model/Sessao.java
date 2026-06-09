@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,4 +32,13 @@ public class Sessao {
 
     @Enumerated(EnumType.STRING)
     private EstadoSistema estadoSistema;
+
+    @OneToMany(mappedBy = "sessao")
+    private List<Evento> eventos;
+
+    @OneToMany(mappedBy = "sessao")
+    private List<Temperatura> temperaturas;
+
+    @OneToMany(mappedBy = "sessao")
+    private List<Usuario> usuarios;
 }

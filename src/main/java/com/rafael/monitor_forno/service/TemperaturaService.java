@@ -1,10 +1,13 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Temperatura;
+import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.TemperaturaRepository;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,9 +19,13 @@ public class TemperaturaService {
 
     private static final double THRESHOLD = 2.0;
     private final TemperaturaRepository temperaturaRepository;
+    private final TemperaturaMapper temperaturaMapper;
+    private final SessaoRepository sessaoRepository;
 
-    public TemperaturaService(TemperaturaRepository temperaturaRepository) {
+    public TemperaturaService(TemperaturaRepository temperaturaRepository, TemperaturaMapper temperaturaMapper, SessaoRepository sessaoRepository) {
         this.temperaturaRepository = temperaturaRepository;
+        this.temperaturaMapper = temperaturaMapper;
+        this.sessaoRepository = sessaoRepository;
     }
 
     public boolean registrarLeitura(TemperaturaRequestDTO dto) {
@@ -29,10 +36,18 @@ public class TemperaturaService {
             return false;
         }
 
+        Sessao sessao = sessaoRepository.findById(dto.getSessaoId())
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Sessao não encontrada " + dto.getSessaoId()
+                        )
+                );
+
         Temperatura temperatura = new Temperatura();
         temperatura.setTemperaturaAtual(dto.getTemperaturaAtual());
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
         temperatura.setRegistradoEm(LocalDateTime.now());
+        temperatura.setSessao(sessao);
 
         temperaturaRepository.save(temperatura);
 
@@ -52,7 +67,7 @@ public class TemperaturaService {
     public List<TemperaturaDTO> findAll() {
         return temperaturaRepository.findAll()
                 .stream()
-                .map(this::toTemperaturaDTO)
+                .map(temperaturaMapper::toTemperaturaDTO)
                 .toList();
     }
 
@@ -63,16 +78,7 @@ public class TemperaturaService {
                                 "Data não encontrada: " + registradoEm
                         )
                 );
-        return toTemperaturaDTO(temperatura);
-    }
-
-    private TemperaturaDTO toTemperaturaDTO(Temperatura temperatura) {
-        return TemperaturaDTO.builder()
-                .id(temperatura.getId())
-                .registradoEm(temperatura.getRegistradoEm())
-                .temperaturaAtual(temperatura.getTemperaturaAtual())
-                .temperaturaUltima(temperatura.getTemperaturaUltima())
-                .build();
+        return temperaturaMapper.toTemperaturaDTO(temperatura);
     }
 
 }

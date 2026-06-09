@@ -7,6 +7,9 @@ import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
 import com.rafael.monitor_forno.dto.SessaoResumoDTO;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.exception.SessaoEncerradaException;
+import com.rafael.monitor_forno.mappers.EventoMapper;
+import com.rafael.monitor_forno.mappers.TemperaturaMapper;
+import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,9 +21,15 @@ import java.util.UUID;
 public class SessaoService {
 
     private final SessaoRepository sessaoRepository;
+    private final EventoMapper eventoMapper;
+    private final TemperaturaMapper temperaturaMapper;
+    private final UserMapper userMapper;
 
-    public SessaoService(SessaoRepository sessaoRepository) {
+    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UserMapper userMapper) {
         this.sessaoRepository = sessaoRepository;
+        this.eventoMapper = eventoMapper;
+        this.temperaturaMapper = temperaturaMapper;
+        this.userMapper = userMapper;
     }
 
     public SessaoResumoDTO iniciarSessao() {
@@ -110,6 +119,9 @@ public class SessaoService {
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .duracaoSegundos(sessao.getDuracaoSegundos())
                 .estadoSistema(sessao.getEstadoSistema())
+                .eventos(sessao.getEventos().stream().map(eventoMapper::toEventoDTO).toList())
+                .temperaturas(sessao.getTemperaturas().stream().map(temperaturaMapper::toTemperaturaDTO).toList())
+                .usuarios(sessao.getUsuarios().stream().map(userMapper::toUserResponseDTO).toList())
                 .build();
     }
 }

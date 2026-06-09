@@ -1,6 +1,8 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
@@ -19,11 +21,13 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final SessaoRepository sessaoRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService, SessaoRepository sessaoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.sessaoRepository = sessaoRepository;
     }
 
     public void cadastrarUsuario(UserRequestDTO dto) {
@@ -34,7 +38,15 @@ public class UsuarioService {
             );
         }
 
+        Sessao sessao = sessaoRepository.findById(dto.getSessaoId())
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Sessão não encontrada " + dto.getSessaoId()
+                        )
+                );
+
         Usuario usuario = new Usuario();
+        usuario.setSessao(sessao);
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setNascimento(dto.getNascimento());

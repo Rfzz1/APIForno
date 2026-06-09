@@ -21,4 +21,8 @@ public class Evento {
 
     @Enumerated(EnumType.STRING)
     private EventoSistema tipo;
+
+    @ManyToOne
+    @JoinColumn(name = "sessao_id")
+    private Sessao sessao;
 }

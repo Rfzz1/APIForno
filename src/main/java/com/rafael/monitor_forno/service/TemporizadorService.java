@@ -60,7 +60,7 @@ public class TemporizadorService {
                 );
 
         Temporizador temporizador = temporizadorRepository.findFirstByUsuarioAndExecutadoFalseOrderByHorarioFimAsc(usuario)
-                .orElseThrow(
+                .orElseThrow(   
                         () -> new RecursoNaoEncontradoException(
                                 "Nenhum temporizador encontrado"
                         )

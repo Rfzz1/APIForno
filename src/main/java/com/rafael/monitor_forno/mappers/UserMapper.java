@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public UserResponseDTO toUserResponseDTO(Usuario usuario) {
+
         return UserResponseDTO.builder()
                 .id(usuario.getId())
                 .nome(usuario.getNome())
@@ -15,4 +16,5 @@ public class UserMapper {
                 .nascimento(usuario.getNascimento())
                 .build();
     }
+
 }

@@ -38,15 +38,7 @@ public class UsuarioService {
             );
         }
 
-        Sessao sessao = sessaoRepository.findById(dto.getSessaoId())
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Sessão não encontrada " + dto.getSessaoId()
-                        )
-                );
-
         Usuario usuario = new Usuario();
-        usuario.setSessao(sessao);
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setNascimento(dto.getNascimento());

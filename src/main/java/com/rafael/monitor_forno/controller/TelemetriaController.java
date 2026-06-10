@@ -1,5 +1,7 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.dto.DashboardDTO;
+import com.rafael.monitor_forno.dto.EstatisticasDTO;
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
 import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
 import com.rafael.monitor_forno.service.TelemetriaService;
@@ -28,5 +30,15 @@ public class TelemetriaController {
     @GetMapping("/atual")
     public ResponseEntity<TelemetriaResponseDTO> buscarAtual(Authentication authentication) {
         return ResponseEntity.ok(telemetriaService.buscarAtual(authentication.getName()));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardDTO> buscarDashboard(Authentication authentication) {
+        return ResponseEntity.ok(telemetriaService.buscarDashboard(authentication.getName()));
+    }
+
+    @GetMapping("/estatisticas")
+    public ResponseEntity<EstatisticasDTO> buscarEstatisticas(Authentication authentication) {
+        return ResponseEntity.ok(telemetriaService.buscarEstatisticas(authentication.getName()));
     }
 }

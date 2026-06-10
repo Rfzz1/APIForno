@@ -41,7 +41,7 @@ public class TemporizadorController {
         return ResponseEntity.ok(temporizadorService.atualizarTemporizador(dto, id));
     }
 
-    @PutMapping("/{id}/executar")
+    @PutMapping("/{id}/encerrar")
     public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id) {
         temporizadorService.marcarComoExecutado(id);
         return ResponseEntity.noContent().build();

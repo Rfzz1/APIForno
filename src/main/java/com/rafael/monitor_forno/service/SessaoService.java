@@ -1,8 +1,9 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.database.model.Evento;
 import com.rafael.monitor_forno.database.model.Sessao;
+import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
 import com.rafael.monitor_forno.dto.SessaoResumoDTO;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
@@ -23,21 +24,29 @@ public class SessaoService {
     private final SessaoRepository sessaoRepository;
     private final EventoMapper eventoMapper;
     private final TemperaturaMapper temperaturaMapper;
+    private final UsuarioRepository usuarioRepository;
     private final UserMapper userMapper;
 
-    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UserMapper userMapper) {
+    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, UserMapper userMapper) {
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.temperaturaMapper = temperaturaMapper;
+        this.usuarioRepository = usuarioRepository;
         this.userMapper = userMapper;
     }
 
-    public SessaoResumoDTO iniciarSessao() {
+    public SessaoResumoDTO iniciarSessao(String email) {
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
 
         Sessao sessao = new Sessao();
-
+        sessao.setUsuario(usuario);
         sessao.setInicioSessao(LocalDateTime.now());
-
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toResumoDTO(sessaoSalva);
@@ -119,9 +128,15 @@ public class SessaoService {
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .duracaoSegundos(sessao.getDuracaoSegundos())
                 .estadoSistema(sessao.getEstadoSistema())
-                .eventos(sessao.getEventos().stream().map(eventoMapper::toEventoDTO).toList())
-                .temperaturas(sessao.getTemperaturas().stream().map(temperaturaMapper::toTemperaturaDTO).toList())
-                .usuarios(sessao.getUsuarios().stream().map(userMapper::toUserResponseDTO).toList())
+                .eventos(
+                        sessao.getEventos() == null
+                        ? List.of()
+                        : sessao.getEventos().stream().map(eventoMapper::toEventoDTO).toList())
+                .temperaturas(
+                        sessao.getTemperaturas() == null
+                        ? List.of()
+                        : sessao.getTemperaturas().stream().map(temperaturaMapper::toTemperaturaDTO).toList())
+                .usuario(userMapper.toUserResponseDTO(sessao.getUsuario()))
                 .build();
     }
 }

@@ -39,6 +39,7 @@ public class Sessao {
     @OneToMany(mappedBy = "sessao")
     private List<Temperatura> temperaturas;
 
-    @OneToMany(mappedBy = "sessao")
-    private List<Usuario> usuarios;
+    @ManyToOne
+    @JoinColumn(name="usuario_id")
+    private Usuario usuario;
 }

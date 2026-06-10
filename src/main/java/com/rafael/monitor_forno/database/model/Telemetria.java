@@ -30,13 +30,17 @@ public class Telemetria {
     @Column(nullable = false)
     private Double temperaturaUltima;
 
+    @Column(nullable = false)
+    private Integer quantidadeSessoes;
+
+    @Column(nullable = false)
+    private Long tempoLigadoMinutos;
+
     @Enumerated(EnumType.STRING)
     private EstadoForno estadoForno;
 
     @Enumerated(EnumType.STRING)
     private EstadoSistema estadoSistema;
-
-    private Long tempoLigadoMinutos;
 
     private LocalDateTime atualizadoEm;
 

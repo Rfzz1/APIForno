@@ -25,6 +25,5 @@ public class SessaoDetalhesDTO {
     private Long duracaoSegundos;
     private List<EventoDTO> eventos;
     private List<TemperaturaDTO> temperaturas;
-    private List<UserResponseDTO> usuarios;
-
+    private UserResponseDTO usuario;
 }

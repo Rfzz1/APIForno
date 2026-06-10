@@ -1,13 +1,12 @@
 package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
+import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
 import com.rafael.monitor_forno.service.TelemetriaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("v1/telemetrias")
@@ -20,10 +19,14 @@ public class TelemetriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto) {
+    public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto, Authentication authentication) {
 
-        telemetriaService.registrar(dto);
+        telemetriaService.registrar(dto, authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("/atual")
+    public ResponseEntity<TelemetriaResponseDTO> buscarAtual(Authentication authentication) {
+        return ResponseEntity.ok(telemetriaService.buscarAtual(authentication.getName()));
+    }
 }

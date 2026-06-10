@@ -38,5 +38,9 @@ public class Telemetria {
 
     private Long tempoLigadoMinutos;
 
-    private LocalDateTime criadoEm;
+    private LocalDateTime atualizadoEm;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 }

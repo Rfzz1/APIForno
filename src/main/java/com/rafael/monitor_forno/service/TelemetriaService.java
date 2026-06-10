@@ -11,6 +11,7 @@ import com.rafael.monitor_forno.dto.DashboardDTO;
 import com.rafael.monitor_forno.dto.EstatisticasDTO;
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
 import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
+import com.rafael.monitor_forno.enums.eventos.EventoSistema;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
@@ -115,13 +116,26 @@ public class TelemetriaService {
 
         long alertas = sessoes.stream()
                 .flatMap(s -> s.getEventos().stream())
-                .filter(e -> e.getTipo() == )
+                .filter(e -> e.getTipo() == EventoSistema.ALERTA_ENTRADA || e.getTipo() == EventoSistema.ALERTA_SAIDA)
+                .count();
+
+        long criticos = sessoes.stream()
+                .flatMap(s -> s.getEventos().stream())
+                .filter(e -> e.getTipo() == EventoSistema.CRITICO_ENTRADA || e.getTipo() == EventoSistema.CRITICO_SAIDA)
+                .count();
+
+        long erros = sessoes.stream()
+                .flatMap(s -> s.getEventos().stream())
+                .filter(e -> e.getTipo() == EventoSistema.ERRO_SENSOR_ENTRADA || e.getTipo() == EventoSistema.ERRO_SENSOR_SAIDA)
+                .count();
 
         return EstatisticasDTO.builder()
                 .tempoTotalLigado(tempoTotalLigado)
                 .quantidadeSessoes(quantidadeSessoes)
                 .temperaturaMaxima(temperaturaMaxima)
                 .alertas(alertas)
+                .criticos(criticos)
+                .errosSensor(erros)
                 .build();
     }
 

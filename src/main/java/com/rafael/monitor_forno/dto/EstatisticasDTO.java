@@ -12,8 +12,8 @@ public class EstatisticasDTO {
     private Long tempoTotalLigado;
     private Integer quantidadeSessoes;
     private Double temperaturaMaxima;
-    private Integer alertas;
-    private Integer criticos;
-    private Integer errosSensor;
+    private Long alertas;
+    private Long criticos;
+    private Long errosSensor;
 
 }

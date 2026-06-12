@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +23,9 @@ public class EventoController {
 
     @PostMapping
     public ResponseEntity<Void> registrarEvento(
-            @RequestBody EventoRequestDTO dto) {
+            @RequestBody EventoRequestDTO dto, Authentication authentication) {
 
-        eventoService.registrarEvento(dto);
+        eventoService.registrarEvento(dto, authentication.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();

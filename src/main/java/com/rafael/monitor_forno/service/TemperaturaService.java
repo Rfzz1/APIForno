@@ -2,8 +2,10 @@ package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Temperatura;
+import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.TemperaturaRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
@@ -21,14 +23,23 @@ public class TemperaturaService {
     private final TemperaturaRepository temperaturaRepository;
     private final TemperaturaMapper temperaturaMapper;
     private final SessaoRepository sessaoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public TemperaturaService(TemperaturaRepository temperaturaRepository, TemperaturaMapper temperaturaMapper, SessaoRepository sessaoRepository) {
+    public TemperaturaService(TemperaturaRepository temperaturaRepository, TemperaturaMapper temperaturaMapper, SessaoRepository sessaoRepository, UsuarioRepository usuarioRepository) {
         this.temperaturaRepository = temperaturaRepository;
         this.temperaturaMapper = temperaturaMapper;
         this.sessaoRepository = sessaoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public boolean registrarLeitura(TemperaturaRequestDTO dto) {
+    public boolean registrarLeitura(TemperaturaRequestDTO dto, String email) {
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
 
         Double diferenca = Math.abs(dto.getTemperaturaAtual() - dto.getTemperaturaUltima());
 
@@ -45,6 +56,7 @@ public class TemperaturaService {
 
         Temperatura temperatura = new Temperatura();
         temperatura.setTemperaturaAtual(dto.getTemperaturaAtual());
+        temperatura.setUsuario(usuario);
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
         temperatura.setRegistradoEm(LocalDateTime.now());
         temperatura.setSessao(sessao);

@@ -2,8 +2,10 @@ package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Evento;
 import com.rafael.monitor_forno.database.model.Sessao;
+import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.EventoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.EventoDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
@@ -21,14 +23,23 @@ public class EventoService {
     private final EventoRepository eventoRepository;
     private final EventoMapper eventoMapper;
     private final SessaoRepository sessaoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper) {
+    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper, UsuarioRepository usuarioRepository) {
         this.eventoRepository = eventoRepository;
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public void registrarEvento(EventoRequestDTO dto) {
+    public void registrarEvento(EventoRequestDTO dto, String email) {
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
 
         if (dto.getTipo() == null) {
             throw new RecursoEmFormatoInvalido(
@@ -46,6 +57,7 @@ public class EventoService {
 
         Evento evento = new Evento();
         evento.setSessao(sessao);
+        evento.setUsuario(usuario);
         evento.setTipo(dto.getTipo());
         evento.setCriadoEm(LocalDateTime.now());
         eventoRepository.save(evento);

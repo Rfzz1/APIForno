@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TelemetriaService {
@@ -95,7 +96,7 @@ public class TelemetriaService {
         int quantidadeSessoes =
                 sessaoRepository.countByUsuario(usuario);
 
-        Double temperaturaMaxima = temperaturaRepository.findTemperaturaMaximaByUsuario(usuario);
+        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByUsuario(usuario)).orElse(0.0);
 
         Evento ultimoEvento = eventoRepository.findFirstByUsuarioOrderByCriadoEmDesc(usuario)
                 .orElse(null);

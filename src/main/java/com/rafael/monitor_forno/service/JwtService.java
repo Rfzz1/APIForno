@@ -13,12 +13,6 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final UsuarioRepository usuarioRepository;
-
-    public JwtService (UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
-
     @Value("${jwt.secret}")
     private String secret;
 

@@ -1,11 +1,8 @@
 spring:
   application:
-    name: monitor-forno
+    name: forno-monitor
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -20,8 +17,6 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USER}
-    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -30,5 +25,4 @@ spring:
             enable: true
 
 jwt:
-  secret: ${JWT_SECRET}
   expiration: 86400000

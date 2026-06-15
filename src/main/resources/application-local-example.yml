@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url:
+    username:
+    password:
+
+  mail:
+    username:
+    password:
+
+jwt:
+  secret:

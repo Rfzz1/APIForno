@@ -3,7 +3,7 @@
 # =========================
 .env
 *.env
-application-local.env
+.env
 *.env
 
 # =========================
@@ -24,3 +24,6 @@ build/
 .idea/
 *.iml
 .vscode/
+
+# Configurações locais
+src/main/resources/application-local.yml

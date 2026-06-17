@@ -134,7 +134,7 @@ public class UsuarioService {
 
                     usuarioRepository.save(usuario);
 
-                    String link = "http://localhost:3000/redefinir-senha?token=" + token;
+                    String link = "http://localhost:5173/redefinir-senha?token=" + token;
 
                     emailService.enviarEmail(usuario.getEmail(),
                             "Recuperação de Senha",

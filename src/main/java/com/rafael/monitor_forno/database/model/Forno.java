@@ -17,7 +17,6 @@ public class Forno {
     @GeneratedValue(strategy= GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
     private String nome;
 
     @Column(nullable = false, unique = true)
@@ -25,8 +24,7 @@ public class Forno {
 
     @Column(nullable = false)
     private String deviceSecret;
-
-    @Column(nullable = false)
+    
     private boolean ativo;
 
     @ManyToOne

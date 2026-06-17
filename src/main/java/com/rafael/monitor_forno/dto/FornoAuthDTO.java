@@ -7,12 +7,13 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegistroFornoDTO {
+@Builder
+public class FornoAuthDTO {
 
-    @NotBlank(message = "Serial number é obrigatório")
+    @NotBlank(message = "Serial Number é obrigatório")
     private String serialNumber;
 
-    @NotBlank(message = "Nome é obrigatório")
-    private String nome;
+    @NotBlank(message = "Device Secret é obrigatório")
+    private String secret;
 
 }

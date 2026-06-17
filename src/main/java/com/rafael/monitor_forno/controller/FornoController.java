@@ -36,4 +36,6 @@ public class FornoController {
         return ResponseEntity.ok(fornoService.autenticar(dto));
     }
 
+    //@GetMapping("/meu-forno")
+
 }

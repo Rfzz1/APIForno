@@ -26,3 +26,7 @@ spring:
 
 jwt:
   expiration: 86400000
+
+server:
+  address: 0.0.0.0
+  port: 8080.

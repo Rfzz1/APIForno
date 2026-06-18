@@ -22,10 +22,12 @@ public class FornoService {
 
     private final FornoRepository fornoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final JwtService jwtService;
 
-    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository) {
+    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService) {
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.jwtService = jwtService;
     }
 
     public RegistroFornoResponseDTO registrar(RegistroFornoDTO dto, String email) {
@@ -77,7 +79,8 @@ public class FornoService {
 
 
         return LoginResponseDTO.builder()
-                .token(UUID.randomUUID().toString())
+                .id(forno.getId())
+                .token(jwtService.gerarToken(forno.getSerialNumber()))
                 .build();
     }
 

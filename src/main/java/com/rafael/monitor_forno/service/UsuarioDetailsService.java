@@ -36,7 +36,7 @@ public class UsuarioDetailsService
                 .builder()
                 .username(usuario.getEmail())
                 .password(usuario.getSenha())
-                .authorities("USER")
+                .authorities("ROLE_USER")
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.config;
 
+import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,70 +21,53 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UsuarioDetailsService usuarioDetailsService;
+    private final FornoDetailsService fornoDetailsService;
 
     public JwtFilter(
             JwtService jwtService,
-            UsuarioDetailsService usuarioDetailsService) {
+            UsuarioDetailsService usuarioDetailsService, FornoDetailsService fornoDetailsService) {
 
         this.jwtService = jwtService;
         this.usuarioDetailsService = usuarioDetailsService;
+        this.fornoDetailsService = fornoDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
-        // Se não existir Authorization ou não começar com Bearer
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-
-            // Remove "Bearer "
             String token = authHeader.substring(7);
+            String subject = jwtService.extrairSubject(token);
+            UserDetails details = null;
 
-            // Extrai email do JWT
-            String email = jwtService.extrairEmail(token);
-
-            System.out.println("Email JWT: " + email);
-
-            // Evita autenticar duas vezes a mesma requisição
-            if (email != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                UserDetails userDetails =
-                        usuarioDetailsService.loadUserByUsername(email);
-
-                // Valida token
-                if (jwtService.tokenValido(
-                        token,
-                        userDetails.getUsername())) {
-
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-
-                    System.out.println("Autenticando usuário: " + userDetails.getUsername());
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authToken);
-                }
+            // 1. Tenta carregar usuário ou forno
+            try {
+                details = usuarioDetailsService.loadUserByUsername(subject);
+            } catch (UsernameNotFoundException e) {
+                details = fornoDetailsService.loadUserByUsername(subject); // Se não é usuário, tenta forno
             }
 
-        } catch (Exception e) {
+            // 2. Valida o token e autentica apenas uma vez
+            if (details != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Token inválido, expirado ou malformado
+                // Aqui garantimos que o token é válido para o subject encontrado
+                if (jwtService.tokenValido(token, details.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("Autenticado com sucesso: " + subject);
+                }
+            }
+        } catch (Exception e) {
             SecurityContextHolder.clearContext();
         }
 

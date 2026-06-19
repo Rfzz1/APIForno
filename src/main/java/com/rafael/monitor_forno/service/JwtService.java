@@ -25,16 +25,16 @@ public class JwtService {
     }
 
     //Secret + header + payload
-    public String gerarToken(String email) {
+    public String gerarToken(String subject) {
         return Jwts.builder()
-                .subject(email)
+                .subject(subject)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSecretKey())
                 .compact();
     }
 
-    public String extrairEmail(String token) {
+    public String extrairSubject(String token) {
         return Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
@@ -45,7 +45,7 @@ public class JwtService {
 
     public boolean tokenValido(String token, String email) {
         try {
-            String emailToken = extrairEmail(token);
+            String emailToken = extrairSubject(token);
 
             return emailToken.equals(email);
 

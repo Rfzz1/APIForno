@@ -1,6 +1,6 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -24,31 +26,36 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    //Secret + header + payload
-    public String gerarToken(String subject) {
+    // Secret + header + payload (Agora exige o tipo da entidade)
+    public String gerarToken(String subject, String tipo) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tipo", tipo); // Salva se é "USUARIO" ou "FORNO"
+
         return Jwts.builder()
+                .claims(claims)
                 .subject(subject)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSecretKey())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas
+                .signWith(getSecretKey()) // Corrigido para getSecretKey() diretamente
                 .compact();
     }
 
-    public String extrairSubject(String token) {
+    public Claims extrairTodasClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+                .getPayload();
     }
 
-    public boolean tokenValido(String token, String email) {
+    public String extrairSubject(String token) {
+        return extrairTodasClaims(token).getSubject();
+    }
+
+    public boolean tokenValido(String token, String username) {
         try {
-            String emailToken = extrairSubject(token);
-
-            return emailToken.equals(email);
-
+            String tokenSubject = extrairSubject(token);
+            return tokenSubject.equals(username);
         } catch (Exception e) {
             return false;
         }

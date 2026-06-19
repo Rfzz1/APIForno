@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class FornoDetails implements UserDetails {
     private final Forno forno;
@@ -24,6 +25,8 @@ public class FornoDetails implements UserDetails {
     public String getPassword() {
         return forno.getDeviceSecret(); // O secret funciona como senha
     }
+
+    public UUID getId() { return forno.getId();}
 
     // Métodos abaixo são obrigatórios pela interface,
     // mas para o forno podemos retornar sempre true

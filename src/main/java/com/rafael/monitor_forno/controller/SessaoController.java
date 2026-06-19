@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,34 +26,52 @@ public class SessaoController {
         this.sessaoService = sessaoService;
     }
 
+    @PreAuthorize("hasRole('FORNO')")
     @PostMapping("/iniciar")
-    public ResponseEntity<SessaoResumoDTO> criarSessao(Authentication authentication) {
+    public ResponseEntity<SessaoResumoDTO> criarSessao() {
 
-        SessaoResumoDTO sessao = sessaoService.iniciarSessao(authentication.getName());
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        SessaoResumoDTO sessao = sessaoService.iniciarSessao(serialNumber);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(sessao);
     }
 
+    @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/encerrar")
-    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id, Authentication authentication) {
+    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id) {
 
-        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, authentication.getName());
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, serialNumber);
 
         return ResponseEntity.ok(sessao);
 
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarSessao(@PathVariable UUID id, Authentication authentication) {
-        sessaoService.deleteById(id, authentication.getName());
+    public ResponseEntity<Void> deletarSessao(@PathVariable UUID id) {
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        sessaoService.deleteById(id, serialNumber);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/minhas")
     public ResponseEntity<List<SessaoDetalhesDTO>> minhasSessao(Authentication authentication, @RequestParam(required = false) LocalDateTime dataInicio, @RequestParam(required = false) LocalDateTime dataFim) {
 
         return ResponseEntity.ok(sessaoService.findAllSessoesByUsuarioAndInicioSessaoBetween(authentication.getName(), dataInicio, dataFim));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id) {
+
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(
+                sessaoService.findById(id, serialNumber)
+        );
+
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -61,15 +81,6 @@ public class SessaoController {
         return ResponseEntity.ok(
                 sessaoService.findAll()
         );
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id, Authentication authentication) {
-
-        return ResponseEntity.ok(
-                sessaoService.findById(id, authentication.getName())
-        );
-
     }
 
 }

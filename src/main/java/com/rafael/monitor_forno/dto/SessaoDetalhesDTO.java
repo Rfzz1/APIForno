@@ -26,4 +26,5 @@ public class SessaoDetalhesDTO {
     private List<EventoDTO> eventos;
     private List<TemperaturaDTO> temperaturas;
     private UserResponseDTO usuario;
+    private RegistroFornoResponseDTO forno;
 }

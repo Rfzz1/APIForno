@@ -77,10 +77,10 @@ public class FornoService {
             );
         }
 
-
+        // ALTERAÇÃO AQUI: Passando "FORNO" como tipo
         return LoginResponseDTO.builder()
                 .id(forno.getId())
-                .token(jwtService.gerarToken(forno.getSerialNumber()))
+                .token(jwtService.gerarToken(forno.getSerialNumber(), "FORNO"))
                 .build();
     }
 

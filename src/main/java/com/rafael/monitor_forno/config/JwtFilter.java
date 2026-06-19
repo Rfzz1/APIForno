@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.config;
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,10 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UsuarioDetailsService usuarioDetailsService;
     private final FornoDetailsService fornoDetailsService;
 
-    public JwtFilter(
-            JwtService jwtService,
-            UsuarioDetailsService usuarioDetailsService, FornoDetailsService fornoDetailsService) {
-
+    public JwtFilter(JwtService jwtService, UsuarioDetailsService usuarioDetailsService, FornoDetailsService fornoDetailsService) {
         this.jwtService = jwtService;
         this.usuarioDetailsService = usuarioDetailsService;
         this.fornoDetailsService = fornoDetailsService;
@@ -45,29 +43,34 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String token = authHeader.substring(7);
-            String subject = jwtService.extrairSubject(token);
-            UserDetails details = null;
+            Claims claims = jwtService.extrairTodasClaims(token);
 
-            // 1. Tenta carregar usuário ou forno
-            try {
-                details = usuarioDetailsService.loadUserByUsername(subject);
-            } catch (UsernameNotFoundException e) {
-                details = fornoDetailsService.loadUserByUsername(subject); // Se não é usuário, tenta forno
-            }
+            String subject = claims.getSubject();
+            String tipo = claims.get("tipo", String.class);
 
-            // 2. Valida o token e autentica apenas uma vez
-            if (details != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails details = null;
 
-                // Aqui garantimos que o token é válido para o subject encontrado
-                if (jwtService.tokenValido(token, details.getUsername())) {
+                // Lógica limpa: Usa o tipo salvo no token para ir direto no banco certo
+                try {
+                    if ("FORNO".equals(tipo)) {
+                        details = fornoDetailsService.loadUserByUsername(subject);
+                    } else if ("USUARIO".equals(tipo)) {
+                        details = usuarioDetailsService.loadUserByUsername(subject);
+                    }
+                } catch (UsernameNotFoundException e) {
+                    System.out.println("Entidade não encontrada para: " + subject);
+                }
+
+                // Valida e autentica
+                if (details != null && jwtService.tokenValido(token, details.getUsername())) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
-
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("Autenticado com sucesso: " + subject);
                 }
             }
         } catch (Exception e) {
+            // Se o token estiver expirado ou inválido, limpa o contexto
             SecurityContextHolder.clearContext();
         }
 

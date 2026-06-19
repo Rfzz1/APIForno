@@ -1,7 +1,9 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
@@ -10,6 +12,7 @@ import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.exception.SessaoEncerradaException;
 import com.rafael.monitor_forno.mappers.EventoMapper;
+import com.rafael.monitor_forno.mappers.FornoMapper;
 import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
@@ -28,42 +31,46 @@ public class SessaoService {
     private final TemperaturaMapper temperaturaMapper;
     private final UsuarioRepository usuarioRepository;
     private final UserMapper userMapper;
+    private final FornoRepository fornoRepository;
+    private final FornoMapper fornoMapper;
 
-    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, UserMapper userMapper) {
+    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, UserMapper userMapper, FornoRepository fornoRepository, FornoMapper fornoMapper) {
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.temperaturaMapper = temperaturaMapper;
         this.usuarioRepository = usuarioRepository;
         this.userMapper = userMapper;
+        this.fornoRepository = fornoRepository;
+        this.fornoMapper = fornoMapper;
     }
 
-    public SessaoResumoDTO iniciarSessao(String email) {
+    public SessaoResumoDTO iniciarSessao(String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado " + serialNumber
                         )
                 );
 
         Sessao sessao = new Sessao();
-        sessao.setUsuario(usuario);
+        sessao.setForno(forno);
         sessao.setInicioSessao(LocalDateTime.now());
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toResumoDTO(sessaoSalva);
     }
 
-    public SessaoDetalhesDTO encerrarSessao(UUID id, String email) {
+    public SessaoDetalhesDTO encerrarSessao(UUID id, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado " + serialNumber
                         )
                 );
 
-        Sessao sessao = sessaoRepository.findByIdAndUsuario(id, usuario)
+        Sessao sessao = sessaoRepository.findByIdAndForno(id, forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Sessão não pertence ao usuário logado"
@@ -90,19 +97,19 @@ public class SessaoService {
         return toDetalhesDTO(sessaoSalva);
     }
 
-    public void deleteById(UUID id, String email) {
+    public void deleteById(UUID id, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado " + serialNumber
                         )
                 );
 
-        Sessao sessao = sessaoRepository.findByIdAndUsuario(id, usuario)
+        Sessao sessao = sessaoRepository.findByIdAndForno(id, forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
-                                "Sessão não pertence ao usuário logado"
+                                "Sessão não pertence ao forno"
                         )
                 );
 
@@ -118,7 +125,7 @@ public class SessaoService {
                 );
 
         if (dataInicio == null || dataFim == null) {
-            return sessaoRepository.findAllByUsuario(usuario)
+            return sessaoRepository.findAllByFornoUsuario(usuario)
                     .stream()
                     .map(this::toDetalhesDTO)
                     .toList();
@@ -147,7 +154,7 @@ public class SessaoService {
                 );
 
         Sessao sessao = sessaoRepository
-                .findByIdAndUsuario(id, usuario)
+                .findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(() ->
                         new AcessoNegadoException(
                                 "Sessão não pertence ao usuário logado"
@@ -184,7 +191,7 @@ public class SessaoService {
                         sessao.getTemperaturas() == null
                         ? List.of()
                         : sessao.getTemperaturas().stream().map(temperaturaMapper::toTemperaturaDTO).toList())
-                .usuario(userMapper.toUserResponseDTO(sessao.getUsuario()))
+                .forno(fornoMapper.toFornoResponseDTO(sessao.getForno()))
                 .build();
     }
 }

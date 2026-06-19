@@ -1,7 +1,9 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
+import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.TemperaturaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +27,13 @@ public class TemperaturaController {
     @PostMapping
     public ResponseEntity<Void> registrarLeitura(@RequestBody TemperaturaRequestDTO dto, Authentication authentication) {
 
-        boolean salva = temperaturaService.registrarLeitura(dto, authentication.getName());
+        FornoDetails fornoDetails = (FornoDetails) authentication.getPrincipal();
 
-        if (!salva) {
-            return ResponseEntity.noContent().build();
-        }
+        dto.setFornoId(fornoDetails.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+        boolean salva = temperaturaService.registrarLeitura(dto, fornoDetails.getId());
+
+        return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

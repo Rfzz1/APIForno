@@ -40,6 +40,6 @@ public class Sessao {
     private List<Temperatura> temperaturas;
 
     @ManyToOne
-    @JoinColumn(name="usuario_id")
-    private Usuario usuario;
+    @JoinColumn(name = "forno_id")
+    private Forno forno;
 }

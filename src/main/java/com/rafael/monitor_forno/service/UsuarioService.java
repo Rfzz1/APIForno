@@ -102,18 +102,16 @@ public class UsuarioService {
                         )
                 );
 
-        if (!passwordEncoder.matches(
-                senha,
-                usuario.getSenha()
-        )) {
-
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
             throw new CredenciaisInvalidasException(
                     "Email ou senha inválidos"
             );
         }
 
+        // ALTERAÇÃO AQUI: Passando "USUARIO" como tipo
         String token = jwtService.gerarToken(
-                usuario.getEmail()
+                usuario.getEmail(),
+                "USUARIO"
         );
 
         return LoginResponseDTO.builder()

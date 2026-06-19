@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.database.repository;
 
+import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,8 +15,13 @@ import java.util.UUID;
 @Repository
 public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
 
-    List<Sessao> findAllByUsuario(Usuario usuario);
-    Optional<Sessao> findByIdAndUsuario(UUID id, Usuario usuario);
+    Optional<Sessao> findByIdAndFornoUsuario(UUID id, Usuario usuario);
+
+    Optional<Sessao> findByIdAndForno(UUID id, Forno forno);
+
+    List<Sessao> findAllByFornoUsuario(Usuario usuario);
+
     List<Sessao> findAllByUsuarioAndInicioSessaoBetween(Usuario usuario, LocalDateTime dataInicio, LocalDateTime dataFim);
+
     int countByUsuario(Usuario usuario);
 }

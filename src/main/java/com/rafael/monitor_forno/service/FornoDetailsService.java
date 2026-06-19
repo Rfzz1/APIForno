@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,12 +18,9 @@ public class FornoDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String serialNumber) {
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RuntimeException("Forno não encontrado")
-                );
-
-        return new FornoDetails(forno);
+    public UserDetails loadUserByUsername(String serialNumber) throws UsernameNotFoundException {
+        return fornoRepository.findBySerialNumber(serialNumber)
+                .map(FornoDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("Forno não encontrado: " + serialNumber));
     }
 }

@@ -1,8 +1,10 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Temperatura;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.TemperaturaRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
@@ -25,20 +27,22 @@ public class    TemperaturaService {
     private final TemperaturaMapper temperaturaMapper;
     private final SessaoRepository sessaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final FornoRepository fornoRepository;
 
-    public TemperaturaService(TemperaturaRepository temperaturaRepository, TemperaturaMapper temperaturaMapper, SessaoRepository sessaoRepository, UsuarioRepository usuarioRepository) {
+    public TemperaturaService(TemperaturaRepository temperaturaRepository, TemperaturaMapper temperaturaMapper, SessaoRepository sessaoRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository) {
         this.temperaturaRepository = temperaturaRepository;
         this.temperaturaMapper = temperaturaMapper;
         this.sessaoRepository = sessaoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.fornoRepository = fornoRepository;
     }
 
-    public boolean registrarLeitura(TemperaturaRequestDTO dto, String email) {
+    public boolean registrarLeitura(TemperaturaRequestDTO dto, UUID fornoId) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado: " + dto.getFornoId()
                         )
                 );
 
@@ -48,10 +52,10 @@ public class    TemperaturaService {
             return false;
         }
 
-        Sessao sessao = sessaoRepository.findByIdAndUsuario(dto.getSessaoId(), usuario)
+        Sessao sessao = sessaoRepository.findByIdAndForno(dto.getSessaoId(), forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
-                                "Sessao não pertence ao usuário " +usuario.getNome()
+                                "Sessao não pertence ao dispositivo " + forno.getNome()
                         )
                 );
 
@@ -60,7 +64,7 @@ public class    TemperaturaService {
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
         temperatura.setRegistradoEm(LocalDateTime.now());
         temperatura.setSessao(sessao);
-        temperatura.setUsuario(usuario);
+        temperatura.setForno(forno);
 
         temperaturaRepository.save(temperatura);
 

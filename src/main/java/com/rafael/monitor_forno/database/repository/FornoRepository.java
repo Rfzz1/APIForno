@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.database.repository;
 
 import com.rafael.monitor_forno.database.model.Forno;
+import com.rafael.monitor_forno.database.model.Sessao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

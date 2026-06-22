@@ -42,6 +42,6 @@ public class Telemetria {
     private LocalDateTime atualizadoEm;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    @JoinColumn(name = "forno_id")
+    private Forno forno;
 }

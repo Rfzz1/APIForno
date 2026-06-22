@@ -7,7 +7,9 @@ import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.TemperaturaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ public class TemperaturaController {
         this.temperaturaService = temperaturaService;
     }
 
+    @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarLeitura(@RequestBody TemperaturaRequestDTO dto, Authentication authentication) {
 
@@ -36,27 +39,28 @@ public class TemperaturaController {
         return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id, Authentication authentication) {
-        temperaturaService.deleteById(id, authentication.getName());
+    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        temperaturaService.deleteById(id, email);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/minhas")
     public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas(Authentication authentication) {
-        return ResponseEntity.ok(temperaturaService.findAllByUsuario(authentication.getName()));
+        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
-    public ResponseEntity<?> buscarTemperaturas(
-            @RequestParam(required = false) LocalDateTime registradoEm, Authentication authentication) {
+    public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) LocalDateTime registradoEm) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (registradoEm != null) {
-            return ResponseEntity.ok(
-                    temperaturaService.findByDate(registradoEm));
+            return ResponseEntity.ok(temperaturaService.findByDate(registradoEm));
         }
-
-        return ResponseEntity.ok(
-                temperaturaService.findAllByUsuario(authentication.getName()));
+        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(email));
     }
 }

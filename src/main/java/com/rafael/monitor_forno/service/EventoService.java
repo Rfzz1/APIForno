@@ -1,9 +1,11 @@
 package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Evento;
+import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.EventoRepository;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.EventoDTO;
@@ -25,20 +27,22 @@ public class EventoService {
     private final EventoMapper eventoMapper;
     private final SessaoRepository sessaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final FornoRepository fornoRepository;
 
-    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper, UsuarioRepository usuarioRepository) {
+    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository) {
         this.eventoRepository = eventoRepository;
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.usuarioRepository = usuarioRepository;
+        this.fornoRepository = fornoRepository;
     }
 
-    public void registrarEvento(EventoRequestDTO dto, String email) {
+    public void registrarEvento(EventoRequestDTO dto, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado: " + serialNumber
                         )
                 );
 
@@ -49,7 +53,7 @@ public class EventoService {
         }
 
         Sessao sessao = sessaoRepository
-                .findByIdAndUsuario(dto.getSessaoId(), usuario)
+                .findByIdAndForno(dto.getSessaoId(), forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Sessão não pertence ao usuário logado"
@@ -59,7 +63,7 @@ public class EventoService {
         Evento evento = new Evento();
         evento.setSessao(sessao);
         evento.setTipo(dto.getTipo());
-        evento.setUsuario(usuario);
+        evento.setForno(forno);
         evento.setCriadoEm(LocalDateTime.now());
         eventoRepository.save(evento);
     }
@@ -73,16 +77,17 @@ public class EventoService {
                         )
                 );
 
-        Evento evento = eventoRepository.findByIdAndUsuario(id, usuario)
+        Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(() ->
                         new AcessoNegadoException(
-                                "Evento não pertence ao usuário logado"
-                        ));
+                                "Evento não pertence ao forno"
+                        )
+                );
 
         eventoRepository.delete(evento);
     }
 
-    public List<EventoDTO> findAllByUsuario(String email) {
+    public List<EventoDTO> findAllByFornoUsuario(String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
@@ -91,7 +96,7 @@ public class EventoService {
                         )
                 );
 
-        return eventoRepository.findAllByUsuario(usuario)
+        return eventoRepository.findAllByFornoUsuario(usuario)
                 .stream()
                 .map(eventoMapper::toEventoDTO)
                 .toList();
@@ -106,9 +111,9 @@ public class EventoService {
                         )
                 );
 
-        Evento evento = eventoRepository.findByIdAndUsuario(id, usuario)
+        Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
-                        () -> new RecursoNaoEncontradoException("Evento não pertence ao usuario logado")
+                        () -> new RecursoNaoEncontradoException("Evento não pertence ao forno")
                 );
 
         return eventoMapper.toEventoDTO(evento);

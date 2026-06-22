@@ -76,20 +76,21 @@ public class    TemperaturaService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Usuário não encontrado: " + email
                         )
                 );
 
-        Temperatura temperatura = temperaturaRepository.findByIdAndUsuario(id,  usuario)
+        Temperatura temperatura = temperaturaRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
-                                "Temperatura não pertence ao usuário logado"
+                                "Temperatura não pertence ao forno"
                         )
                 );
+
         temperaturaRepository.delete(temperatura);
     }
 
-    public List<TemperaturaDTO> findAllByUsuario(String email) {
+    public List<TemperaturaDTO> findAllByFornoUsuario(String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
@@ -98,7 +99,7 @@ public class    TemperaturaService {
                         )
                 );
 
-        return temperaturaRepository.findAllByUsuario(usuario)
+        return temperaturaRepository.findAllByFornoUsuario(usuario)
                 .stream()
                 .map(temperaturaMapper::toTemperaturaDTO)
                 .toList();

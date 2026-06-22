@@ -7,8 +7,12 @@ import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
 import com.rafael.monitor_forno.service.TelemetriaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/telemetrias")
@@ -20,27 +24,39 @@ public class TelemetriaController {
         this.telemetriaService = telemetriaService;
     }
 
+    @PreAuthorize("hasRole('FORNO')")
     @PostMapping
-    public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto, Authentication authentication) {
+    public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto) {
 
-        System.out.println("SALVANDO TELEMETRIA");
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        telemetriaService.registrar(dto, authentication.getName());
+        telemetriaService.registrar(dto, serialNumber);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/atual")
-    public ResponseEntity<TelemetriaResponseDTO> buscarAtual(Authentication authentication) {
-        return ResponseEntity.ok(telemetriaService.buscarAtual(authentication.getName()));
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/forno/{fornoId}/atual")
+    public ResponseEntity<TelemetriaResponseDTO> buscarTelemetriaAtual(@PathVariable UUID fornoId) {
+        // O Usuário se identifica pelo token (E-mail)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(telemetriaService.buscarAtual(fornoId, email));
     }
 
-    @GetMapping("/dashboard")
-    public ResponseEntity<DashboardDTO> buscarDashboard(Authentication authentication) {
-        return ResponseEntity.ok(telemetriaService.buscarDashboard(authentication.getName()));
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/forno/{fornoId}/dashboard")
+    public ResponseEntity<DashboardDTO> buscarDashboard(@PathVariable UUID fornoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(telemetriaService.buscarDashboard(fornoId, email));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/estatisticas")
-    public ResponseEntity<EstatisticasDTO> buscarEstatisticas(Authentication authentication) {
-        return ResponseEntity.ok(telemetriaService.buscarEstatisticas(authentication.getName()));
+    public ResponseEntity<EstatisticasDTO> buscarEstatisticas() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // A estatística continua global (soma dos dados de todos os fornos do usuário)
+        return ResponseEntity.ok(telemetriaService.buscarEstatisticas(email));
     }
 }

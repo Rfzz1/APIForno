@@ -7,12 +7,14 @@ import com.rafael.monitor_forno.dto.EstatisticasDTO;
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
 import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
 import com.rafael.monitor_forno.enums.eventos.EventoSistema;
+import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TelemetriaService {
@@ -23,30 +25,32 @@ public class TelemetriaService {
     private final EventoRepository eventoRepository;
     private final TemporizadorRepository temporizadorRepository;
     private final TemperaturaRepository temperaturaRepository;
+    private final FornoRepository fornoRepository;
 
-    public TelemetriaService(TelemetriaRepository telemetriaRepository, UsuarioRepository usuarioRepository, SessaoRepository sessaoRepository, EventoRepository eventoRepository,TemporizadorRepository temporizadorRepository, TemperaturaRepository temperaturaRepository) {
+    public TelemetriaService(TelemetriaRepository telemetriaRepository, UsuarioRepository usuarioRepository, SessaoRepository sessaoRepository, EventoRepository eventoRepository,TemporizadorRepository temporizadorRepository, TemperaturaRepository temperaturaRepository, FornoRepository fornoRepository) {
         this.telemetriaRepository = telemetriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.sessaoRepository = sessaoRepository;
         this.eventoRepository = eventoRepository;
         this.temporizadorRepository = temporizadorRepository;
         this.temperaturaRepository = temperaturaRepository;
+        this.fornoRepository = fornoRepository;
     }
 
-    public void registrar(TelemetriaRequestDTO dto, String email) {
+    public void registrar(TelemetriaRequestDTO dto, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Forno não encontrado " +serialNumber
                         )
                 );
 
         Telemetria telemetria = telemetriaRepository
-                .findFirstByUsuarioOrderByAtualizadoEmDesc(usuario)
+                .findFirstByFornoOrderByAtualizadoEmDesc(forno)
                 .orElse(new Telemetria());
 
-        telemetria.setUsuario(usuario);
+        telemetria.setForno(forno);
 
         telemetria.setTemperaturaAtual(dto.getTemperaturaAtual());
         telemetria.setTemperaturaUltima(dto.getTemperaturaUltima());
@@ -58,50 +62,40 @@ public class TelemetriaService {
         telemetriaRepository.save(telemetria);
     }
 
-    public TelemetriaResponseDTO buscarAtual(String email) {
+    public TelemetriaResponseDTO buscarAtual(UUID fornoId, String email) {
 
-            Usuario usuario = usuarioRepository.findByEmail(email)
-                    .orElseThrow(
-                            () -> new RecursoNaoEncontradoException(
-                                    "Usuario não encontrado " + email
-                            )
-                    );
+        Forno forno = validarFornoDoUsuario(fornoId, email);
 
-            Telemetria telemetria = telemetriaRepository.findFirstByUsuarioOrderByAtualizadoEmDesc(usuario)
-                    .orElseThrow(
-                            () -> new RecursoNaoEncontradoException(
-                                    "Nenhuma Telemetria encontrada " + usuario
-                            )
-                    );
-
-            return toTelemetriaResponseDTO(telemetria);
-    }
-
-    public DashboardDTO buscarDashboard(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Telemetria telemetria = telemetriaRepository.findFirstByFornoOrderByAtualizadoEmDesc(forno)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Nenhuma Telemetria encontrada " + forno
                         )
                 );
 
-        Telemetria telemetria = telemetriaRepository.findFirstByUsuarioOrderByAtualizadoEmDesc(usuario)
+        return toTelemetriaResponseDTO(telemetria);
+    }
+
+    public DashboardDTO buscarDashboard(UUID fornoId, String email) {
+        Forno forno = validarFornoDoUsuario(fornoId, email);
+
+        Telemetria telemetria = telemetriaRepository.findFirstByFornoOrderByAtualizadoEmDesc(forno)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Nenhuma telemetria encontrada " + usuario
+                                "Nenhuma telemetria encontrada " + forno
                         )
                 );
 
 
         int quantidadeSessoes =
-                sessaoRepository.countByUsuario(usuario);
+                sessaoRepository.countByFornoUsuario(forno.getUsuario());
 
-        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByUsuario(usuario)).orElse(0.0);
+        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoUsuario(forno.getUsuario())).orElse(0.0);
 
-        Evento ultimoEvento = eventoRepository.findFirstByUsuarioOrderByCriadoEmDesc(usuario)
+        Evento ultimoEvento = eventoRepository.findFirstByFornoUsuarioOrderByCriadoEmDesc(forno.getUsuario())
                 .orElse(null);
 
-        Temporizador proximoTemporizador = temporizadorRepository.findFirstByUsuarioAndExecutadoFalseOrderByHorarioFimAsc(usuario)
+        Temporizador proximoTemporizador = temporizadorRepository.findFirstByUsuarioAndExecutadoFalseOrderByHorarioFimAsc(forno.getUsuario())
                 .orElse(null);
 
         return DashboardDTO.builder()
@@ -134,7 +128,7 @@ public class TelemetriaService {
                         )
                 );
 
-        List<Sessao> sessoes = sessaoRepository.findAllByUsuario(usuario);
+        List<Sessao> sessoes = sessaoRepository.findAllByFornoUsuario(usuario);
 
         int quantidadeSessoes = sessoes.size();
         long tempoTotalLigado = sessoes.stream()
@@ -170,6 +164,19 @@ public class TelemetriaService {
                 .criticos(criticos)
                 .errosSensor(erros)
                 .build();
+    }
+
+    private Forno validarFornoDoUsuario(UUID fornoId, String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado " + email));
+
+        Forno forno = fornoRepository.findById(fornoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Forno não encontrado"));
+
+        if (!forno.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoNegadoException("Este forno não pertence ao usuário logado.");
+        }
+        return forno;
     }
 
     private TelemetriaResponseDTO toTelemetriaResponseDTO (Telemetria telemetria) {

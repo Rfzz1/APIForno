@@ -131,7 +131,7 @@ public class SessaoService {
                     .toList();
         }
 
-        return sessaoRepository.findAllByUsuarioAndInicioSessaoBetween(usuario, dataInicio, dataFim)
+        return sessaoRepository.findAllByFornoUsuarioAndInicioSessaoBetween(usuario, dataInicio, dataFim)
                 .stream()
                 .map(this::toDetalhesDTO)
                 .toList();

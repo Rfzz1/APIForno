@@ -15,4 +15,5 @@ public class EventoRequestDTO {
 
     private EventoSistema tipo;
     private UUID sessaoId;
+    private UUID fornoId;
 }

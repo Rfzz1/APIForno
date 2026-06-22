@@ -1,7 +1,9 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Temporizador;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.TemporizadorRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
@@ -19,21 +21,28 @@ public class TemporizadorService {
 
     private final TemporizadorRepository temporizadorRepository;
     private final UsuarioRepository usuarioRepository;
+    private final FornoRepository fornoRepository;
 
-    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository) {
+    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository) {
         this.temporizadorRepository = temporizadorRepository;
         this.usuarioRepository = usuarioRepository;
+        this.fornoRepository = fornoRepository;
     }
 
-    public void criarTemporizador(TemporizadorRequestDTO dto, String email) {
+    public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email) {
 
-        Usuario usuario = usuarioRepository
-                .findByEmail(email)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
+                                "Forno não encontrado"
                         )
                 );
+
+        if (!forno.getUsuario().getEmail().equals(email)) {
+            throw new AcessoNegadoException(
+                    "Temporizador não pertence ao usuário logado"
+            );
+        }
 
         if (dto.getHorarioFim().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException(
@@ -45,22 +54,21 @@ public class TemporizadorService {
         temporizador.setCriadoEm(LocalDateTime.now());
         temporizador.setHorarioFim(dto.getHorarioFim());
         temporizador.setExecutado(false);
-        temporizador.setUsuario(usuario);
+        temporizador.setForno(forno);
         temporizadorRepository.save(temporizador);
 
     }
 
-    public TemporizadorResponseDTO buscarProximoTemporizador(String email) {
+    public TemporizadorResponseDTO buscarProximoTemporizador(String serialNumber) {
 
-        Usuario usuario = usuarioRepository
-                .findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
+                                "Forno não encontrado"
                         )
                 );
 
-        Temporizador temporizador = temporizadorRepository.findFirstByUsuarioAndExecutadoFalseOrderByHorarioFimAsc(usuario)
+        Temporizador temporizador = temporizadorRepository.findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(forno)
                 .orElseThrow(   
                         () -> new RecursoNaoEncontradoException(
                                 "Nenhum temporizador encontrado"
@@ -81,7 +89,7 @@ public class TemporizadorService {
                 );
 
         return temporizadorRepository
-                .findByUsuario(usuario)
+                .findByFornoUsuario(usuario)
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();
@@ -96,7 +104,7 @@ public class TemporizadorService {
                         )
                 );
 
-        Temporizador temporizadorExistente = temporizadorRepository.findByIdAndUsuario(id, usuario)
+        Temporizador temporizadorExistente = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Temporizador não pertence ao usuário logado"
@@ -114,16 +122,16 @@ public class TemporizadorService {
         return toResponseDTO(temporizadorRepository.save(temporizadorExistente));
     }
 
-    public void marcarComoExecutado(UUID id, String email) {
+    public void marcarComoExecutado(UUID id, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " +email
+                                "Forno não encontrado"
                         )
                 );
 
-        Temporizador temporizador = temporizadorRepository.findByIdAndUsuario(id, usuario)
+        Temporizador temporizador = temporizadorRepository.findByIdAndForno(id, forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Temporizador não pertence ao usuário logado"
@@ -142,7 +150,7 @@ public class TemporizadorService {
                         )
                 );
 
-        Temporizador temporizador = temporizadorRepository.findByIdAndUsuario(id, usuario)
+        Temporizador temporizador = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Temporizador não pertence ao usuário logado "
@@ -164,11 +172,11 @@ public class TemporizadorService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
+                                "Usuário não encontrado " +email
                         )
                 );
 
-        Temporizador temporizador = temporizadorRepository.findByIdAndUsuario(id, usuario)
+        Temporizador temporizador = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Temporizador não pertence ao usuário logado"

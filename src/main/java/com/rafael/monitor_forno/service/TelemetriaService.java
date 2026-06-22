@@ -95,7 +95,7 @@ public class TelemetriaService {
         Evento ultimoEvento = eventoRepository.findFirstByFornoUsuarioOrderByCriadoEmDesc(forno.getUsuario())
                 .orElse(null);
 
-        Temporizador proximoTemporizador = temporizadorRepository.findFirstByUsuarioAndExecutadoFalseOrderByHorarioFimAsc(forno.getUsuario())
+        Temporizador proximoTemporizador = temporizadorRepository.findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(forno)
                 .orElse(null);
 
         return DashboardDTO.builder()

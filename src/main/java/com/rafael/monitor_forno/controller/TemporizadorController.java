@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,47 +24,57 @@ public class TemporizadorController {
         this.temporizadorService = temporizadorService;
     }
 
-    @PostMapping
-    public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, Authentication authentication) {
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/forno/{fornoId}")
+    public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
 
-        temporizadorService.criarTemporizador(dto, authentication.getName());
+        temporizadorService.criarTemporizador(dto, fornoId, authentication.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarTemporizador(@PathVariable UUID id, Authentication authentication) {
         temporizadorService.deleteById(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     public ResponseEntity<TemporizadorResponseDTO> editarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(temporizadorService.atualizarTemporizador(dto, id, authentication.getName()));
     }
 
-    @PutMapping("/{id}/encerrar")
-    public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id, Authentication authentication) {
-        temporizadorService.marcarComoExecutado(id, authentication.getName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/proximo")
-    public ResponseEntity<TemporizadorResponseDTO>
-    buscarProximoTemporizador(
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                temporizadorService.buscarProximoTemporizador(
-                        authentication.getName()
-                )
-        );
-    }
-
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/meus")
     public ResponseEntity<List<TemporizadorResponseDTO>> buscarTemporizadorUsuario(Authentication authentication) {
 
         return ResponseEntity.ok(temporizadorService.buscarTemporizadoresUsuario(authentication.getName()));
+    }
+
+    @PreAuthorize("hasRole('FORNO')")
+    @PutMapping("/{id}/encerrar")
+    public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id) {
+
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        temporizadorService.marcarComoExecutado(id, serialNumber);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('FORNO')")
+    @GetMapping("/proximo")
+    public ResponseEntity<TemporizadorResponseDTO>
+    buscarProximoTemporizador() {
+
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(
+                temporizadorService.buscarProximoTemporizador(
+                        serialNumber
+                )
+        );
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -15,9 +15,9 @@ import java.util.UUID;
 @Repository
 public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
 
-    Optional<Sessao> findByIdAndFornoUsuario(UUID id, Usuario usuario);
-
     Optional<Sessao> findByIdAndForno(UUID id, Forno forno);
+
+    Optional<Sessao> findByIdAndFornoUsuario(UUID id, Usuario usuario);
 
     List<Sessao> findAllByFornoUsuario(Usuario usuario);
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/auth")
-public class AuthController {
+public class    AuthController {
 
     private final UsuarioService usuarioService;
 

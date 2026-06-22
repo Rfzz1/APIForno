@@ -22,7 +22,7 @@ import java.util.UUID;
 @Service
 public class    TemperaturaService {
 
-    private static final double THRESHOLD = 2.0;
+    private static final double THRESHOLD = 4.0;
     private final TemperaturaRepository temperaturaRepository;
     private final TemperaturaMapper temperaturaMapper;
     private final SessaoRepository sessaoRepository;

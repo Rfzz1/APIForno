@@ -10,8 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TemporizadorRepository extends JpaRepository<Temporizador, UUID> {
-    Optional<Temporizador>
-    findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(Forno forno);
+    Optional<Temporizador> findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(Forno forno);
     List<Temporizador> findByFornoUsuario(Usuario usuario);
     Optional<Temporizador> findByIdAndForno(UUID id, Forno forno);
     Optional<Temporizador> findByIdAndFornoUsuario(UUID id, Usuario usuario);

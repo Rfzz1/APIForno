@@ -33,13 +33,13 @@ public class Sessao {
     @Enumerated(EnumType.STRING)
     private EstadoSistema estadoSistema;
 
+    @ManyToOne
+    @JoinColumn(name = "forno_id")
+    private Forno forno;
+
     @OneToMany(mappedBy = "sessao")
     private List<Evento> eventos;
 
     @OneToMany(mappedBy = "sessao")
     private List<Temperatura> temperaturas;
-
-    @ManyToOne
-    @JoinColumn(name = "forno_id")
-    private Forno forno;
 }

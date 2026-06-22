@@ -102,6 +102,7 @@ public class EventoService {
                 .toList();
     }
 
+    //adsas
     public EventoDTO findById(UUID id, String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

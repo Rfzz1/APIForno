@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST,"/v1/auth/login", "/v1/fornos/auth", "/v1/usuario", "/v1/auth/esqueci-minha-senha", "/v1/auth/redefinir-senha").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/v1/auth/login", "/v1/fornos/auth", "/v1/usuario", "/v1/auth/esqueci-minha-senha").permitAll()
                         .requestMatchers("/v1/temperaturas").hasRole("FORNO")
                         .requestMatchers(HttpMethod.POST, "/v1/usuario/**").hasAuthority("USER")
                         .anyRequest().authenticated()

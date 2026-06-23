@@ -4,10 +4,13 @@ import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,28 +29,32 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable UUID id) {
-       usuarioService.deleteById(id);
+    @DeleteMapping
+    public ResponseEntity<Void> deletarUsuario(Authentication authentication) {
+       usuarioService.deleteByEmail(authentication.getName());
        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> atualizarUsuario(@Valid @RequestBody UserRequestDTO dto, @PathVariable UUID id) {
+    public ResponseEntity<UserResponseDTO> atualizarUsuario(@Valid @RequestBody UserRequestDTO dto, Authentication authentication) {
         UserResponseDTO usuarioAtualizado =
-                usuarioService.atualizarUsuario(dto, id);
+                usuarioService.atualizarUsuario(dto, authentication.getName());
 
         return ResponseEntity.ok(usuarioAtualizado);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getUsuario(@RequestParam(required = false) UUID id) {
-        if (id != null) {
-            return ResponseEntity.ok(usuarioService.findById(id));
-        }
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 
         return ResponseEntity.ok(usuarioService.findAll());
 
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUsuarioById(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.findById(id));
     }
 
 }

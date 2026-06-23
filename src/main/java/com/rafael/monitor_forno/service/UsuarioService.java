@@ -8,6 +8,7 @@ import com.rafael.monitor_forno.dto.LoginResponseDTO;
 import com.rafael.monitor_forno.dto.NovaSenhaDTO;
 import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
+import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
@@ -45,18 +46,19 @@ public class UsuarioService {
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setNascimento(dto.getNascimento());
+        usuario.setRole(Role.USER);
 
         String senhaHash = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaHash);
         usuarioRepository.save(usuario);
     }
 
-    public UserResponseDTO atualizarUsuario(UserRequestDTO dto, UUID id) {
+    public UserResponseDTO atualizarUsuario(UserRequestDTO dto, String email) {
 
-        Usuario usuarioExsitente = usuarioRepository.findById(id)
+        Usuario usuarioExsitente = usuarioRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado" + id
+                                "Usuário não encontrado" + email
                         )
                 );
 
@@ -75,11 +77,11 @@ public class UsuarioService {
         return toUserResponseDTO(usuarioRepository.save(usuarioExsitente));
     }
 
-    public void deleteById(UUID id) {
-        Usuario usuario = usuarioRepository.findById(id)
+    public void deleteByEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado" + id
+                                "Usuário não encontrado " + email
                         )
                 );
         usuarioRepository.delete(usuario);

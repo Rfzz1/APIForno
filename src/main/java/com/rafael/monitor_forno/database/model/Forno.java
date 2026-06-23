@@ -24,6 +24,9 @@ public class Forno {
 
     @Column(nullable = false)
     private String deviceSecret;
+
+    @Column(nullable = false, length = 20)
+    private String pinSeguranca;
     
     private boolean ativo;
 

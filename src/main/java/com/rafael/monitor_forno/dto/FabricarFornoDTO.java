@@ -7,12 +7,16 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegistroFornoDTO {
+@Builder
+public class FabricarFornoDTO {
 
     @NotBlank(message = "Serial number é obrigatório")
     private String serialNumber;
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome base do modelo é obrigatório")
     private String nome;
+
+    @NotBlank(message = "PIN de segurança (ex: mín 20 dígitos) é obrigatório")
+    private String pinSeguranca;
 
 }

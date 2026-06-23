@@ -48,7 +48,7 @@ public class SessaoController {
 
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarSessao(@PathVariable UUID id) {
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -56,14 +56,14 @@ public class SessaoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/minhas")
     public ResponseEntity<List<SessaoDetalhesDTO>> minhasSessao(Authentication authentication, @RequestParam(required = false) LocalDateTime dataInicio, @RequestParam(required = false) LocalDateTime dataFim) {
 
         return ResponseEntity.ok(sessaoService.findAllSessoesByUsuarioAndInicioSessaoBetween(authentication.getName(), dataInicio, dataFim));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id) {
 
@@ -74,7 +74,7 @@ public class SessaoController {
 
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<List<SessaoResumoDTO>> pegarTodasSessoes() {
 

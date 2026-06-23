@@ -1,13 +1,12 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.dto.FornoAuthDTO;
-import com.rafael.monitor_forno.dto.LoginResponseDTO;
-import com.rafael.monitor_forno.dto.RegistroFornoDTO;
-import com.rafael.monitor_forno.dto.RegistroFornoResponseDTO;
+import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.FornoService;
 import jakarta.validation.Valid;
 import lombok.extern.java.Log;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,16 +23,24 @@ public class FornoController {
         this.fornoService = fornoService;
     }
 
-    @PostMapping("/registrar")
-    public ResponseEntity<RegistroFornoResponseDTO> registrar(@Valid @RequestBody RegistroFornoDTO dto, Authentication authentication) {
+    @PreAuthorize("hasAuthority('ADIMN')")
+    @PostMapping("/fabricar")
+    public ResponseEntity<RegistroFornoResponseDTO> fabricarForno(@Valid @RequestBody FabricarFornoDTO dto) {
 
-        return ResponseEntity.ok(fornoService.registrar(dto, authentication.getName()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(fornoService.fabricar(dto));
     }
 
     @PostMapping("/auth")
     public ResponseEntity<LoginResponseDTO> autenticar(@Valid @RequestBody FornoAuthDTO dto) {
 
         return ResponseEntity.ok(fornoService.autenticar(dto));
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/vincular")
+    public ResponseEntity<Void> vincularForno(@Valid @RequestBody VincularFornoDTO dto, Authentication authentication) {
+        fornoService.vincularFornoaoUsuario(dto, authentication.getName());
+        return ResponseEntity.ok().build();
     }
 
     //@GetMapping("/meu-forno")

@@ -4,14 +4,8 @@ import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
-import com.rafael.monitor_forno.dto.FornoAuthDTO;
-import com.rafael.monitor_forno.dto.LoginResponseDTO;
-import com.rafael.monitor_forno.dto.RegistroFornoDTO;
-import com.rafael.monitor_forno.dto.RegistroFornoResponseDTO;
-import com.rafael.monitor_forno.exception.AcessoNegadoException;
-import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
-import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
-import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import com.rafael.monitor_forno.dto.*;
+import com.rafael.monitor_forno.exception.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,14 +24,7 @@ public class FornoService {
         this.jwtService = jwtService;
     }
 
-    public RegistroFornoResponseDTO registrar(RegistroFornoDTO dto, String email) {
-
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+    public RegistroFornoResponseDTO fabricar (FabricarFornoDTO dto) {
 
         Optional<Forno> fornoExistente = fornoRepository.findBySerialNumber(dto.getSerialNumber());
 
@@ -49,8 +36,8 @@ public class FornoService {
 
         Forno forno = new Forno();
         forno.setSerialNumber(dto.getSerialNumber());
-        forno.setUsuario(usuario);
         forno.setNome(dto.getNome());
+        forno.setPinSeguranca(dto.getPinSeguranca());
 
         forno.setDeviceSecret(
                 UUID.randomUUID().toString()
@@ -84,8 +71,36 @@ public class FornoService {
                 .build();
     }
 
+    public void vincularFornoaoUsuario(VincularFornoDTO dto, String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+
+        Forno forno = fornoRepository.findBySerialNumber(dto.getSerialNumber())
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + dto.getSerialNumber()
+                        )
+                );
+
+        if (forno.getUsuario() != null) {
+            throw new CredencialJaCadastradaException("Este forno já está vinculado a uma conta");
+        }
+
+        if (!forno.getPinSeguranca().equals(dto.getPinSeguranca())) {
+            throw new AcessoNegadoException("PIN de segurança inválido para este forno");
+        }
+
+        forno.setUsuario(usuario);
+        fornoRepository.save(forno);
+    }
+
     private RegistroFornoResponseDTO toRegistroFornoResponseDTO(Forno forno) {
         return RegistroFornoResponseDTO.builder()
+                .id(forno.getId())
                 .serialNumber(forno.getSerialNumber())
                 .secret(forno.getDeviceSecret())
                 .build();

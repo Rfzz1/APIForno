@@ -35,7 +35,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas
+                .expiration(new Date(System.currentTimeMillis() + expiration)) // 10 horas
                 .signWith(getSecretKey()) // Corrigido para getSecretKey() diretamente
                 .compact();
     }

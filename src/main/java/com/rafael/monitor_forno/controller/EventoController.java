@@ -34,7 +34,7 @@ public class EventoController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvento(
             @PathVariable UUID id) {
@@ -47,7 +47,7 @@ public class EventoController {
     }
 
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping
     public ResponseEntity<?> getAllEventos(@RequestParam(required = false) UUID id) {
 

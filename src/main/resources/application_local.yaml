@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/forno_monitor
+    username: postgres
+    password: C^%vchLNevMd3B^AjTJW
+
+  mail:
+    username: rafinhafiorioofc@gmail.com
+    password: eqpp yhka kpfc vbvd
+
+jwt:
+  secret: 96FSe74HoFk7gfxIw8KHcEk8chlZ0dbpkxzQnnYkriw=

@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/v1/auth/login", "/v1/fornos/auth", "/v1/usuario", "/v1/auth/esqueci-minha-senha").permitAll()
                         .requestMatchers("/v1/temperaturas").hasRole("FORNO")
-                        .requestMatchers(HttpMethod.POST, "/v1/usuario/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/v1/usuario/**").hasAuthority("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

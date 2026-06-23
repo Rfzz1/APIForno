@@ -39,7 +39,7 @@ public class TemperaturaController {
         return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -47,13 +47,13 @@ public class TemperaturaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/minhas")
     public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas(Authentication authentication) {
         return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping
     public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) LocalDateTime registradoEm) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

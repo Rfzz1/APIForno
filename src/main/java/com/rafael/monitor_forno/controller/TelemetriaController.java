@@ -34,7 +34,7 @@ public class TelemetriaController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/forno/{fornoId}/atual")
     public ResponseEntity<TelemetriaResponseDTO> buscarTelemetriaAtual(@PathVariable UUID fornoId) {
         // O Usuário se identifica pelo token (E-mail)
@@ -43,7 +43,7 @@ public class TelemetriaController {
         return ResponseEntity.ok(telemetriaService.buscarAtual(fornoId, email));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/forno/{fornoId}/dashboard")
     public ResponseEntity<DashboardDTO> buscarDashboard(@PathVariable UUID fornoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -51,7 +51,7 @@ public class TelemetriaController {
         return ResponseEntity.ok(telemetriaService.buscarDashboard(fornoId, email));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/estatisticas")
     public ResponseEntity<EstatisticasDTO> buscarEstatisticas() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

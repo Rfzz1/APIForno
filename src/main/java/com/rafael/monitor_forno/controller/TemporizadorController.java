@@ -24,7 +24,7 @@ public class TemporizadorController {
         this.temporizadorService = temporizadorService;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/forno/{fornoId}")
     public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
 
@@ -33,20 +33,20 @@ public class TemporizadorController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarTemporizador(@PathVariable UUID id, Authentication authentication) {
         temporizadorService.deleteById(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @PutMapping("/{id}")
     public ResponseEntity<TemporizadorResponseDTO> editarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(temporizadorService.atualizarTemporizador(dto, id, authentication.getName()));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/meus")
     public ResponseEntity<List<TemporizadorResponseDTO>> buscarTemporizadorUsuario(Authentication authentication) {
 
@@ -77,7 +77,7 @@ public class TemporizadorController {
         );
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<?> getTemporizador(@RequestParam(required = false) UUID id, Authentication authentication) {
 

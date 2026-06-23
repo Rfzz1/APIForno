@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.database.model;
 
+import com.rafael.monitor_forno.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,10 @@ public class Usuario {
     private String tokenRecuperacaoSenha;
 
     private LocalDateTime expiracaoToken;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
 
 }

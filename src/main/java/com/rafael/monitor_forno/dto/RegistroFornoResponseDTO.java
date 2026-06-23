@@ -14,5 +14,6 @@ public class RegistroFornoResponseDTO {
     private UUID id;
     private String serialNumber;
     private String secret;
+    private boolean ativo;
 
 }

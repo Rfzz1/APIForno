@@ -2,7 +2,6 @@ package com.rafael.monitor_forno.dto;
 
 import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.enums.estados.EstadoSistema;
-import jdk.jfr.Event;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,5 +25,5 @@ public class SessaoDetalhesDTO {
     private List<EventoDTO> eventos;
     private List<TemperaturaDTO> temperaturas;
     private UserResponseDTO usuario;
-    private RegistroFornoResponseDTO forno;
+    private FornoResponseDTO forno;
 }

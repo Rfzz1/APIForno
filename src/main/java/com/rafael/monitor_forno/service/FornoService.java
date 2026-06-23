@@ -8,6 +8,7 @@ import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.exception.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class FornoService {
         this.jwtService = jwtService;
     }
 
-    public RegistroFornoResponseDTO fabricar (FabricarFornoDTO dto) {
+    public FornoResponseDTO fabricar (FabricarFornoDTO dto) {
 
         Optional<Forno> fornoExistente = fornoRepository.findBySerialNumber(dto.getSerialNumber());
 
@@ -47,7 +48,7 @@ public class FornoService {
 
         fornoRepository.save(forno);
 
-        return toRegistroFornoResponseDTO(forno);
+        return toFornoResponseDTO(forno);
     }
 
     public LoginResponseDTO autenticar(FornoAuthDTO dto) {
@@ -98,8 +99,21 @@ public class FornoService {
         fornoRepository.save(forno);
     }
 
-    private RegistroFornoResponseDTO toRegistroFornoResponseDTO(Forno forno) {
-        return RegistroFornoResponseDTO.builder()
+    public List<FornoResponseDTO> buscarMeusFornos(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+        return fornoRepository.findByUsuario(usuario)
+                .stream()
+                .map(this::toFornoResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    private FornoResponseDTO toFornoResponseDTO(Forno forno) {
+        return FornoResponseDTO.builder()
                 .id(forno.getId())
                 .serialNumber(forno.getSerialNumber())
                 .secret(forno.getDeviceSecret())

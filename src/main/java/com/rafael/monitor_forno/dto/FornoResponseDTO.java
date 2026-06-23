@@ -9,7 +9,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegistroFornoResponseDTO {
+public class FornoResponseDTO {
 
     private UUID id;
     private String serialNumber;

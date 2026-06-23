@@ -51,8 +51,8 @@ public class SessaoController {
     @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarSessao(@PathVariable UUID id) {
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        sessaoService.deleteById(id, serialNumber);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        sessaoService.deleteById(id, email);
         return ResponseEntity.noContent().build();
     }
 

@@ -188,6 +188,17 @@ public class UsuarioService {
         return toUserResponseDTO(usuario);
     }
 
+    public UserResponseDTO meuPerfil(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+
+        return toUserResponseDTO(usuario);
+    }
+
     private UserResponseDTO toUserResponseDTO(Usuario usuario) {
         return UserResponseDTO.builder()
                 .id(usuario.getId())

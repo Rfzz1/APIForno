@@ -43,6 +43,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioAtualizado);
     }
 
+    @GetMapping("/meu-perfil")
+    public ResponseEntity<UserResponseDTO> getMeuPerfil(Authentication authentication) {
+        UserResponseDTO usuario = usuarioService.meuPerfil(authentication.getName());
+        return ResponseEntity.ok(usuario);
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {

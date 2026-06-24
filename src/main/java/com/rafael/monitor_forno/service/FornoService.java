@@ -44,8 +44,6 @@ public class FornoService {
                 UUID.randomUUID().toString()
         );
 
-        forno.setAtivo(true);
-
         fornoRepository.save(forno);
 
         return toFornoResponseDTO(forno);
@@ -96,6 +94,7 @@ public class FornoService {
         }
 
         forno.setUsuario(usuario);
+        forno.setAtivo(true);
         fornoRepository.save(forno);
     }
 

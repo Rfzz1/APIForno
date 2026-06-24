@@ -35,7 +35,7 @@ public class FornoController {
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping("/vincular")
+    @PutMapping("/vincular")
     public ResponseEntity<Void> vincularForno(@Valid @RequestBody VincularFornoDTO dto, Authentication authentication) {
         fornoService.vincularFornoaoUsuario(dto, authentication.getName());
         return ResponseEntity.ok().build();

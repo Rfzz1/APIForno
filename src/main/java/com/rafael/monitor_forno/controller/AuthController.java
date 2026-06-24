@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/auth")
-@CrossOrigin(origins="http://localhost:5173")
+@RequestMapping("v1/auth")
 public class    AuthController {
 
     private final UsuarioService usuarioService;

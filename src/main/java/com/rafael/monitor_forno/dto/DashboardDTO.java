@@ -25,5 +25,6 @@ public class DashboardDTO {
     private EventoSistema ultimoEvento;
     private LocalDateTime proximoTemporizador;
     private LocalDateTime atualizadoEm;
+    private UUID fornoId;
 
 }

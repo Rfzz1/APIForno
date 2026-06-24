@@ -99,6 +99,7 @@ public class TelemetriaService {
                 .orElse(null);
 
         return DashboardDTO.builder()
+                .fornoId(forno.getId())
                 .temperaturaAtual(telemetria.getTemperaturaAtual())
                 .temperaturaUltima(telemetria.getTemperaturaUltima())
                 .estadoForno(telemetria.getEstadoForno())

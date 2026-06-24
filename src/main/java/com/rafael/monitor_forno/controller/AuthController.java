@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.controller;
 import com.rafael.monitor_forno.dto.LoginRequestDTO;
 import com.rafael.monitor_forno.dto.LoginResponseDTO;
 import com.rafael.monitor_forno.dto.NovaSenhaDTO;
+import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.service.EmailService;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -35,9 +36,9 @@ public class    AuthController {
 
     @PostMapping("/esqueci-minha-senha")
     public ResponseEntity<String> esqueciSenha(
-            @RequestParam String email
-    ) {
-        usuarioService.gerarTokenRecuperacao(email);
+            @RequestBody UserRequestDTO dto
+            ) {
+        usuarioService.gerarTokenRecuperacao(dto.getEmail());
 
         return ResponseEntity.ok("Se o e-mail existir, enviaremos instruções para recuperação.");
     }

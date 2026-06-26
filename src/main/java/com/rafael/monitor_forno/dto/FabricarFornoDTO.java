@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FabricarFornoDTO {
+public class  FabricarFornoDTO {
 
     @NotBlank(message = "Serial number é obrigatório")
     private String serialNumber;

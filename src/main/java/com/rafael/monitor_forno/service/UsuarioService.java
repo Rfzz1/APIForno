@@ -134,7 +134,7 @@ public class UsuarioService {
 
                     usuarioRepository.save(usuario);
 
-                    String link = "http://56.125.180.47/redefinir-senha?token=" + token;
+                    String link = "https://monitoramentoforno.com.br/redefinir-senha?token=" + token;
 
                     emailService.enviarEmail(usuario.getEmail(),
                             "Recuperação de Senha",

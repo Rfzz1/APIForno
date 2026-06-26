@@ -19,7 +19,8 @@ public class CorsConfig {
 
         config.setAllowedOrigins(
                     List.of("http://localhost:5173",
-                            "http://56.125.180.47")
+                            "http://56.125.180.47",
+                            "https://monitoramentoforno.com.br/redefinir-senha?token=")
         );
 
         config.setAllowedMethods(

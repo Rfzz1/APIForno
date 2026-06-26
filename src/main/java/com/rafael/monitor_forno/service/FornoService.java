@@ -116,6 +116,8 @@ public class FornoService {
                 .id(forno.getId())
                 .serialNumber(forno.getSerialNumber())
                 .secret(forno.getDeviceSecret())
+                .ativo(forno.isAtivo())
+                .nome(forno.getNome())
                 .build();
     }
 

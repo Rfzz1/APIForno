@@ -15,5 +15,5 @@ public class FornoResponseDTO {
     private String serialNumber;
     private String secret;
     private boolean ativo;
-
+    private String nome;
 }

@@ -67,9 +67,9 @@ public class SessaoController {
     @GetMapping("/{id}")
     public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id) {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(
-                sessaoService.findById(id, serialNumber)
+                sessaoService.findById(id, email)
         );
 
     }

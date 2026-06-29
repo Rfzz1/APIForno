@@ -27,9 +27,10 @@ public class JwtService {
     }
 
     // Secret + header + payload (Agora exige o tipo da entidade)
-    public String gerarToken(String subject, String tipo) {
+    public String gerarToken(String subject, String tipo, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("tipo", tipo); // Salva se é "USUARIO" ou "FORNO"
+        claims.put("tipo", tipo);
+        claims.put("role", role);
 
         return Jwts.builder()
                 .claims(claims)

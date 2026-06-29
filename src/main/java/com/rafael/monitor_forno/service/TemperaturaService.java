@@ -64,6 +64,7 @@ public class    TemperaturaService {
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
         temperatura.setTemperaturaExterna(dto.getTemperaturaExterna());
         temperatura.setRegistradoEm(LocalDateTime.now());
+        temperatura.setUsuario(forno.getUsuario());
         temperatura.setSessao(sessao);
         temperatura.setForno(forno);
 

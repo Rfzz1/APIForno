@@ -16,4 +16,5 @@ public class TemperaturaRequestDTO {
     private Double temperaturaExterna;
     private UUID sessaoId;
     private UUID fornoId;
+    private UUID usuarioId;
 }

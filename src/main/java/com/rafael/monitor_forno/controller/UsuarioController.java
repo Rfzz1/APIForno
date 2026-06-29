@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,14 @@ public class UsuarioController {
                 usuarioService.atualizarUsuario(dto, authentication.getName());
 
         return ResponseEntity.ok(usuarioAtualizado);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping ("/{id}/promover")
+    public ResponseEntity<UserResponseDTO> promoverUsuario(@PathVariable UUID id) {
+
+        return ResponseEntity.ok(usuarioService.promoverUsuario(id));
+
     }
 
     @GetMapping("/meu-perfil")

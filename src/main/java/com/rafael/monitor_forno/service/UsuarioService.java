@@ -77,6 +77,23 @@ public class UsuarioService {
         return toUserResponseDTO(usuarioRepository.save(usuarioExsitente));
     }
 
+    public UserResponseDTO promoverUsuario(UUID id) {
+
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + id
+                        )
+                );
+
+        usuarioExistente.setRole(Role.ADMIN);
+
+        return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
+
+    }
+
+
+
     public void deleteByEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(

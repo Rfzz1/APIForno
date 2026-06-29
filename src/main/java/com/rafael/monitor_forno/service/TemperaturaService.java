@@ -91,6 +91,20 @@ public class    TemperaturaService {
         temperaturaRepository.delete(temperatura);
     }
 
+    public List<TemperaturaDTO> findAllByFornoIdAndUsuario(UUID fornoId, String email) {
+
+        List<Temperatura> temperaturas = temperaturaRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+
+        if (!fornoRepository.existsById(fornoId)) {
+            throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
+        }
+
+        return temperaturas.stream()
+            .map(temperaturaMapper::toTemperaturaDTO)
+            .toList();
+
+    }
+
     public List<TemperaturaDTO> findAllByFornoUsuario(String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

@@ -1,5 +1,7 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.database.model.Evento;
+import com.rafael.monitor_forno.dto.EventoDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
 import org.springframework.http.HttpStatus;
@@ -9,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +47,15 @@ public class EventoController {
         eventoService.deleteById(id, email);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/fornos/{fornoId}")
+    public ResponseEntity<List<EventoDTO>> getAllEventsByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(eventoService.findAllByFornoAndUsuario(fornoId, email));
     }
 
 

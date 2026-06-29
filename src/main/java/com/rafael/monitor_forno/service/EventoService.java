@@ -102,7 +102,21 @@ public class EventoService {
                 .toList();
     }
 
-    //adsas
+    public List<EventoDTO> findAllByFornoAndUsuario(UUID fornoId, String email) {
+
+        List<Evento> eventos = eventoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+
+        if (!fornoRepository.existsById(fornoId)) {
+            throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
+        }
+
+        return eventos.stream()
+                .map(eventoMapper::toEventoDTO)
+                .toList();
+
+    }
+
+
     public EventoDTO findById(UUID id, String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

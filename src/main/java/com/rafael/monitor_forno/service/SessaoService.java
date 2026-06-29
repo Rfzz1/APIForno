@@ -17,7 +17,6 @@ import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -114,6 +113,21 @@ public class SessaoService {
                 );
 
         sessaoRepository.delete(sessao);
+    }
+
+    public List<SessaoDetalhesDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
+
+        List<Sessao> sessoes = sessaoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+
+        if (!fornoRepository.existsById(fornoId)) {
+            throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
+        }
+
+        return sessoes.stream()
+            .map(this::toDetalhesDTO)
+            .toList();
+
+
     }
 
     public List<SessaoDetalhesDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {

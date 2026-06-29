@@ -14,4 +14,5 @@ public interface TemporizadorRepository extends JpaRepository<Temporizador, UUID
     List<Temporizador> findByFornoUsuario(Usuario usuario);
     Optional<Temporizador> findByIdAndForno(UUID id, Forno forno);
     Optional<Temporizador> findByIdAndFornoUsuario(UUID id, Usuario usuario);
+    List<Temporizador> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
 }

@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.service.TemporizadorService;
@@ -51,6 +52,15 @@ public class TemporizadorController {
     public ResponseEntity<List<TemporizadorResponseDTO>> buscarTemporizadorUsuario(Authentication authentication) {
 
         return ResponseEntity.ok(temporizadorService.buscarTemporizadoresUsuario(authentication.getName()));
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/fornos/{fornoId}")
+    public ResponseEntity<List<TemporizadorResponseDTO>> getAllTemporizadoresByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(temporizadorService.buscarTemporizadoresFornoUsuario(fornoId, email));
     }
 
     @PreAuthorize("hasRole('FORNO')")

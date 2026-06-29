@@ -19,4 +19,6 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
 
     Optional<Evento> findFirstByFornoUsuarioOrderByCriadoEmDesc(Usuario usuario);
 
+    List<Evento> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
+
 }

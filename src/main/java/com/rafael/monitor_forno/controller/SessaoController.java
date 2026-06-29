@@ -74,6 +74,15 @@ public class SessaoController {
 
     }
 
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/fornos/{fornoId}")
+    public ResponseEntity<List<SessaoDetalhesDTO>> getAllSessoesByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(sessaoService.findAllSessoesByFornoIdAndUsuario(fornoId, email));
+
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<List<SessaoResumoDTO>> pegarTodasSessoes() {

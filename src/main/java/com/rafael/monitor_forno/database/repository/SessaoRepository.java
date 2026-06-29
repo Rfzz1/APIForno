@@ -21,6 +21,8 @@ public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     List<Sessao> findAllByFornoUsuario(Usuario usuario);
 
+    List<Sessao> findAllByFornoIdAndFornoUsuarioEmail(UUID id, String email);
+
     List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, LocalDateTime dataInicio, LocalDateTime dataFim);
 
     int countByFornoUsuario(Usuario usuario);

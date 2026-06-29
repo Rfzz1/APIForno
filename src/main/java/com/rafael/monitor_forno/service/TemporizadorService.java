@@ -95,6 +95,16 @@ public class TemporizadorService {
                 .toList();
     }
 
+    public List<TemporizadorResponseDTO> buscarTemporizadoresFornoUsuario(UUID fornoId, String email) {
+
+        List<Temporizador> temporizadores = temporizadorRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+
+        return temporizadores.stream()
+                .map(this::toResponseDTO)
+                .toList();
+
+    }
+
     public TemporizadorResponseDTO atualizarTemporizador(TemporizadorRequestDTO dto, UUID id, String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

@@ -13,6 +13,7 @@ public class TemperaturaMapper {
                 .registradoEm(temperatura.getRegistradoEm())
                 .temperaturaAtual(temperatura.getTemperaturaAtual())
                 .temperaturaUltima(temperatura.getTemperaturaUltima())
+                .temperaturaExterna(temperatura.getTemperaturaExterna())
                 .build();
     }
 

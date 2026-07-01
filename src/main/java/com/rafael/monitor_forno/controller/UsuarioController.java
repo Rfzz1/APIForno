@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.dto.NovaSenhaLogadoDTO;
 import com.rafael.monitor_forno.dto.UserRequestDTO;
 import com.rafael.monitor_forno.dto.UserResponseDTO;
 import com.rafael.monitor_forno.service.UsuarioService;
@@ -30,12 +31,14 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping
     public ResponseEntity<Void> deletarUsuario(Authentication authentication) {
        usuarioService.deleteByEmail(authentication.getName());
        return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> atualizarUsuario(@Valid @RequestBody UserRequestDTO dto, Authentication authentication) {
         UserResponseDTO usuarioAtualizado =
@@ -52,10 +55,22 @@ public class UsuarioController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meu-perfil")
     public ResponseEntity<UserResponseDTO> getMeuPerfil(Authentication authentication) {
         UserResponseDTO usuario = usuarioService.meuPerfil(authentication.getName());
         return ResponseEntity.ok(usuario);
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PutMapping("/alterar-minha-senha")
+    public ResponseEntity<Void> alterarSenha(@Valid @RequestBody NovaSenhaLogadoDTO dto) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        usuarioService.atualizarSenha(dto, email);
+
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

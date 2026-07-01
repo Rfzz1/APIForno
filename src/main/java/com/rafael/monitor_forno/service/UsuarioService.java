@@ -1,13 +1,8 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
-import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
-import com.rafael.monitor_forno.dto.LoginResponseDTO;
-import com.rafael.monitor_forno.dto.NovaSenhaDTO;
-import com.rafael.monitor_forno.dto.UserRequestDTO;
-import com.rafael.monitor_forno.dto.UserResponseDTO;
+import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
@@ -51,6 +46,27 @@ public class UsuarioService {
         String senhaHash = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaHash);
         usuarioRepository.save(usuario);
+
+        String link = "https://monitoramentoforno.com.br";
+
+        emailService.enviarEmail(usuario.getEmail(),
+                "Bem vindo(a) ao nosso monitoramento de forno! Seu cadastro foi concluído!",
+                """
+                        Olá, %s! Estamos empolgados por ter você conosco. Seu cadastro foi realizado com sucesso, sinta-se à vontade para explorar nossos serviços!<br><br>
+                        
+                        <b>Seus dados de acesso:</b><br><br>
+                        
+                        E-mail cadastrado: %s<br><br>
+                        
+                        Acesse o sistema clicando aqui: <a href="%s">Acessar Monitoramento</a><br><br>
+                        
+                        Se tiver alguma dúvida ou precisar de assistência, não hesite em entrar em contato.<br>
+                        Estamos muito felizes em ter você conosco!<br><br>
+                        
+                        Abraços,<br>
+                        Equipe Monitoramento de Forno
+                        """.formatted(usuario.getNome(), usuario.getEmail(), link)
+        );
     }
 
     public UserResponseDTO atualizarUsuario(UserRequestDTO dto, String email) {
@@ -75,6 +91,27 @@ public class UsuarioService {
         }
 
         return toUserResponseDTO(usuarioRepository.save(usuarioExsitente));
+    }
+
+    public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
+
+        Usuario usuarioExistente = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+
+        if (!passwordEncoder.matches(dto.senhaAtual(), usuarioExistente.getSenha())) {
+            throw new RecursoNaoEncontradoException(
+                    "Senha atual incorreta"
+            );
+        }
+
+        usuarioExistente.setSenha(dto.senhaAtualizada());
+
+        usuarioRepository.save(usuarioExistente);
+
     }
 
     public UserResponseDTO promoverUsuario(UUID id) {

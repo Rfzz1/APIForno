@@ -41,7 +41,6 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String fotoBase64;
+    @OneToOne(fetch = FetchType.LAZY)
+    private FotoPerfil fotoPerfil;
 }

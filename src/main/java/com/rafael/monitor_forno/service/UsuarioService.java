@@ -261,7 +261,6 @@ public class UsuarioService {
                 .nome(usuario.getNome())
                 .email(usuario.getEmail())
                 .nascimento(usuario.getNascimento())
-                .fotoBase64(usuario.getFotoBase64())
                 .build();
     }
 }

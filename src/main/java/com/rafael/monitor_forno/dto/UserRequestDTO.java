@@ -29,5 +29,4 @@ public class UserRequestDTO {
             message = "A senha deve possuir no mínimo 8 caracteres, uma letra maiúscula, uma minúscula e um número"
     )
     private String senha;
-    private String fotoBase64;
 }

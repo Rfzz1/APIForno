@@ -56,7 +56,6 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST,"/v1/auth/login", "/v1/fornos/auth", "/v1/usuario", "/v1/auth/esqueci-minha-senha", "/v1/auth/redefinir-senha").permitAll()
                         .requestMatchers("/v1/temperaturas").hasAnyAuthority("ROLE_FORNO", "USER")
-                        .requestMatchers(HttpMethod.POST, "/v1/usuario/**").hasAuthority("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

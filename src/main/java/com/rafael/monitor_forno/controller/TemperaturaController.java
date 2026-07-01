@@ -39,7 +39,7 @@ public class TemperaturaController {
         return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -47,7 +47,7 @@ public class TemperaturaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
     public ResponseEntity<List<TemperaturaDTO>> gettAllTemperatureByFornoIdAndUsuario(@PathVariable UUID fornoId) {
 
@@ -56,13 +56,13 @@ public class TemperaturaController {
         return ResponseEntity.ok(temperaturaService.findAllByFornoIdAndUsuario(fornoId, email));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/minhas")
     public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas(Authentication authentication) {
         return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) LocalDateTime registradoEm) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

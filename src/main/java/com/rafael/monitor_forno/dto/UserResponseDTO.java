@@ -15,4 +15,5 @@ public class UserResponseDTO {
     private String nome;
     private String email;
     private LocalDate nascimento;
+    private String fotoBase64;
 }

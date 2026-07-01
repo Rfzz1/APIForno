@@ -37,7 +37,7 @@ public class EventoController {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvento(
             @PathVariable UUID id) {
@@ -49,7 +49,7 @@ public class EventoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
     public ResponseEntity<List<EventoDTO>> getAllEventsByFornoIdAndUsuario(@PathVariable UUID fornoId) {
 
@@ -59,7 +59,7 @@ public class EventoController {
     }
 
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<?> getAllEventos(@RequestParam(required = false) UUID id) {
 

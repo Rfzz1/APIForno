@@ -25,7 +25,7 @@ public class TemporizadorController {
         this.temporizadorService = temporizadorService;
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/forno/{fornoId}")
     public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
 
@@ -34,27 +34,27 @@ public class TemporizadorController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarTemporizador(@PathVariable UUID id, Authentication authentication) {
         temporizadorService.deleteById(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<TemporizadorResponseDTO> editarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(temporizadorService.atualizarTemporizador(dto, id, authentication.getName()));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus")
     public ResponseEntity<List<TemporizadorResponseDTO>> buscarTemporizadorUsuario(Authentication authentication) {
 
         return ResponseEntity.ok(temporizadorService.buscarTemporizadoresUsuario(authentication.getName()));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
     public ResponseEntity<List<TemporizadorResponseDTO>> getAllTemporizadoresByFornoIdAndUsuario(@PathVariable UUID fornoId) {
 
@@ -87,7 +87,7 @@ public class TemporizadorController {
         );
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<?> getTemporizador(@RequestParam(required = false) UUID id, Authentication authentication) {
 

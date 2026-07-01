@@ -34,14 +34,14 @@ public class FornoController {
         return ResponseEntity.ok(fornoService.autenticar(dto));
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/vincular")
     public ResponseEntity<Void> vincularForno(@Valid @RequestBody VincularFornoDTO dto, Authentication authentication) {
         fornoService.vincularFornoaoUsuario(dto, authentication.getName());
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus")
     public ResponseEntity<List<FornoResponseDTO>> buscarMeusFornos(Authentication authentication) {
         List<FornoResponseDTO> fornos = fornoService.buscarMeusFornos(authentication.getName());

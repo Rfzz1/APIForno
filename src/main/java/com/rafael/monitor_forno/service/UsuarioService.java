@@ -223,9 +223,8 @@ public class UsuarioService {
             throw new CredenciaisInvalidasException("Token expirado");
         }
 
-        usuario.setSenha(
-                passwordEncoder.encode(dto.novaSenha())
-        );
+        String senhaHash = passwordEncoder.encode(dto.novaSenha());
+        usuario.setSenha(senhaHash);
 
         usuario.setTokenRecuperacaoSenha(null);
         usuario.setExpiracaoToken(null);

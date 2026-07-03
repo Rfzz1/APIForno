@@ -108,7 +108,7 @@ public class UsuarioService {
             );
         }
 
-        usuarioExistente.setSenha(dto.senhaAtualizada());
+        usuarioExistente.setSenha(passwordEncoder.encode(dto.senhaAtualizada()));
 
         usuarioRepository.save(usuarioExistente);
 

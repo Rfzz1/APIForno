@@ -8,6 +8,7 @@ import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.exception.*;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class FornoService {
         Forno forno = new Forno();
         forno.setSerialNumber(dto.getSerialNumber());
         forno.setNome(dto.getNome());
-        forno.setPinSeguranca(dto.getPinSeguranca());
+        forno.setPinSeguranca(gerarPinSeguranca());
 
         forno.setDeviceSecret(
                 UUID.randomUUID().toString()
@@ -109,6 +110,19 @@ public class FornoService {
                 .stream()
                 .map(this::toFornoResponseDTO)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private String gerarPinSeguranca() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!*$#";
+        SecureRandom random = new SecureRandom();
+        StringBuilder pin = new StringBuilder();
+
+        for (int i = 0; i < 20; i++) {
+            int index = random.nextInt(caracteres.length());
+            pin.append(caracteres.charAt(index));
+        }
+
+        return pin.toString();
     }
 
     private FornoResponseDTO toFornoResponseDTO(Forno forno) {

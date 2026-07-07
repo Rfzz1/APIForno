@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("v1/telemetrias")
+@RequestMapping("/telemetrias")
 public class TelemetriaController {
 
     private final TelemetriaService telemetriaService;

@@ -19,8 +19,10 @@ public class SessaoDetalhesDTO {
     private UUID id;
     private LocalDateTime inicioSessao;
     private LocalDateTime fimSessao;
+    private EstadoForno estadoFornoAtual;
+    private EstadoSistema estadoSistemaAtual;
     private EstadoForno estadoFornoFinal;
-    private EstadoSistema estadoSistema;
+    private EstadoSistema estadoSistemaFinal;
     private Long duracaoSegundos;
     private List<EventoDTO> eventos;
     private List<TemperaturaDTO> temperaturas;

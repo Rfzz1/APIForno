@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("v1/temporizadores")
+@RequestMapping("/temporizadores")
 public class TemporizadorController {
 
     private final TemporizadorService temporizadorService;

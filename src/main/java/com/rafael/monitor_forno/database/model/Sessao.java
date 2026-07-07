@@ -28,10 +28,16 @@ public class Sessao {
     private Long duracaoSegundos;
 
     @Enumerated(EnumType.STRING)
+    private EstadoForno estadoFornoAtual;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoSistema estadoSistemaAtual;
+
+    @Enumerated(EnumType.STRING)
     private EstadoForno estadoFornoFinal;
 
     @Enumerated(EnumType.STRING)
-    private EstadoSistema estadoSistema;
+    private EstadoSistema estadoSistemaFinal;
 
     @ManyToOne
     @JoinColumn(name = "forno_id")

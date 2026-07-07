@@ -54,8 +54,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/v1/auth/login", "/v1/fornos/auth", "/v1/usuario", "/v1/auth/esqueci-minha-senha", "/v1/auth/redefinir-senha").permitAll()
-                        .requestMatchers("/v1/temperaturas").hasAnyAuthority("ROLE_FORNO", "USER")
+                        .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha").permitAll()
+                        .requestMatchers("/temperaturas").hasAnyAuthority("ROLE_FORNO", "USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

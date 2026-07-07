@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("v1/temperaturas")
+@RequestMapping("/temperaturas")
 public class TemperaturaController {
 
     private final TemperaturaService temperaturaService;

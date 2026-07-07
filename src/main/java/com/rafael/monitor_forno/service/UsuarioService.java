@@ -7,6 +7,7 @@ import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,9 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService) {
         this.usuarioRepository = usuarioRepository;
@@ -47,7 +51,7 @@ public class UsuarioService {
         usuario.setSenha(senhaHash);
         usuarioRepository.save(usuario);
 
-        String link = "https://monitoramentoforno.com.br";
+        String link = baseUrl;
 
         emailService.enviarEmail(usuario.getEmail(),
                 "Bem vindo(a) ao nosso monitoramento de forno! Seu cadastro foi concluído!",
@@ -190,7 +194,7 @@ public class UsuarioService {
 
                     usuarioRepository.save(usuario);
 
-                    String link = "https://monitoramentoforno.com.br/redefinir-senha?token=" + token;
+                    String link = baseUrl + "/redefinir-senha?token=" + token;
 
                     emailService.enviarEmail(usuario.getEmail(),
                             "Recuperação de Senha",

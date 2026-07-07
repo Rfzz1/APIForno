@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("v1/usuario/foto-perfil")
+@RequestMapping("/usuario/foto-perfil")
 public class FotoPerfilController {
 
     private final FotoPerfilService fotoPerfilService;

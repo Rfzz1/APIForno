@@ -1,6 +1,8 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.dto.SessaoAtualizarDTO;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
+import com.rafael.monitor_forno.dto.SessaoEncerrarDTO;
 import com.rafael.monitor_forno.dto.SessaoResumoDTO;
 import com.rafael.monitor_forno.service.SessaoService;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("v1/sessoes")
+@RequestMapping("/sessoes")
 public class SessaoController {
 
     private final SessaoService sessaoService;
@@ -39,13 +41,23 @@ public class SessaoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/encerrar")
-    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id) {
+    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id, @RequestBody SessaoEncerrarDTO dto) {
 
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, serialNumber);
+        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, serialNumber, dto);
 
         return ResponseEntity.ok(sessao);
 
+    }
+
+    @PreAuthorize("hasRole('FORNO')")
+    @PutMapping("/{id}/atualizar")
+    public ResponseEntity<SessaoDetalhesDTO> atualizarSessao(@PathVariable UUID id, @RequestBody SessaoAtualizarDTO dto) {
+
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        SessaoDetalhesDTO sessao = sessaoService.atualizarSessao(id, serialNumber, dto);
+
+        return ResponseEntity.ok(sessao);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

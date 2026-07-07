@@ -87,8 +87,7 @@ public class TelemetriaService {
                 );
 
 
-        int quantidadeSessoes =
-                sessaoRepository.countByFornoUsuario(forno.getUsuario());
+        int quantidadeSessoes = sessaoRepository.countByFornoUsuario(forno.getUsuario());
 
         Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoUsuario(forno.getUsuario())).orElse(0.0);
 

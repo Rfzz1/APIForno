@@ -6,8 +6,11 @@ import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import com.rafael.monitor_forno.dto.SessaoAtualizarDTO;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
+import com.rafael.monitor_forno.dto.SessaoEncerrarDTO;
 import com.rafael.monitor_forno.dto.SessaoResumoDTO;
+import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.exception.SessaoEncerradaException;
@@ -60,7 +63,7 @@ public class SessaoService {
         return toResumoDTO(sessaoSalva);
     }
 
-    public SessaoDetalhesDTO encerrarSessao(UUID id, String serialNumber) {
+    public SessaoDetalhesDTO encerrarSessao(UUID id, String serialNumber, SessaoEncerrarDTO dto) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
@@ -91,9 +94,48 @@ public class SessaoService {
 
         sessao.setDuracaoSegundos(duracaoSegundos);
 
+        if(dto.getEstadoSistemaFinal() != null) {
+            sessao.setEstadoSistemaFinal(dto.getEstadoSistemaFinal());
+        }
+        sessao.setEstadoFornoFinal(EstadoForno.FORNO_DESLIGADO);
+
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toDetalhesDTO(sessaoSalva);
+    }
+
+    public SessaoDetalhesDTO atualizarSessao(UUID id, String serialNumber, SessaoAtualizarDTO dto) {
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + serialNumber
+                        )
+                );
+
+        Sessao sessao = sessaoRepository.findByIdAndForno(id, forno)
+                .orElseThrow(
+                        () -> new AcessoNegadoException(
+                                "Sessão não pertence ao usuário logado"
+                        )
+                );
+
+        if (sessao.getFimSessao() != null) {
+            throw new SessaoEncerradaException(
+                    "Sessão já encerrada."
+            );
+        }
+
+        // Atualizar os campos com base no DTO
+        if (dto.getEstadoSistemaAtual() != null) {
+            sessao.setEstadoSistemaAtual(dto.getEstadoSistemaAtual());
+        }
+        if (dto.getEstadoFornoAtual() != null) {
+            sessao.setEstadoFornoAtual(dto.getEstadoFornoAtual());
+        }
+
+        Sessao sessaoAtualizada = sessaoRepository.save(sessao);
+
+        return toDetalhesDTO(sessaoAtualizada);
     }
 
     public void deleteById(UUID id, String serialNumber) {
@@ -185,7 +227,7 @@ public class SessaoService {
                 .inicioSessao(sessao.getInicioSessao())
                 .fimSessao(sessao.getFimSessao())
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
-                .estadoSistema(sessao.getEstadoSistema())
+                .estadoSistemaFinal(sessao.getEstadoSistemaFinal())
                 .build();
     }
 
@@ -194,9 +236,11 @@ public class SessaoService {
                 .id(sessao.getId())
                 .inicioSessao(sessao.getInicioSessao())
                 .fimSessao(sessao.getFimSessao())
-                .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .duracaoSegundos(sessao.getDuracaoSegundos())
-                .estadoSistema(sessao.getEstadoSistema())
+                .estadoSistemaAtual(sessao.getEstadoSistemaAtual())
+                .estadoFornoAtual(sessao.getEstadoFornoAtual())
+                .estadoSistemaFinal(sessao.getEstadoSistemaFinal())
+                .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .eventos(
                         sessao.getEventos() == null
                         ? List.of()

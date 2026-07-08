@@ -132,6 +132,7 @@ public class FornoService {
                 .secret(forno.getDeviceSecret())
                 .ativo(forno.isAtivo())
                 .nome(forno.getNome())
+                .pinSeguranca(forno.getPinSeguranca())
                 .build();
     }
 

@@ -1,8 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.dto.NovaSenhaLogadoDTO;
-import com.rafael.monitor_forno.dto.UserRequestDTO;
-import com.rafael.monitor_forno.dto.UserResponseDTO;
+import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -39,20 +37,12 @@ public class UsuarioController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> atualizarUsuario(@Valid @RequestBody UserRequestDTO dto, Authentication authentication) {
+    @PutMapping("/meu-perfil")
+    public ResponseEntity<UserResponseDTO> atualizarMeuPerfil(@Valid @RequestBody AtualizarMeuPerfilDTO dto, Authentication authentication) {
         UserResponseDTO usuarioAtualizado =
                 usuarioService.atualizarUsuario(dto, authentication.getName());
 
         return ResponseEntity.ok(usuarioAtualizado);
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping ("/{id}/promover")
-    public ResponseEntity<UserResponseDTO> promoverUsuario(@PathVariable UUID id) {
-
-        return ResponseEntity.ok(usuarioService.promoverUsuario(id));
-
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -79,6 +69,36 @@ public class UsuarioController {
 
         return ResponseEntity.ok(usuarioService.findAll());
 
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping ("/{id}/promover")
+    public ResponseEntity<UserResponseDTO> promoverUsuario(@PathVariable UUID id) {
+
+        return ResponseEntity.ok(usuarioService.promoverUsuario(id));
+
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping ("/{id}/rebaixar")
+    public ResponseEntity<UserResponseDTO> rebaixarUsuario(@PathVariable UUID id) {
+
+        return ResponseEntity.ok(usuarioService.rebaixarUsuario(id));
+
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping ("/{id}/admin/atualizar-usuario")
+    public ResponseEntity<UserResponseDTO> atualizarUsuarioAdmin(@PathVariable UUID id, @Valid @RequestBody AdminAtualizarUsuarioDTO dto) {
+
+        return ResponseEntity.ok(usuarioService.atualizarUsuarioAdmin(id, dto));
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{id}/admin/deletar-usuario")
+    public ResponseEntity<Void> deletarUsuarioAdmin(@PathVariable UUID id) {
+        usuarioService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

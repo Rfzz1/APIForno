@@ -73,28 +73,26 @@ public class UsuarioService {
         );
     }
 
-    public UserResponseDTO atualizarUsuario(UserRequestDTO dto, String email) {
+    public UserResponseDTO atualizarUsuario(AtualizarMeuPerfilDTO dto, String email) {
 
-        Usuario usuarioExsitente = usuarioRepository.findByEmail(email)
+        Usuario usuarioExistente = usuarioRepository.findByEmail(email)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Usuário não encontrado" + email
                         )
                 );
 
-        usuarioExsitente.setNome(dto.getNome());
-        usuarioExsitente.setNascimento(dto.getNascimento());
-        usuarioExsitente.setEmail(dto.getEmail());
-
-        if (dto.getSenha() != null &&
-                !dto.getSenha().isBlank()) {
-
-            usuarioExsitente.setSenha(
-                    passwordEncoder.encode(dto.getSenha())
-            );
+        if (!usuarioExistente.getEmail().equals(dto.getEmail())) {
+            if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+                throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
+            }
         }
 
-        return toUserResponseDTO(usuarioRepository.save(usuarioExsitente));
+        usuarioExistente.setNome(dto.getNome());
+        usuarioExistente.setNascimento(dto.getNascimento());
+        usuarioExistente.setEmail(dto.getEmail());
+
+        return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
     }
 
     public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
@@ -117,23 +115,6 @@ public class UsuarioService {
         usuarioRepository.save(usuarioExistente);
 
     }
-
-    public UserResponseDTO promoverUsuario(UUID id) {
-
-        Usuario usuarioExistente = usuarioRepository.findById(id)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado: " + id
-                        )
-                );
-
-        usuarioExistente.setRole(Role.ADMIN);
-
-        return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
-
-    }
-
-
 
     public void deleteByEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -199,15 +180,15 @@ public class UsuarioService {
                     emailService.enviarEmail(usuario.getEmail(),
                             "Recuperação de Senha",
                             """
-                                    Olá!
+                                    Olá!<br><br>
                                     
-                                    Recebemos uma solicitação para redefinição da sua senha.
+                                    Recebemos uma solicitação para redefinição da sua senha.<br><br>
                                     
-                                    Clique no link abaixo:
+                                    Clique no link abaixo:<br><br>
                                     
-                                    %s
+                                    %s<br><br>
                                     
-                                    Este link expira em 30 minutos.
+                                    Este link expira em 30 minutos.<br><br>
                                     
                                     Caso você não tenha solicitado esta alteração, ignore este e-mail.
                                     """.formatted(link)
@@ -245,6 +226,63 @@ public class UsuarioService {
                 );
 
         return toUserResponseDTO(usuario);
+    }
+
+    public void deleteById(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + id
+                        )
+                );
+        usuarioRepository.delete(usuario);
+    }
+
+    public UserResponseDTO promoverUsuario(UUID id) {
+
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + id
+                        )
+                );
+
+        usuarioExistente.setRole(Role.ADMIN);
+
+        return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
+
+    }
+
+    public UserResponseDTO rebaixarUsuario(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + id
+                        )
+                );
+        usuario.setRole(Role.USER);
+        return toUserResponseDTO(usuarioRepository.save(usuario));
+    }
+
+    public UserResponseDTO atualizarUsuarioAdmin(UUID id, AdminAtualizarUsuarioDTO dto) {
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + id
+                        )
+                );
+
+        if (!usuarioExistente.getEmail().equals(dto.getEmail())) {
+            if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+                throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
+            }
+        }
+
+        usuarioExistente.setNome(dto.getNome());
+        usuarioExistente.setEmail(dto.getEmail());
+        usuarioExistente.setNascimento(dto.getNascimento());
+
+        return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
     }
 
     public UserResponseDTO meuPerfil(String email) {

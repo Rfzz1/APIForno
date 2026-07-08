@@ -125,6 +125,12 @@ public class SessaoService {
             );
         }
 
+        long duracaoSegundos = ChronoUnit.SECONDS.between(
+                sessao.getInicioSessao(),
+                LocalDateTime.now()
+        );
+        sessao.setDuracaoSegundos(duracaoSegundos);
+
         // Atualizar os campos com base no DTO
         if (dto.getEstadoSistemaAtual() != null) {
             sessao.setEstadoSistemaAtual(dto.getEstadoSistemaAtual());

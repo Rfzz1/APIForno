@@ -40,6 +40,7 @@ public class FornoService {
         forno.setSerialNumber(dto.getSerialNumber());
         forno.setPinSeguranca(gerarPinSeguranca());
         forno.setReivindicado(false);
+        forno.setNome(dto.getNome());
 
         forno.setDeviceSecret(
                 UUID.randomUUID().toString()

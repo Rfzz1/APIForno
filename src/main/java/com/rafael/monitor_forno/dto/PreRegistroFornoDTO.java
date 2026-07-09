@@ -13,4 +13,7 @@ public class PreRegistroFornoDTO {
     @NotBlank(message = "Serial number é obrigatório")
     private String serialNumber;
 
+    @NotBlank(message = "Nome é obrigatório")
+    private String nome;
+
 }

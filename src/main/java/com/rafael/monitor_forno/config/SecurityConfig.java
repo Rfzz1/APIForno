@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha", "/fornos/auto-provisionar").permitAll()
                         .requestMatchers("/temperaturas").hasAnyAuthority("ROLE_FORNO", "USER")
                         .anyRequest().authenticated()
                 )

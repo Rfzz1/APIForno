@@ -16,5 +16,7 @@ public class EventoDTO {
     private UUID id;
     private LocalDateTime criadoEm;
     private EventoSistema tipo;
+    private UUID fornoId;
+    private UUID sessaoId;
 
 }

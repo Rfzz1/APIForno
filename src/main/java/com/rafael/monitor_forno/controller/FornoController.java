@@ -22,10 +22,16 @@ public class FornoController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/fabricar")
-    public ResponseEntity<FornoResponseDTO> fabricarForno(@Valid @RequestBody FabricarFornoDTO dto) {
+    @PostMapping("/pre-registrar")
+    public ResponseEntity<FornoResponseDTO> fabricarForno(@Valid @RequestBody PreRegistroFornoDTO dto) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(fornoService.fabricar(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(fornoService.preRegistro(dto));
+    }
+
+    @PostMapping("/auto-provisionar")
+    public ResponseEntity<AutoProvisionamentoResponseDTO> autoProvisionar(@Valid @RequestBody AutoProvisionamentoDTO dto) {
+
+        return ResponseEntity.ok(fornoService.autoProvisionar(dto));
     }
 
     @PostMapping("/auth")

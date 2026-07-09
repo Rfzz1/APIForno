@@ -29,6 +29,7 @@ public class Forno {
     private String pinSeguranca;
     
     private boolean ativo;
+    private boolean reivindicado;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

@@ -13,8 +13,8 @@ public class FornoResponseDTO {
 
     private UUID id;
     private String serialNumber;
-    private String secret;
     private boolean ativo;
     private String nome;
     private String pinSeguranca;
+    private boolean reivindicado;
 }

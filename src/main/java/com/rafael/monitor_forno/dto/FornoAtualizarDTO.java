@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
 import lombok.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter

@@ -16,4 +16,7 @@ public class VincularFornoDTO {
     @NotBlank(message = "PIN de segurança é obrigatório")
     private String pinSeguranca;
 
+    @NotBlank(message = "Nome do forno é obrigatório")
+    private String nome;
+
 }

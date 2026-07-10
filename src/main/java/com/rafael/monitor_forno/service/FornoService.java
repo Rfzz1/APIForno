@@ -40,6 +40,7 @@ public class FornoService {
         forno.setSerialNumber(dto.getSerialNumber());
         forno.setPinSeguranca(gerarPinSeguranca());
         forno.setReivindicado(false);
+        forno.setAtivo(false);
         forno.setNome(dto.getNome() != null ? dto.getNome() : "Forno sem nome");
 
         forno.setDeviceSecret(
@@ -91,7 +92,6 @@ public class FornoService {
             );
         }
 
-        // ALTERAÇÃO AQUI: Passando "FORNO" como tipo
         return LoginResponseDTO.builder()
                 .id(forno.getId())
                 .token(jwtService.gerarToken(forno.getSerialNumber(), "FORNO", "FORNO"))
@@ -127,7 +127,39 @@ public class FornoService {
 
         forno.setUsuario(usuario);
         forno.setAtivo(true);
+        forno.setNome(dto.getNome() != null ? dto.getNome() : forno.getNome());
         fornoRepository.save(forno);
+    }
+
+    public FornoResponseDTO atualizarForno(FornoAtualizarDTO dto, String email, String serialNumber) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + serialNumber
+                        )
+                );
+
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException("Você não tem permissão para atualizar este forno");
+        }
+
+        if (!forno.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para atualizar este forno");
+        }
+
+        if (dto.getNome() != null && !dto.getNome().trim().isEmpty()) {
+            forno.setNome(dto.getNome());
+        }
+        fornoRepository.save(forno);
+
+        return toFornoResponseDTO(forno);
     }
 
     public List<FornoResponseDTO> buscarMeusFornos(String email) {

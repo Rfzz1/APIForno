@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,17 @@ public class FornoController {
     public ResponseEntity<LoginResponseDTO> autenticar(@Valid @RequestBody FornoAuthDTO dto) {
 
         return ResponseEntity.ok(fornoService.autenticar(dto));
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER')")
+    @PutMapping("/atualizar-forno")
+    public ResponseEntity<FornoResponseDTO> atualizarForno(@Valid @RequestBody FornoAtualizarDTO dto) {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+
+        FornoResponseDTO forno = fornoService.atualizarForno(dto, email, serialNumber);
+        return ResponseEntity.ok(forno);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

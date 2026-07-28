@@ -17,4 +17,5 @@ public class FornoResponseDTO {
     private String nome;
     private String pinSeguranca;
     private boolean reivindicado;
+    private boolean muted;
 }

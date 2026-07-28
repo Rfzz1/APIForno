@@ -6,8 +6,11 @@ import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.exception.*;
+import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +22,13 @@ public class FornoService {
     private final FornoRepository fornoRepository;
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
+    private final FornoWebSocketHandler fornoWebSocketHandler;
 
-    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService) {
+    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler) {
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
+        this.fornoWebSocketHandler = fornoWebSocketHandler;
     }
 
     public FornoResponseDTO preRegistro (PreRegistroFornoDTO dto) {
@@ -131,6 +136,7 @@ public class FornoService {
         fornoRepository.save(forno);
     }
 
+    @Transactional
     public void desvincularFornoDoUsuario(String email, String serialNumber) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(
@@ -146,7 +152,7 @@ public class FornoService {
                         )
                 );
 
-        if (!forno.getUsuario().getId().equals(usuario.getId())) {
+        if (forno.getUsuario() == null || !forno.getUsuario().getId().equals(usuario.getId())) {
             throw new AcessoNegadoException("Você não tem permissão para desvincular este forno");
         }
 
@@ -197,6 +203,36 @@ public class FornoService {
                 .stream()
                 .map(this::toFornoResponseDTO)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    public void mutarBuzzer(String email, String serialNumber) {
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+
+        Forno forno =  fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + serialNumber
+                        )
+                );
+
+        if (forno.getUsuario() == null || !forno.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para silenciar este forno");
+        }
+
+        forno.setMuted(true);
+        fornoRepository.save(forno);
+
+        try {
+            fornoWebSocketHandler.enviarComandoParaForno(serialNumber, "{\"acao\": \"MUTE\"}");
+        } catch (IOException e) {
+            throw new RuntimeException("Falha ao enviar comando para o ESP32 " + serialNumber, e);
+        }
     }
 
     private String gerarPinSeguranca() {

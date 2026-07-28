@@ -62,8 +62,15 @@ public class FornoController {
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/desvincular/{serialNumber}")
     public ResponseEntity<Void> desvincularForno(@PathVariable String serialNumber, Authentication authentication) {
-        fornoService.desvincularFornoDoUsuario(serialNumber, authentication.getName());
+        fornoService.desvincularFornoDoUsuario(authentication.getName(),serialNumber);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PostMapping("/mutar-buzzer/{serialNumber}")
+    public ResponseEntity<Void> mutarBuzzer(@PathVariable String serialNumber, Authentication authentication) {
+        fornoService.mutarBuzzer(authentication.getName(), serialNumber);
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

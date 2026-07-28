@@ -30,6 +30,7 @@ public class Forno {
     
     private boolean ativo;
     private boolean reivindicado;
+    private boolean isMuted;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

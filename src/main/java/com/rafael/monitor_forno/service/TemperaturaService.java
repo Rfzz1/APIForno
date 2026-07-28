@@ -106,6 +106,32 @@ public class    TemperaturaService {
 
     }
 
+    public List<TemperaturaDTO> buscarTemperaturasPorSessao(UUID sessaoId, String email) {
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+
+        Sessao sessao = sessaoRepository.findById(sessaoId)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Sessão não encontrada: " + sessaoId
+                        )
+                );
+
+        if (sessao.getForno().getUsuario() == null || !sessao.getForno().getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para acessar os dados desta sessão.");
+        }
+
+        List<Temperatura> temperaturas = temperaturaRepository.findAllBySessaoId(sessaoId);
+        return temperaturas.stream()
+                .map(temperaturaMapper::toTemperaturaDTO)
+                .toList();
+    }
+
     public List<TemperaturaDTO> findAllByFornoUsuario(String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

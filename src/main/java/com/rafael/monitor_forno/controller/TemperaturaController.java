@@ -58,8 +58,17 @@ public class TemperaturaController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/minhas")
-    public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas(Authentication authentication) {
-        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
+    public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(email));
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/sessoes/{sessaoId}/temperaturas")
+    public ResponseEntity<List<TemperaturaDTO>> buscarTemperaturasPorSessao(@PathVariable UUID sessaoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<TemperaturaDTO> temperaturas = temperaturaService.buscarTemperaturasPorSessao(sessaoId, email);
+        return ResponseEntity.ok(temperaturas);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

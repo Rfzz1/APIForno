@@ -205,6 +205,8 @@ public class FornoService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+
+
     public void mutarBuzzer(String email, String serialNumber) {
 
         Usuario usuario = usuarioRepository.findByEmail(email)

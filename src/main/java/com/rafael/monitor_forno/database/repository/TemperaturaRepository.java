@@ -19,6 +19,7 @@ public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> 
     Optional<Temperatura> findByIdAndFornoUsuario(UUID id, Usuario usuario);
     List<Temperatura> findAllByFornoUsuario(Usuario usuario);
     List<Temperatura> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
+    List<Temperatura> findAllBySessaoId(UUID sessaoId);
 
     @Query("""
     SELECT MAX(t.temperaturaAtual)

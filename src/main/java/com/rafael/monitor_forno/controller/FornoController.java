@@ -46,9 +46,8 @@ public class FornoController {
     public ResponseEntity<FornoResponseDTO> atualizarForno(@Valid @RequestBody FornoAtualizarDTO dto) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
 
-        FornoResponseDTO forno = fornoService.atualizarForno(dto, email, serialNumber);
+        FornoResponseDTO forno = fornoService.atualizarForno(dto, email, dto.getSerialNumber());
         return ResponseEntity.ok(forno);
     }
 

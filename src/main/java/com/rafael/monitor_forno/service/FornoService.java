@@ -231,7 +231,7 @@ public class FornoService {
         try {
             fornoWebSocketHandler.enviarComandoParaForno(serialNumber, "{\"acao\": \"MUTE\"}");
         } catch (IOException e) {
-            throw new RuntimeException("Falha ao enviar comando para o ESP32 " + serialNumber, e);
+            throw new FornoDesconectadoException("Falha na comunicação de rede com o forno " + serialNumber);
         }
     }
 

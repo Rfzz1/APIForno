@@ -7,7 +7,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 @Configuration
-@EnableWebSocket
+@EnableWebSocket //Ativa suporte de websocket para spring boot
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final FornoWebSocketHandler fornoWebSocketHandler;
@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // Define a rota de conexão: ws://localhost:8080/ws/forno
+        //Mapeia a URL e conecta com o nosso Handler
         registry.addHandler(fornoWebSocketHandler, "/ws/forno").setAllowedOrigins("*");
     }
 }

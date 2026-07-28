@@ -43,6 +43,11 @@ public class    GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
+    @ExceptionHandler(FornoDesconectadoException.class)
+    public ResponseEntity<String> handleFornoDesconectado(FornoDesconectadoException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
+    }
+
     //Validação de Beans das credenciais
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidacao(

@@ -51,7 +51,6 @@ public class EventoService {
                     "Tipo do evento não informado"
             );
         }
-
         Sessao sessao = sessaoRepository
                 .findByIdAndForno(dto.getSessaoId(), forno)
                 .orElseThrow(

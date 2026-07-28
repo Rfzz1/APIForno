@@ -60,6 +60,13 @@ public class FornoController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @DeleteMapping("/desvincular/{serialNumber}")
+    public ResponseEntity<Void> desvincularForno(@PathVariable String serialNumber, Authentication authentication) {
+        fornoService.desvincularFornoDoUsuario(serialNumber, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus")
     public ResponseEntity<List<FornoResponseDTO>> buscarMeusFornos(Authentication authentication) {
         List<FornoResponseDTO> fornos = fornoService.buscarMeusFornos(authentication.getName());

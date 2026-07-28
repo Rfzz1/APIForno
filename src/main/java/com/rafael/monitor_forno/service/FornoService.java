@@ -131,6 +131,30 @@ public class FornoService {
         fornoRepository.save(forno);
     }
 
+    public void desvincularFornoDoUsuario(String email, String serialNumber) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + serialNumber
+                        )
+                );
+
+        if (!forno.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para desvincular este forno");
+        }
+
+        forno.setUsuario(null);
+        forno.setAtivo(false);
+        fornoRepository.save(forno);
+    }
+
     public FornoResponseDTO atualizarForno(FornoAtualizarDTO dto, String email, String serialNumber) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(

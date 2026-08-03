@@ -41,6 +41,10 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
+    private String codigoVerificacaoEmail;
+    private LocalDateTime expiracaoCodigoEmail;
+    private String novoEmailPendente;
+
     @OneToOne(fetch = FetchType.LAZY)
     private FotoPerfil fotoPerfil;
 }

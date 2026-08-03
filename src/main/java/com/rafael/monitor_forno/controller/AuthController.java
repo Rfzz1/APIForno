@@ -1,9 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.dto.LoginRequestDTO;
-import com.rafael.monitor_forno.dto.LoginResponseDTO;
-import com.rafael.monitor_forno.dto.NovaSenhaDTO;
-import com.rafael.monitor_forno.dto.UserRequestDTO;
+import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.EmailService;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -47,5 +44,20 @@ public class    AuthController {
         usuarioService.redefinirSenha(dto);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/enviar-codigo-redefinir-email")
+    public ResponseEntity<String> enviarCodigoRedefinirEmail(@Valid @RequestBody SolicitarTrocaEmailDTO dto, java.security.Principal principal) {
+
+        String email = principal.getName();
+        usuarioService.enviarCodigoRedefinirEmail(email);
+        return ResponseEntity.ok("Código de redefinição enviado com sucesso.");
+    }
+
+    @PostMapping("/verificar-codigo-redefinir-email")
+    public ResponseEntity<String> verificarCodigoRedefinirEmail(@RequestBody ConfirmarTrocaEmailDTO dto, java.security.Principal principal) {
+        String email = principal.getName();
+        usuarioService.verificarCodigoRedefinirEmail(email, dto.getCodigo());
+        return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
 }

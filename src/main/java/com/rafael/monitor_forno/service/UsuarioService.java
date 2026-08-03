@@ -196,6 +196,87 @@ public class UsuarioService {
                 });
     }
 
+    public void enviarCodigoRedefinirEmail(String emailAtual, String senhaAtual, String novoEmail) {
+
+        Usuario usuario = usuarioRepository.findByEmail(emailAtual)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+
+        if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
+            throw new CredenciaisInvalidasException(
+                    "Email ou senha inválidos"
+            );
+        }
+
+        if (usuarioRepository.findByEmail(novoEmail).isPresent()) {
+            throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
+        }
+
+        String otp = String.format("%06d", new java.util.Random().nextInt(10000));
+
+        usuario.setCodigoVerificacaoEmail(otp);
+        usuario.setExpiracaoCodigoEmail(LocalDateTime.now().plusMinutes(15));
+        usuario.setNovoEmailPendente(novoEmail);
+
+        usuarioRepository.save(usuario);
+
+        emailService.enviarEmail(usuario.getEmail(),
+                "Código de Verificação para Alteração de E-mail",
+                """
+                        Olá, %s!<br><br>
+                        
+                        Recebemos uma solicitação para alterar o e-mail da sua conta para <b>%s<b>.<br><br>
+                        
+                        Seu código de verificação é:<br><br>
+                        
+                        <b>%s</b><br><br>
+                        
+                        Este código expira em 15 minutos.<br><br>
+                        
+                        Caso você não tenha solicitado esta alteração, ignore este e-mail e altere sua senha.
+                        """.formatted(usuario.getNome(), novoEmail, otp)
+        );
+
+    }
+
+    public void verificarCodigoRedefinirEmail(String emailAtual, String codigo) {
+
+        Usuario usuario = usuarioRepository.findByEmail(emailAtual)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+
+        if (!usuario.getCodigoVerificacaoEmail().equals(codigo)) {
+            throw new CredenciaisInvalidasException("Código de verificação inválido");
+        }
+
+        if (usuario.getExpiracaoCodigoEmail().isBefore(LocalDateTime.now())) {
+            throw new CredenciaisInvalidasException("Código de verificação expirado");
+        }
+
+        String antigoEmail = usuario.getEmail();
+        String novoEmail = usuario.getNovoEmailPendente();
+
+        usuario.setEmail(novoEmail);
+        usuario.setCodigoVerificacaoEmail(null);
+        usuario.setExpiracaoCodigoEmail(null);
+        usuario.setNovoEmailPendente(null);
+
+        usuarioRepository.save(usuario);
+
+        emailService.enviarEmail(
+                novoEmail,
+                "E-mail alterado com sucesso!",
+                "Sua conta agora está vinculada a este endereço de e-mail."
+        );
+
+    }
+
     public void redefinirSenha(NovaSenhaDTO dto) {
         Usuario usuario = usuarioRepository.findByTokenRecuperacaoSenha(dto.token())
                 .orElseThrow(

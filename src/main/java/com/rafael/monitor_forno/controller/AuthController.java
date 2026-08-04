@@ -60,4 +60,4 @@ public class    AuthController {
         usuarioService.verificarCodigoRedefinirEmail(emailAtual, dto.codigo());
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
-}
+}//d

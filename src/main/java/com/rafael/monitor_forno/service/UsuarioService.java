@@ -215,7 +215,7 @@ public class UsuarioService {
             throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
         }
 
-        String otp = String.format("%06d", new java.util.Random().nextInt(100000));
+        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
 
         usuario.setCodigoVerificacaoEmail(otp);
         usuario.setExpiracaoCodigoEmail(LocalDateTime.now().plusMinutes(15));

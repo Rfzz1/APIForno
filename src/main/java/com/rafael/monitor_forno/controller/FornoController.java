@@ -2,7 +2,7 @@ package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.FornoService;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/fornos")

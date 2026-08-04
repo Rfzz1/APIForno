@@ -1,5 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
+import jakarta.validation.constraints.*;
+
 public record SolicitarTrocaEmailDTO (
         @NotBlank(message = "A senha atual é obrigatória")
       String senhaAtual,

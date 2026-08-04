@@ -2,7 +2,7 @@ package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.UsuarioService;
-import jakarta.validation.Valid;
+import jakarta.validation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -49,15 +49,15 @@ public class    AuthController {
     @PostMapping("/enviar-codigo-redefinir-email")
     public ResponseEntity<String> enviarCodigoRedefinirEmail(@Valid @RequestBody SolicitarTrocaEmailDTO dto, java.security.Principal principal) {
 
-        String email = principal.getName();
-        usuarioService.enviarCodigoRedefinirEmail(email);
+        String emailAtual = principal.getName();
+        usuarioService.enviarCodigoRedefinirEmail (emailAtual, dto.senhaAtual(), dto.novoEmail());
         return ResponseEntity.ok("Código de redefinição enviado com sucesso.");
     }
 
     @PostMapping("/verificar-codigo-redefinir-email")
     public ResponseEntity<String> verificarCodigoRedefinirEmail(@RequestBody ConfirmarTrocaEmailDTO dto, java.security.Principal principal) {
-        String email = principal.getName();
-        usuarioService.verificarCodigoRedefinirEmail(email, dto.getCodigo());
+        String emailAtual = principal.getName();
+        usuarioService.verificarCodigoRedefinirEmail(emailAtual, dto.codigo());
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
 }

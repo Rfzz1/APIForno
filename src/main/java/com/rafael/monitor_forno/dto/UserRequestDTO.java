@@ -1,10 +1,10 @@
 package com.rafael.monitor_forno.dto;
 
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.br.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,4 +27,8 @@ public class UserRequestDTO {
             message = "A senha deve possuir no mínimo 8 caracteres, uma letra maiúscula, uma minúscula e um número"
     )
     private String senha;
+
+    @NotBlank(message = "CPF é obrigatório")
+    @CPF(message = "CPF inválido")
+    private String cpf;
 }

@@ -46,6 +46,15 @@ public class SessaoService {
         this.fornoMapper = fornoMapper;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+    }
+
     public SessaoResumoDTO iniciarSessao(String serialNumber) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
@@ -179,12 +188,7 @@ public class SessaoService {
     }
 
     public List<SessaoDetalhesDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         if (dataInicio == null || dataFim == null) {
             return sessaoRepository.findAllByFornoUsuario(usuario)
@@ -208,12 +212,7 @@ public class SessaoService {
 
     public SessaoDetalhesDTO findById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Sessao sessao = sessaoRepository
                 .findByIdAndFornoUsuario(id, usuario)

@@ -31,6 +31,14 @@ public class FornoService {
         this.fornoWebSocketHandler = fornoWebSocketHandler;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return  usuarioRepository.findByEmail(email).orElseThrow(
+                () -> new RecursoNaoEncontradoException(
+                        "Usuário não encontrado " + email
+                )
+        );
+    }
+
     public FornoResponseDTO preRegistro (PreRegistroFornoDTO dto) {
 
         Optional<Forno> fornoExistente = fornoRepository.findBySerialNumber(dto.getSerialNumber());
@@ -104,12 +112,7 @@ public class FornoService {
     }
 
     public void vincularFornoaoUsuario(VincularFornoDTO dto, String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Forno forno = fornoRepository.findBySerialNumber(dto.getSerialNumber())
                 .orElseThrow(
@@ -138,12 +141,7 @@ public class FornoService {
 
     @Transactional
     public void desvincularFornoDoUsuario(String email, String serialNumber) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario =buscarUsuarioLogado(email);
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
@@ -162,12 +160,7 @@ public class FornoService {
     }
 
     public FornoResponseDTO atualizarForno(FornoAtualizarDTO dto, String email, String serialNumber) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
@@ -193,12 +186,7 @@ public class FornoService {
     }
 
     public List<FornoResponseDTO> buscarMeusFornos(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
         return fornoRepository.findByUsuario(usuario)
                 .stream()
                 .map(this::toFornoResponseDTO)
@@ -209,12 +197,7 @@ public class FornoService {
 
     public void mutarBuzzer(String email, String serialNumber) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Forno forno =  fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(

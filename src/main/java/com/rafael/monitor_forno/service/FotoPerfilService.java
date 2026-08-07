@@ -22,9 +22,13 @@ public class FotoPerfilService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public FotoPerfilResponseDTO setProfileImage(FotoPerfilRequestDTO dto, String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+    private Usuario buscarUsuarioLogado (String email) {
+        return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o email: " + email));
+    }
+
+    public FotoPerfilResponseDTO setProfileImage(FotoPerfilRequestDTO dto, String email) {
+        Usuario usuario = buscarUsuarioLogado(email);
 
         if (fotoPerfilRepository.findByUsuario(usuario).isPresent()) {
             throw new IllegalArgumentException("O usuário já possui uma foto de perfil. Use a rota de atualização.");
@@ -37,8 +41,7 @@ public class FotoPerfilService {
     }
 
     public void deleteProfileImage(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o email: " + email));
+        Usuario usuario = buscarUsuarioLogado(email);
 
         FotoPerfil fotoPerfil = fotoPerfilRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Foto de perfil não encontrada para o usuário: " + email));
@@ -48,8 +51,7 @@ public class FotoPerfilService {
 
     public FotoPerfilResponseDTO changeProfileImage(FotoPerfilRequestDTO dto, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o email: " + email));
+        Usuario usuario = buscarUsuarioLogado(email);
 
         FotoPerfil fotoPerfil = fotoPerfilRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Foto de perfil não encontrada para o usuário: " + email));
@@ -60,8 +62,7 @@ public class FotoPerfilService {
 
     public FotoPerfilResponseDTO getFotoPerfilByUsuario(String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o email: " + email));
+        Usuario usuario = buscarUsuarioLogado(email);
 
         FotoPerfil fotoPerfil = fotoPerfilRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Foto de perfil não encontrada para o usuário: " + email));

@@ -37,6 +37,15 @@ public class    TemperaturaService {
         this.fornoRepository = fornoRepository;
     }
 
+    private Usuario  buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+    }
+
     public boolean registrarLeitura(TemperaturaRequestDTO dto, UUID fornoId) {
 
         Forno forno = fornoRepository.findById(fornoId)
@@ -75,12 +84,7 @@ public class    TemperaturaService {
 
     public void deleteById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado: " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Temperatura temperatura = temperaturaRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
@@ -108,12 +112,7 @@ public class    TemperaturaService {
 
     public List<TemperaturaDTO> buscarTemperaturasPorSessao(UUID sessaoId, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado: " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Sessao sessao = sessaoRepository.findById(sessaoId)
                 .orElseThrow(
@@ -134,12 +133,7 @@ public class    TemperaturaService {
 
     public List<TemperaturaDTO> findAllByFornoUsuario(String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         return temperaturaRepository.findAllByFornoUsuario(usuario)
                 .stream()

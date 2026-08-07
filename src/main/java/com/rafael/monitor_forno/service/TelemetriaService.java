@@ -37,6 +37,15 @@ public class TelemetriaService {
         this.fornoRepository = fornoRepository;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado " + email
+                        )
+                );
+    }
+
     public void registrar(TelemetriaRequestDTO dto, String serialNumber) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
@@ -121,12 +130,7 @@ public class TelemetriaService {
     }
 
     public EstatisticasDTO buscarEstatisticas(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        ()-> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         List<Sessao> sessoes = sessaoRepository.findAllByFornoUsuario(usuario);
 
@@ -167,8 +171,7 @@ public class TelemetriaService {
     }
 
     private Forno validarFornoDoUsuario(UUID fornoId, String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado " + email));
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Forno não encontrado"));

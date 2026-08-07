@@ -29,6 +29,15 @@ public class TemporizadorService {
         this.fornoRepository = fornoRepository;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+    }
+
     public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email) {
 
         Forno forno = fornoRepository.findById(fornoId)
@@ -80,13 +89,7 @@ public class TemporizadorService {
 
     public List<TemporizadorResponseDTO> buscarTemporizadoresUsuario(String email) {
 
-        Usuario usuario = usuarioRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         return temporizadorRepository
                 .findByFornoUsuario(usuario)
@@ -107,12 +110,7 @@ public class TemporizadorService {
 
     public TemporizadorResponseDTO atualizarTemporizador(TemporizadorRequestDTO dto, UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " +email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Temporizador temporizadorExistente = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
@@ -153,12 +151,7 @@ public class TemporizadorService {
 
     public void deleteById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " +email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Temporizador temporizador = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(
@@ -179,12 +172,7 @@ public class TemporizadorService {
 
     public TemporizadorResponseDTO findById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " +email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Temporizador temporizador = temporizadorRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(

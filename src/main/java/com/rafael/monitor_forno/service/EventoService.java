@@ -37,6 +37,15 @@ public class EventoService {
         this.fornoRepository = fornoRepository;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+    }
+
     public void registrarEvento(EventoRequestDTO dto, String serialNumber) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
@@ -69,12 +78,7 @@ public class EventoService {
 
     public void deleteById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(() ->
@@ -88,12 +92,7 @@ public class EventoService {
 
     public List<EventoDTO> findAllByFornoUsuario(String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         return eventoRepository.findAllByFornoUsuario(usuario)
                 .stream()
@@ -118,12 +117,7 @@ public class EventoService {
 
     public EventoDTO findById(UUID id, String email) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
                 .orElseThrow(

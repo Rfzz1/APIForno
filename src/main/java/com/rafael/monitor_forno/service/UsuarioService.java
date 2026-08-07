@@ -33,6 +33,15 @@ public class UsuarioService {
         this.emailService = emailService;
     }
 
+    private Usuario buscarUsuarioLogado(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Usuário não encontrado: " + email
+                        )
+                );
+    }
+
     public void cadastrarUsuario(UserRequestDTO dto) {
 
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -75,12 +84,7 @@ public class UsuarioService {
 
     public UserResponseDTO atualizarUsuario(AtualizarMeuPerfilDTO dto, String email) {
 
-        Usuario usuarioExistente = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado" + email
-                        )
-                );
+        Usuario usuarioExistente = buscarUsuarioLogado(email);
 
         if (!usuarioExistente.getEmail().equals(dto.getEmail())) {
             if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -97,12 +101,7 @@ public class UsuarioService {
 
     public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
 
-        Usuario usuarioExistente = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuarioExistente = buscarUsuarioLogado(email);
 
         if (!passwordEncoder.matches(dto.senhaAtual(), usuarioExistente.getSenha())) {
             throw new RecursoNaoEncontradoException(
@@ -117,12 +116,7 @@ public class UsuarioService {
     }
 
     public void deleteByEmail(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
         usuarioRepository.delete(usuario);
     }
 
@@ -135,13 +129,7 @@ public class UsuarioService {
 
     public LoginResponseDTO login(String email, String senha) {
 
-        Usuario usuario = usuarioRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         if (!passwordEncoder.matches(senha, usuario.getSenha())) {
             throw new CredenciaisInvalidasException(
@@ -198,12 +186,7 @@ public class UsuarioService {
 
     public void enviarCodigoRedefinirEmail(String emailAtual, String senhaAtual, String novoEmail) {
 
-        Usuario usuario = usuarioRepository.findByEmail(emailAtual)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(emailAtual);
 
         if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
             throw new CredenciaisInvalidasException(
@@ -244,12 +227,7 @@ public class UsuarioService {
 
     public void verificarCodigoRedefinirEmail(String emailAtual, String codigo) {
 
-        Usuario usuario = usuarioRepository.findByEmail(emailAtual)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(emailAtual);
 
         if (!usuario.getCodigoVerificacaoEmail().equals(codigo)) {
             throw new CredenciaisInvalidasException("Código de verificação inválido");
@@ -367,12 +345,7 @@ public class UsuarioService {
     }
 
     public UserResponseDTO meuPerfil(String email) {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Usuário não encontrado: " + email
-                        )
-                );
+        Usuario usuario = buscarUsuarioLogado(email);
 
         return toUserResponseDTO(usuario);
     }

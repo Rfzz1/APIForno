@@ -1,11 +1,8 @@
 package com.rafael.monitor_forno.dto;
 
-
+import jakarta.validation.constraints.*;
 import com.rafael.monitor_forno.enums.suporte.Categoria;
-import com.rafael.monitor_forno.enums.suporte.Status;
 import lombok.*;
-
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,9 +11,12 @@ import java.util.UUID;
 @Builder
 public class SuporteRequestDTO {
 
-    private UUID id;
+    @NotBlank(message = "Categoria e obrigatório")
     private Categoria categoria;
-    private Status status;
+
+    @NotBlank(message = "Titulo é obrigatório")
     private String titulo;
+
+    @NotBlank(message = "Mensagem é obrigatório")
     private String mensagem;
 }

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,9 +27,6 @@ public class Suporte {
     @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
-    private String mensagem;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
@@ -39,5 +38,8 @@ public class Suporte {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @OneToMany(mappedBy = "suporte", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MensagemSuporte> mensagens = new ArrayList<>();
 
 }

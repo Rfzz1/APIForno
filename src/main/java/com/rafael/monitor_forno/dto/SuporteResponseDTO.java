@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.enums.suporte.Categoria;
 import com.rafael.monitor_forno.enums.suporte.Status;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -17,7 +18,6 @@ public class SuporteResponseDTO {
     private Categoria categoria;
     private Status status;
     private String titulo;
-    private String mensagem;
-
+    private List<SuporteMensagemResponseDTO> mensagens;
 
 }

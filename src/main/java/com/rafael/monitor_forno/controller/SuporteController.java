@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.dto.SuporteNovaMensagemRequestDTO;
 import com.rafael.monitor_forno.dto.SuporteResponseDTO;
 import com.rafael.monitor_forno.service.SuporteService;
 import jakarta.validation.*;
@@ -57,13 +58,13 @@ public class SuporteController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PutMapping("/{id}/atualizar-ticket")
-    public ResponseEntity<Void> atualizarTicket(@PathVariable UUID id, @Valid @RequestBody SuporteRequestDTO dto) {
+    @PutMapping("/{id}/mensagens")
+    public ResponseEntity<Void> responderTicket(@PathVariable UUID id, @Valid @RequestBody SuporteNovaMensagemRequestDTO dto) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        suporteService.atualizarTicket(id, dto, email);
+        suporteService.adicionarMensagemChat(id, dto, email);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -73,7 +74,7 @@ public class SuporteController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         suporteService.deletarTicket(id, email);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     //=========== ADMIN =================
@@ -87,10 +88,10 @@ public class SuporteController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PutMapping("/{id}/atualizar-status-ticket")
-    public ResponseEntity<Void> atualizarStatusTicket(@PathVariable UUID id, @RequestBody SuporteRequestDTO dto) {
+    @PutMapping("/{id}/finalizar-ticket")
+    public ResponseEntity<Void> finalizarTicket(@PathVariable UUID id) {
 
-        suporteService.atualizarStatusTicket(id, dto);
+        suporteService.finalizarticket(id);
         return ResponseEntity.ok().build();
     }
 

@@ -20,6 +20,8 @@ public class FotoPerfilController {
         this.fotoPerfilService = fotoPerfilService;
     }
 
+    // ========= ROTAS COMPARTILHADAS =======
+
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/set-img")
     public ResponseEntity<FotoPerfilResponseDTO> setProfileImage(@RequestBody FotoPerfilRequestDTO dto) {
@@ -56,6 +58,8 @@ public class FotoPerfilController {
         FotoPerfilResponseDTO responseDTO = fotoPerfilService.getFotoPerfilByUsuario(email);
         return ResponseEntity.ok(responseDTO);
     }
+
+    // ========= ROTAS DO ADMIN =======
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/visualizar-img/{id}")

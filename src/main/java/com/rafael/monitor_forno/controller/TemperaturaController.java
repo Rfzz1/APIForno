@@ -26,6 +26,8 @@ public class TemperaturaController {
         this.temperaturaService = temperaturaService;
     }
 
+    // ========= ROTAS DO FORNO =======
+
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarLeitura(@RequestBody TemperaturaRequestDTO dto, Authentication authentication) {
@@ -38,6 +40,8 @@ public class TemperaturaController {
 
         return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
+
+    // ========= ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")

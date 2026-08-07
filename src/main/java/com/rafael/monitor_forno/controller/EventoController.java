@@ -24,6 +24,8 @@ public class EventoController {
         this.eventoService = eventoService;
     }
 
+    // ========= ROTAS DO FORNO =======
+
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarEvento(
@@ -36,6 +38,8 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
     }
+
+    // ========= ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")

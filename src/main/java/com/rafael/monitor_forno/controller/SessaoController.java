@@ -28,6 +28,8 @@ public class SessaoController {
         this.sessaoService = sessaoService;
     }
 
+    // ========= ROTAS DO FORNO =======
+
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping("/iniciar")
     public ResponseEntity<SessaoResumoDTO> criarSessao() {
@@ -59,6 +61,8 @@ public class SessaoController {
 
         return ResponseEntity.ok(sessao);
     }
+
+    // ========= ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
@@ -94,6 +98,8 @@ public class SessaoController {
         return ResponseEntity.ok(sessaoService.findAllSessoesByFornoIdAndUsuario(fornoId, email));
 
     }
+
+    // ========= ROTAS DO ADMIN =======
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping

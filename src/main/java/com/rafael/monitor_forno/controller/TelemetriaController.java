@@ -24,6 +24,8 @@ public class TelemetriaController {
         this.telemetriaService = telemetriaService;
     }
 
+    // ========= ROTAS DO FORNO =======
+
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto) {
@@ -33,6 +35,8 @@ public class TelemetriaController {
         telemetriaService.registrar(dto, serialNumber);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // ========= ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/forno/{fornoId}/atual")

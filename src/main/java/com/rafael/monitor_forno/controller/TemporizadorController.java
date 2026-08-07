@@ -25,6 +25,8 @@ public class TemporizadorController {
         this.temporizadorService = temporizadorService;
     }
 
+    // ========= ROTAS COMPARTILHADAS =======
+
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/forno/{fornoId}")
     public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
@@ -63,6 +65,19 @@ public class TemporizadorController {
         return ResponseEntity.ok(temporizadorService.buscarTemporizadoresFornoUsuario(fornoId, email));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping
+    public ResponseEntity<?> getTemporizador(@RequestParam(required = false) UUID id, Authentication authentication) {
+
+        if (id != null) {
+            return ResponseEntity.ok(temporizadorService.findById(id, authentication.getName()));
+        }
+
+        return ResponseEntity.ok(temporizadorService.findAll());
+    }
+
+    // ========= ROTAS DO FORNO =======
+
     @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/encerrar")
     public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id) {
@@ -85,16 +100,5 @@ public class TemporizadorController {
                         serialNumber
                 )
         );
-    }
-
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping
-    public ResponseEntity<?> getTemporizador(@RequestParam(required = false) UUID id, Authentication authentication) {
-
-        if (id != null) {
-            return ResponseEntity.ok(temporizadorService.findById(id, authentication.getName()));
-        }
-
-        return ResponseEntity.ok(temporizadorService.findAll());
     }
 }

@@ -23,11 +23,15 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
+    // ======= ROTAS GLOBAIS ===========
+
     @PostMapping
     public ResponseEntity<Void> cadastrarUsuario(@Valid @RequestBody UserRequestDTO dto) {
         usuarioService.cadastrarUsuario(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // ======== ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping
@@ -62,6 +66,8 @@ public class UsuarioController {
 
         return ResponseEntity.ok().build();
     }
+
+    // ======= ROTAS DO ADMIN ======
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping

@@ -22,6 +22,8 @@ public class FornoController {
         this.fornoService = fornoService;
     }
 
+    // ========= ROTAS DO ADMIN =======
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/pre-registrar")
     public ResponseEntity<FornoResponseDTO> fabricarForno(@Valid @RequestBody PreRegistroFornoDTO dto) {
@@ -41,7 +43,9 @@ public class FornoController {
         return ResponseEntity.ok(fornoService.autenticar(dto));
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    // ========= ROTAS COMPARTILHADAS =======
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/atualizar-forno")
     public ResponseEntity<FornoResponseDTO> atualizarForno(@Valid @RequestBody FornoAtualizarDTO dto) {
 

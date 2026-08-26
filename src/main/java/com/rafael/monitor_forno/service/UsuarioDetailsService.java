@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.config.CustomUserDetails;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,23 +21,19 @@ public class UsuarioDetailsService
     }
 
     @Override
-    public UserDetails loadUserByUsername(
-            String email)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
-        Usuario usuario = usuarioRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException(
-                                "Usuário não encontrado"
-                        )   
-                );
+        // Criamos a lista de permissões (Role) corretamente
+        var authorities = java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(usuario.getRole().name()));
 
-        return org.springframework.security.core.userdetails.User
-                .builder()
-                .username(usuario.getEmail())
-                .password(usuario.getSenha())
-                .authorities(usuario.getRole().name())
-                .build();
+        // Retorna a nossa classe customizada com a versão inclusa
+        return new CustomUserDetails(
+                usuario.getEmail(),
+                usuario.getSenha(),
+                authorities,
+                usuario.getVersaoUsuario() // <-- Pegando do banco
+        );
     }
 }

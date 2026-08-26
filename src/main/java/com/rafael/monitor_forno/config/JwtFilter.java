@@ -4,10 +4,8 @@ import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -48,10 +47,12 @@ public class JwtFilter extends OncePerRequestFilter {
             String subject = claims.getSubject();
             String tipo = claims.get("tipo", String.class);
 
+            // 1. Extraímos a versão que está guardada dentro do Token JWT
+            Long versaoToken = claims.get("versao", Long.class);
+
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails details = null;
 
-                // Lógica limpa: Usa o tipo salvo no token para ir direto no banco certo
                 try {
                     if ("FORNO".equals(tipo)) {
                         details = fornoDetailsService.loadUserByUsername(subject);
@@ -62,15 +63,27 @@ public class JwtFilter extends OncePerRequestFilter {
                     System.out.println("Entidade não encontrada para: " + subject);
                 }
 
-                // Valida e autentica
                 if (details != null && jwtService.tokenValido(token, details.getUsername())) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    // 2. Fazemos a validação da versão se for um Usuário
+                    boolean versaoValida = true;
+                    if (details instanceof CustomUserDetails) {
+                        CustomUserDetails customUser = (CustomUserDetails) details;
+                        // Compara a versão do banco com a versão que veio no token
+                        if (!Objects.equals(customUser.getVersaoUsuario(), versaoToken)) {
+                            versaoValida = false;
+                        }
+                    }
+
+                    // 3. Se o token for válido E a versão bater, autentica no sistema!
+                    if (versaoValida) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
             }
         } catch (Exception e) {
-            // Se o token estiver expirado ou inválido, limpa o contexto
             SecurityContextHolder.clearContext();
         }
 

@@ -12,8 +12,8 @@ import java.util.UUID;
 @Repository
 public interface SuporteRepository extends JpaRepository<Suporte, UUID> {
 
-    List<Suporte> findAllBySuporteUsuario (Usuario usuario);
-    Optional<Suporte> findByIdAndSuporteUsuario (UUID id, Usuario usuario);
+    List<Suporte> findAllByUsuario(Usuario usuario);
+    Optional<Suporte> findByIdAndUsuario(UUID id, Usuario usuario);
 
 
 }

@@ -7,6 +7,7 @@ import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class UsuarioService {
         usuario.setEmail(dto.getEmail());
         usuario.setNascimento(dto.getNascimento());
         usuario.setRole(Role.USER);
+        usuario.setVersaoUsuario(1L);
 
         String senhaHash = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaHash);
@@ -203,10 +205,9 @@ public class UsuarioService {
         usuario.setCodigoVerificacaoEmail(otp);
         usuario.setExpiracaoCodigoEmail(LocalDateTime.now().plusMinutes(15));
         usuario.setNovoEmailPendente(novoEmail);
-
         usuarioRepository.save(usuario);
 
-        emailService.enviarEmail(usuario.getEmail(),
+        emailService.enviarEmail(usuario.getNovoEmailPendente(),
                 "Código de Verificação para Alteração de E-mail",
                 """
                         Olá, %s!<br><br>
@@ -237,9 +238,9 @@ public class UsuarioService {
             throw new CredenciaisInvalidasException("Código de verificação expirado");
         }
 
-        String antigoEmail = usuario.getEmail();
         String novoEmail = usuario.getNovoEmailPendente();
 
+        usuario.setEmailAnterior(emailAtual);
         usuario.setEmail(novoEmail);
         usuario.setCodigoVerificacaoEmail(null);
         usuario.setExpiracaoCodigoEmail(null);
@@ -247,11 +248,39 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        emailService.enviarEmail(
-                novoEmail,
-                "E-mail alterado com sucesso!",
-                "Sua conta agora está vinculada a este endereço de e-mail."
+        String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
+        String link = baseUrl + "/reverter-email?token=" + token;
+
+        emailService.enviarEmail(usuario.getEmailAnterior() ,
+                "E-mail alterado com sucesso",
+                """
+                        Olá, %s!<br><br>
+                        
+                        O seu e-mail foi alterado para <b>%s<b>.<br><br>
+                        
+                        Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
+                        %s
+                        """.formatted(usuario.getNome(), novoEmail, link)
         );
+
+    }
+
+    public void reverterEmail(ReversaoEmailDTO dto) {
+
+        Claims claims = jwtService.extrairTodasClaims(dto.getToken());
+        String emailAntigo = claims.get("emailAntigo", String.class);
+
+        Usuario usuario = usuarioRepository.findByEmailAnterior(emailAntigo)
+                        .orElseThrow(
+                                () -> new RecursoNaoEncontradoException(
+                                        "Email não encontrado"
+                                )
+                        );
+
+        usuario.setEmail(emailAntigo);
+        usuario.setEmailAnterior(null);
+        usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
+        usuarioRepository.save(usuario);
 
     }
 

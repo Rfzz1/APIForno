@@ -13,4 +13,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
     //Será usado pelo login e pelo spring security
     Optional<Usuario> findByEmail(String email);
     Optional<Usuario> findByTokenRecuperacaoSenha(String token);
+    Optional<Usuario> findByEmailAnterior(String emailAnterior);
 }

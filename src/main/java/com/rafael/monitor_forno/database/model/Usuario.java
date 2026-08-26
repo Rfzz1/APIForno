@@ -44,6 +44,8 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
+    private Long versaoUsuario;
+    private String emailAnterior;
     private String codigoVerificacaoEmail;
     private LocalDateTime expiracaoCodigoEmail;
     private String novoEmailPendente;

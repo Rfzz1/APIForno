@@ -2,15 +2,15 @@ package com.rafael.monitor_forno.config;
 
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
-        // Passando os services diretamente nos construtores
+
         DaoAuthenticationProvider fornoProvider = new DaoAuthenticationProvider(fornoDetailsService);
         fornoProvider.setPasswordEncoder(passwordEncoder);
 
@@ -63,4 +63,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-//sda

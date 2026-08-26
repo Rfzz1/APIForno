@@ -66,7 +66,7 @@ public class SuporteService {
     public List<SuporteResponseDTO> findAllBySuporteUsuario (String email) {
         Usuario usuario = buscarUsuarioLogado(email);
 
-        return suporteRepository.findAllBySuporteUsuario(usuario)
+        return suporteRepository.findAllByUsuario(usuario)
                 .stream()
                 .map(this::toSuporteResponseDTO)
                 .toList();
@@ -76,7 +76,7 @@ public class SuporteService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Suporte Suporte = suporteRepository.findByIdAndSuporteUsuario(id, usuario)
+        Suporte Suporte = suporteRepository.findByIdAndUsuario(id, usuario)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Ticket não encontrado: " + id
@@ -90,7 +90,7 @@ public class SuporteService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Suporte suporte = suporteRepository.findByIdAndSuporteUsuario(id, usuario)
+        Suporte suporte = suporteRepository.findByIdAndUsuario(id, usuario)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Ticket não encontrado: " + id
@@ -134,7 +134,7 @@ public class SuporteService {
                         )
                 );
 
-        Suporte suporte = suporteRepository.findByIdAndSuporteUsuario(id, usuario)
+        Suporte suporte = suporteRepository.findByIdAndUsuario(id, usuario)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Ticket não encontrado para esse usuário: " + email

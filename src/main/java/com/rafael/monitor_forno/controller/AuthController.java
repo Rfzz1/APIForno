@@ -59,4 +59,12 @@ public class AuthController {
         usuarioService.verificarCodigoRedefinirEmail(emailAtual, dto.codigo());
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
+
+    @PutMapping("/reverter-email")
+    public ResponseEntity<Void> reverterMudancaEmail(@RequestBody ReversaoEmailDTO dto) {
+
+        usuarioService.reverterEmail(dto);
+        return ResponseEntity.ok().build();
+
+    }
 }

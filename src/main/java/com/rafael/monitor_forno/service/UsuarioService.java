@@ -247,7 +247,6 @@ public class UsuarioService {
         usuario.setNovoEmailPendente(null);
 
         usuarioRepository.save(usuario);
-
         String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
         String link = baseUrl + "/reverter-email?token=" + token;
 

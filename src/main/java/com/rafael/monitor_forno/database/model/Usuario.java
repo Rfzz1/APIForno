@@ -13,7 +13,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "usuarios")
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Usuario {
 
     @Id
@@ -52,4 +55,5 @@ public class Usuario {
 
     @OneToOne(fetch = FetchType.LAZY)
     private FotoPerfil fotoPerfil;
+
 }

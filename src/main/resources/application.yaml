@@ -50,3 +50,6 @@ app:
   base-url: ${APP_BASE_URL:https://monitoramentoforno.com.br}
   nome-app-dev: "MONITORAMENTO FORNO - DEV"
   nome-app-comum: "MONITORAMENTO FORNO"
+
+firebase:
+  caminho: ${FIREBASE_CAMINHO}

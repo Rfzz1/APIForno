@@ -16,6 +16,5 @@ public class TemperaturaDTO {
     private UUID id;
     private Double temperaturaAtual;
     private Double temperaturaUltima;
-    private Double temperaturaExterna;
     private LocalDateTime registradoEm;
 }

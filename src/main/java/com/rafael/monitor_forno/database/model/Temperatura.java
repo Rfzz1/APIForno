@@ -21,9 +21,6 @@ public class Temperatura {
     @Column (nullable = false)
     private Double temperaturaUltima;
 
-    @Column (nullable = false)
-    private Double temperaturaExterna;
-
     @Column(nullable = false)
     private LocalDateTime registradoEm;
 

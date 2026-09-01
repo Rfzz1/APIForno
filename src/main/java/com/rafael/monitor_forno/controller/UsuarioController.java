@@ -109,7 +109,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> getUsuarioById(@PathVariable UUID id) {
+    public ResponseEntity<UserResponseAdminDTO> getUsuarioById(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.findById(id));
     }
 

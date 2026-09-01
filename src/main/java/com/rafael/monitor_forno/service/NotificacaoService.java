@@ -1,6 +1,5 @@
 package com.rafael.monitor_forno.service;
 
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;

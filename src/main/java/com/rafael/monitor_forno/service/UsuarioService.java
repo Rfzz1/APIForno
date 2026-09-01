@@ -304,7 +304,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    public UserResponseDTO findById(UUID id) {
+    public UserResponseAdminDTO findById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
@@ -312,7 +312,7 @@ public class UsuarioService {
                         )
                 );
 
-        return toUserResponseDTO(usuario);
+        return toUserResponseAdminDTO(usuario);
     }
 
     public void deleteById(UUID id) {
@@ -376,6 +376,16 @@ public class UsuarioService {
         Usuario usuario = buscarUsuarioLogado(email);
 
         return toUserResponseDTO(usuario);
+    }
+
+    private UserResponseAdminDTO toUserResponseAdminDTO(Usuario usuario) {
+        return UserResponseAdminDTO.builder()
+                .id(usuario.getId())
+                .nome(usuario.getNome())
+                .email(usuario.getEmail())
+                .cpf(usuario.getCpf())
+                .emailAnterior(usuario.getEmailAnterior())
+                .build();
     }
 
     private UserResponseDTO toUserResponseDTO(Usuario usuario) {

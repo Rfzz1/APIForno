@@ -15,23 +15,28 @@ import java.io.IOException;
 @Configuration
 public class FireBaseConfig {
 
-    FileInputStream fis;
-
-    @Value("${caminho}")
+    @Value("${firebase.caminho}")
     private String path;
 
     @PostConstruct
     public void inicializarFirebase() throws IOException {
-        try {
-            fis = new FileInputStream(path);
+
+        try (FileInputStream fis = new FileInputStream(path)) {
+
+            GoogleCredentials credentials =
+                    GoogleCredentials.fromStream(fis);
+
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(credentials)
+                    .build();
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
         } catch (FileNotFoundException e) {
-            throw new RecursoNaoEncontradoException(e.getMessage());
+            throw new RecursoNaoEncontradoException(
+                    "Arquivo de credenciais do Firebase não encontrado: " + path
+            );
         }
-
-        GoogleCredentials credentials = GoogleCredentials.fromStream(fis);
-        FirebaseOptions options = FirebaseOptions.builder().setCredentials(credentials).build();
-
-        FirebaseApp.initializeApp(options);
     }
-
 }

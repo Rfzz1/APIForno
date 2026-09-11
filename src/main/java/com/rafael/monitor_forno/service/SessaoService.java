@@ -107,6 +107,7 @@ public class SessaoService {
             sessao.setEstadoSistemaFinal(dto.getEstadoSistemaFinal());
         }
         sessao.setEstadoFornoFinal(EstadoForno.FORNO_DESLIGADO);
+        sessao.setEstadoFornoAtual(EstadoForno.FORNO_DESLIGADO);
 
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 

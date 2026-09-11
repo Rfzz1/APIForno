@@ -145,7 +145,7 @@ public class UsuarioService {
         // ALTERAÇÃO AQUI: Passando "USUARIO" como tipo
         String token = jwtService.gerarToken(
                 usuario.getEmail(),
-                "USUARIO", role
+                "USUARIO", role, usuario.getVersaoUsuario()
         );
 
         return LoginResponseDTO.builder()

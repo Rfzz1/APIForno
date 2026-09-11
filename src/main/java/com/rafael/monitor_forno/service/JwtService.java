@@ -29,6 +29,7 @@ public class JwtService {
 
     private static final String TIPO = "tipo";
     private static final String ROLE = "role";
+    private static final String VERSAO_USER = "versao";
     private static final String EMAIL_ANTIGO = "emailAntigo";
     private static final String NOVO_EMAIL = "novoEmail";
 
@@ -38,10 +39,11 @@ public class JwtService {
     }
 
     // Secret + header + payload (Agora exige o tipo da entidade)
-    public String gerarToken(String subject, String tipo, String role) {
+    public String gerarToken(String subject, String tipo, String role, Long versaoUsuario) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TIPO, tipo);
         claims.put(ROLE, role);
+        claims.put(VERSAO_USER, versaoUsuario);
 
         return Jwts.builder()
                 .claims(claims)
@@ -50,6 +52,10 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expiration)) // 24 horas
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+    public String gerarToken(String subject, String tipo, String role) {
+        return gerarToken(subject, tipo, role, null);
     }
 
     public String gerarTokenReversaoEmail(String emailAntigo, String novoEmail) {

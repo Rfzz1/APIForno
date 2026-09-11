@@ -56,6 +56,7 @@ public class UsuarioService {
         usuario.setEmail(dto.getEmail());
         usuario.setNascimento(dto.getNascimento());
         usuario.setRole(Role.USER);
+        usuario.setCpf(dto.getCpf());
         usuario.setVersaoUsuario(1L);
         usuario.setCpf(dto.getCpf());
 
@@ -145,7 +146,7 @@ public class UsuarioService {
         // ALTERAÇÃO AQUI: Passando "USUARIO" como tipo
         String token = jwtService.gerarToken(
                 usuario.getEmail(),
-                "USUARIO", role
+                "USUARIO", role, usuario.getVersaoUsuario()
         );
 
         return LoginResponseDTO.builder()

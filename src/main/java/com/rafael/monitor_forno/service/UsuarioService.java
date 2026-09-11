@@ -57,6 +57,7 @@ public class UsuarioService {
         usuario.setNascimento(dto.getNascimento());
         usuario.setRole(Role.USER);
         usuario.setVersaoUsuario(1L);
+        usuario.setCpf(dto.getCpf());
 
         String senhaHash = passwordEncoder.encode(dto.getSenha());
         usuario.setSenha(senhaHash);

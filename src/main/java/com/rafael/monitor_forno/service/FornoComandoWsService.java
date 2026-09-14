@@ -1,9 +1,11 @@
 package com.rafael.monitor_forno.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import com.rafael.monitor_forno.dto.FornoSilenciarBuzzerDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
@@ -17,21 +19,23 @@ public class FornoComandoWsService {
     private final FornoSessionRegistry fornoSessionRegistry;
     private final FornoRepository fornoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ObjectMapper objectMapper;
 
-    public FornoComandoWsService(FornoSessionRegistry fornoSessionRegistry, FornoRepository fornoRepository, UsuarioRepository usuarioRepository) {
+    public FornoComandoWsService(FornoSessionRegistry fornoSessionRegistry, FornoRepository fornoRepository, UsuarioRepository usuarioRepository, ObjectMapper objectMapper) {
         this.fornoSessionRegistry = fornoSessionRegistry;
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.objectMapper = objectMapper;
     }
 
     public void silenciarBuzzer(String serialNumber, String email) {
 
         Usuario usuario =  usuarioRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("Usuario no encontrado")
+                () -> new RuntimeException("Usuario não encontrado")
         );
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber).orElseThrow(
-                () -> new RuntimeException("Forno no encontrado")
+                () -> new RuntimeException("Forno não encontrado")
         );
 
         if (forno.getUsuario() == null || !forno.getUsuario().equals(usuario)) {
@@ -47,11 +51,24 @@ public class FornoComandoWsService {
             );
         }
 
+        FornoSilenciarBuzzerDTO dto = toFornoSilenciarBuzzerDTO(forno);
+
         try {
-            session.sendMessage(new TextMessage("SILENCIAR_BUZZER"));
+
+            String json = objectMapper.writeValueAsString(dto);
+            session.sendMessage(new TextMessage(json));
+
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar comando para o forno", e);
         }
+    }
+
+    public FornoSilenciarBuzzerDTO toFornoSilenciarBuzzerDTO(Forno forno) {
+        return FornoSilenciarBuzzerDTO.builder()
+                .serialNumber(forno.getSerialNumber())
+                .acao("MUTE")
+                .isMuted(true)
+                .build();
     }
 
 }

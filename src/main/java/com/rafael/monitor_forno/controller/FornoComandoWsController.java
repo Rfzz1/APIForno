@@ -1,13 +1,10 @@
 package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.service.FornoComandoWsService;
-import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/fornos")
@@ -20,7 +17,7 @@ public class FornoComandoWsController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @RequestMapping("/{serialNumber}/silenciar-buzzer")
+    @PostMapping("/{serialNumber}/silenciar-buzzer")
     public ResponseEntity<Void> silenciarBuzzer(@PathVariable String serialNumber) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

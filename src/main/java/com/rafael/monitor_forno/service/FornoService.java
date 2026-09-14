@@ -193,33 +193,6 @@ public class FornoService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-
-
-    public void mutarBuzzer(String email, String serialNumber) {
-
-        Usuario usuario = buscarUsuarioLogado(email);
-
-        Forno forno =  fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
-                        )
-                );
-
-        if (forno.getUsuario() == null || !forno.getUsuario().getId().equals(usuario.getId())) {
-            throw new AcessoNegadoException("Você não tem permissão para silenciar este forno");
-        }
-
-        forno.setMuted(true);
-        fornoRepository.save(forno);
-
-        try {
-            fornoWebSocketHandler.enviarComandoParaForno(serialNumber, "{\"acao\": \"MUTE\"}");
-        } catch (IOException e) {
-            throw new FornoDesconectadoException("Falha na comunicação de rede com o forno " + serialNumber);
-        }
-    }
-
     private String gerarPinSeguranca() {
         String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!*$#";
         SecureRandom random = new SecureRandom();

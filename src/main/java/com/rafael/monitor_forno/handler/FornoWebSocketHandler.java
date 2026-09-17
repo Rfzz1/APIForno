@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.handler;
 
+import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -12,7 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class FornoWebSocketHandler extends TextWebSocketHandler {
 
-    private Map<String, WebSocketSession> sessoesAtivas = new ConcurrentHashMap<>();
+    private final FornoSessionRegistry fornoSessionRegistry;
+
+    public FornoWebSocketHandler(FornoSessionRegistry fornoSessionRegistry) {
+        this.fornoSessionRegistry = fornoSessionRegistry;
+    }
 
     @Override
     protected void handleTextMessage(WebSocketSession sessao, TextMessage mensagem) throws Exception {
@@ -27,18 +32,18 @@ public class FornoWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession sessao) throws Exception {
 
-        String rota = sessao.getUri().getPath();
-        String[] partesRota = rota.split("/");
-        sessoesAtivas.put(partesRota[2], sessao);
+        String serialNumber = (String) sessao.getAttributes().get("serialNumber");
+        fornoSessionRegistry.registrar(serialNumber, sessao);
+        sessao.sendMessage(new TextMessage("Conexão estabelecida com sucesso. Forno: " + serialNumber));
 
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession sessao, CloseStatus status) throws Exception {
 
-        String rota = sessao.getUri().getPath();
-        String[] partesRota = rota.split("/");
-        sessoesAtivas.remove(partesRota[2]);
+        String serialNumber =  (String) sessao.getAttributes().get("serialNumber");
+        fornoSessionRegistry.remover(serialNumber);
+        System.out.println("Forno desconectado: " + serialNumber + " - " + status);
 
     }
 

@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.RefreshToken;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
@@ -23,15 +24,17 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -141,12 +144,15 @@ public class UsuarioService {
         }
 
         String role = usuario.getRole().toString();
+        String emailU = usuario.getEmail();
 
         // ALTERAÇÃO AQUI: Passando "USUARIO" como tipo
         String token = jwtService.gerarToken(
                 usuario.getEmail(),
                 "USUARIO", role, usuario.getVersaoUsuario()
         );
+
+        RefreshToken refreshToken = refreshTokenService.cadastrarRefreshToken(emailU);
 
         return LoginResponseDTO.builder()
                 .id(usuario.getId())

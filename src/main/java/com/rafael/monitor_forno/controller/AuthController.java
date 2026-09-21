@@ -1,9 +1,13 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.database.model.RefreshToken;
+import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.dto.*;
+import com.rafael.monitor_forno.service.RefreshTokenService;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -13,11 +17,13 @@ import java.util.UUID;
 public class AuthController {
 
     private final UsuarioService usuarioService;
+    private final RefreshTokenService  refreshTokenService;
 
     public AuthController(
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService, RefreshTokenService refreshTokenService) {
 
         this.usuarioService = usuarioService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/login")
@@ -26,6 +32,19 @@ public class AuthController {
 
         LoginResponseDTO response = usuarioService.login(dto.getEmail(), dto.getSenha());
 
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequestDTO dto) {
+        refreshTokenService.logout(dto.getRefreshToken());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/renovar-refresh-token")
+    public ResponseEntity<RefreshTokenResponseDTO> renovar(@RequestBody RefreshTokenRequestDTO dto) {
+        RefreshTokenResponseDTO response = refreshTokenService.renovarRefreshToken(dto.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 

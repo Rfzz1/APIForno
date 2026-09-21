@@ -27,6 +27,9 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @Value("${jwt.expirationRefresh}")
+    private Long expirationRefresh;
+
     private static final String TIPO = "tipo";
     private static final String ROLE = "role";
     private static final String VERSAO_USER = "versao";
@@ -56,6 +59,21 @@ public class JwtService {
 
     public String gerarToken(String subject, String tipo, String role) {
         return gerarToken(subject, tipo, role, null);
+    }
+
+    public String gerarRefreshToken(String subject, String tipo, String role, Long versaoUsuario) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(TIPO, tipo);
+        claims.put(ROLE, role);
+        claims.put(VERSAO_USER, versaoUsuario);
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expirationRefresh)) // 2 semanas
+                .signWith(getSecretKey())
+                .compact();
     }
 
     public String gerarTokenReversaoEmail(String emailAntigo, String novoEmail) {

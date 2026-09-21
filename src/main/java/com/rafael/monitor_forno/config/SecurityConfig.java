@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/ws/**").permitAll()
+                        .requestMatchers("/error", "/ws/**", "/auth/logout", "/auth/renovar-refresh-token").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha", "/fornos/auto-provisionar").permitAll()
                         .requestMatchers("/temperaturas").hasAnyAuthority("ROLE_FORNO", "USER")
                         .anyRequest().authenticated()

@@ -56,4 +56,7 @@ public class Usuario {
     @OneToOne(fetch = FetchType.LAZY)
     private FotoPerfil fotoPerfil;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
+    private java.util.List<RefreshToken> refreshTokens;
+
 }

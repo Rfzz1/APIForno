@@ -152,11 +152,12 @@ public class UsuarioService {
                 "USUARIO", role, usuario.getVersaoUsuario()
         );
 
-        RefreshToken refreshToken = refreshTokenService.cadastrarRefreshToken(emailU);
+        String refreshToken = refreshTokenService.cadastrarRefreshToken(emailU).getRefreshToken();
 
         return LoginResponseDTO.builder()
                 .id(usuario.getId())
                 .token(token)
+                .refreshtoken(refreshToken)
                 .build();
     }
 

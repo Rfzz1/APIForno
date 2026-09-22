@@ -48,7 +48,7 @@ public class RefreshTokenService {
         String refreshTokenUsuario = jwtService.gerarRefreshToken(usuario.getEmail(), "USUARIO", "USUARIO", usuario.getVersaoUsuario());
 
         Duration duracaoexpiracao = Duration.ofMillis(expirationRefresh);
-        LocalDateTime expiracao =  LocalDateTime.now().plusMinutes(duracaoexpiracao.toMinutes());
+        LocalDateTime expiracao =  LocalDateTime.now().plus(duracaoexpiracao);
 
         refreshToken.setUsuario(usuario);
         refreshToken.setRefreshToken(refreshTokenUsuario);

@@ -1,7 +1,13 @@
 package com.rafael.monitor_forno.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.FornoSilenciarBuzzerDTO;
 import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
+import com.rafael.monitor_forno.service.FornoComandoWsService;
+import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -17,6 +23,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public WebSocketConfig(FornoWebSocketHandler fornoWebSocketHandler,  JwtHandshakeInterceptor jwtHandshakeInterceptor) {
         this.fornoWebSocketHandler = fornoWebSocketHandler;
         this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Override

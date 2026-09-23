@@ -6,13 +6,17 @@ import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.TemporizadorRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
+import com.rafael.monitor_forno.dto.TemporizadorWSDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,11 +26,13 @@ public class TemporizadorService {
     private final TemporizadorRepository temporizadorRepository;
     private final UsuarioRepository usuarioRepository;
     private final FornoRepository fornoRepository;
+    private final FornoComandoWsService fornoComandoWsService;
 
-    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository) {
+    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository,FornoComandoWsService fornoComandoWsService) {
         this.temporizadorRepository = temporizadorRepository;
         this.usuarioRepository = usuarioRepository;
         this.fornoRepository = fornoRepository;
+        this.fornoComandoWsService = fornoComandoWsService;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -38,7 +44,7 @@ public class TemporizadorService {
                 );
     }
 
-    public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email) {
+    public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email, String serialNumber) {
 
         Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
@@ -63,8 +69,11 @@ public class TemporizadorService {
         temporizador.setCriadoEm(LocalDateTime.now());
         temporizador.setHorarioFim(dto.getHorarioFim());
         temporizador.setExecutado(false);
+        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(LocalDateTime.now(), dto.getHorarioFim()));
         temporizador.setForno(forno);
         temporizadorRepository.save(temporizador);
+
+        fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
 
     }
 
@@ -189,6 +198,7 @@ public class TemporizadorService {
                 .criadoEm(temporizador.getCriadoEm())
                 .horarioFim(temporizador.getHorarioFim())
                 .executado(temporizador.isExecutado())
+                .duracaoSegundos(temporizador.getDuracaoSegundos())
                 .build();
     }
 }

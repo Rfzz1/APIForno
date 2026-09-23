@@ -15,5 +15,6 @@ public class TemporizadorResponseDTO {
    private UUID id;
    private LocalDateTime criadoEm;
    private LocalDateTime horarioFim;
+   private Long duracaoSegundos;
    private boolean executado;
 }

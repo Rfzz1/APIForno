@@ -28,6 +28,9 @@ public class Temporizador {
     private LocalDateTime horarioFim;
 
     @Column(nullable = false)
+    private Long duracaoSegundos;
+
+    @Column(nullable = false)
     private boolean executado;
 
     @ManyToOne

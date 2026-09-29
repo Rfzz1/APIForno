@@ -13,7 +13,7 @@ import java.util.UUID;
 public class TemporizadorResponseDTO {
 
    private UUID id;
-   private LocalDateTime criadoEm;
+   private LocalDateTime horarioInicio;
    private LocalDateTime horarioFim;
    private Long duracaoSegundos;
    private boolean executado;

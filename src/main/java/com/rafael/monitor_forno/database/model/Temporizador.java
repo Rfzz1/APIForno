@@ -22,7 +22,7 @@ public class Temporizador {
     private UUID id;
 
     @Column(nullable = false)
-    private LocalDateTime criadoEm;
+    private LocalDateTime horarioInicio;
 
     @Column(nullable = false)
     private LocalDateTime horarioFim;

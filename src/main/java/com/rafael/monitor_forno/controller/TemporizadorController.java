@@ -29,9 +29,12 @@ public class TemporizadorController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/forno/{fornoId}")
-    public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
+    public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId) {
 
-        temporizadorService.criarTemporizador(dto, fornoId, authentication.getName());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        temporizadorService.criarTemporizador(dto, fornoId, email, serialNumber);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

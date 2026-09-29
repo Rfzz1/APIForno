@@ -6,13 +6,10 @@ import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.TemporizadorRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
-import com.rafael.monitor_forno.dto.TemporizadorWSDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
-import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -66,10 +63,10 @@ public class TemporizadorService {
         }
 
         Temporizador temporizador = new Temporizador();
-        temporizador.setCriadoEm(LocalDateTime.now());
+        temporizador.setHorarioInicio(dto.getHorarioIncio());
         temporizador.setHorarioFim(dto.getHorarioFim());
         temporizador.setExecutado(false);
-        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(LocalDateTime.now(), dto.getHorarioFim()));
+        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(dto.getHorarioIncio(), dto.getHorarioFim()));
         temporizador.setForno(forno);
         temporizadorRepository.save(temporizador);
 
@@ -195,7 +192,7 @@ public class TemporizadorService {
     private TemporizadorResponseDTO toResponseDTO(Temporizador temporizador) {
         return TemporizadorResponseDTO.builder()
                 .id(temporizador.getId())
-                .criadoEm(temporizador.getCriadoEm())
+                .horarioInicio(temporizador.getHorarioInicio())
                 .horarioFim(temporizador.getHorarioFim())
                 .executado(temporizador.isExecutado())
                 .duracaoSegundos(temporizador.getDuracaoSegundos())

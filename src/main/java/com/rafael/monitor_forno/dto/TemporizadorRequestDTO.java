@@ -12,5 +12,5 @@ import java.time.LocalDateTime;
 public class TemporizadorRequestDTO {
 
     private LocalDateTime horarioFim;
-    private LocalDateTime horarioIncio;
+    private LocalDateTime horarioInicio;
 }

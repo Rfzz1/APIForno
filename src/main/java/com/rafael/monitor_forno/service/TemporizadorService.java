@@ -9,14 +9,23 @@ import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
+import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cglib.core.Local;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+@EnableScheduling
 @Service
 public class TemporizadorService {
 
@@ -24,12 +33,14 @@ public class TemporizadorService {
     private final UsuarioRepository usuarioRepository;
     private final FornoRepository fornoRepository;
     private final FornoComandoWsService fornoComandoWsService;
+    private final TaskScheduler  taskScheduler;
 
-    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository,FornoComandoWsService fornoComandoWsService) {
+    public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository,FornoComandoWsService fornoComandoWsService, TaskScheduler taskScheduler) {
         this.temporizadorRepository = temporizadorRepository;
         this.usuarioRepository = usuarioRepository;
         this.fornoRepository = fornoRepository;
         this.fornoComandoWsService = fornoComandoWsService;
+        this.taskScheduler = taskScheduler;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -56,22 +67,65 @@ public class TemporizadorService {
             );
         }
 
-        if (dto.getHorarioFim().isBefore(LocalDateTime.now())) {
+        if (dto.getHorarioFim() == null || dto.getHorarioInicio() == null) {
+            throw new CredenciaisInvalidasException(
+                    "Insira valores válidos"
+            );
+        }
+
+        if (dto.getHorarioFim().isBefore(LocalDateTime.now()) || dto.getHorarioInicio().isBefore(LocalDateTime.now()) || dto.getHorarioFim().isBefore(dto.getHorarioInicio())) {
             throw new IllegalArgumentException(
                     "O horário deve estar no futuro"
             );
         }
 
         Temporizador temporizador = new Temporizador();
-        temporizador.setHorarioInicio(dto.getHorarioIncio());
+        temporizador.setHorarioInicio(dto.getHorarioInicio());
         temporizador.setHorarioFim(dto.getHorarioFim());
         temporizador.setExecutado(false);
-        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(dto.getHorarioIncio(), dto.getHorarioFim()));
+        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(dto.getHorarioInicio(), dto.getHorarioFim()));
         temporizador.setForno(forno);
         temporizadorRepository.save(temporizador);
 
-        fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
+        Instant horarioInicio = dto.getHorarioInicio().atZone(ZoneId.systemDefault()).toInstant();
 
+        taskScheduler.schedule(
+                () -> {
+                    fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
+                    temporizador.setExecutado(true);
+                    temporizadorRepository.save(temporizador);
+                },
+                horarioInicio
+        );
+
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void buscarTemporizadoresNaoExecutados() {
+
+        System.out.println("Servidor reiniciado. Buscando temporizadores não executados");
+
+        List<Temporizador> temporizadores = temporizadorRepository.findAllByExecutadoFalse();
+
+        for (Temporizador temporizador : temporizadores) {
+
+            Instant horarioInicio = temporizador.getHorarioInicio().atZone(ZoneId.systemDefault()).toInstant();
+            LocalDateTime agora = LocalDateTime.now();
+
+            if (agora.isBefore(temporizador.getHorarioInicio())) {
+                taskScheduler.schedule(
+                        () -> {
+                            fornoComandoWsService.dispararBuzzer(temporizador.getForno().getSerialNumber(), temporizador);
+                            temporizador.setExecutado(true);
+                            temporizadorRepository.save(temporizador);
+                        },
+                        horarioInicio
+                );
+            } else {
+                temporizador.setExecutado(true);
+                temporizadorRepository.save(temporizador);
+            }
+        }
     }
 
     public TemporizadorResponseDTO buscarProximoTemporizador(String serialNumber) {

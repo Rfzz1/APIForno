@@ -47,6 +47,7 @@ public class FornoComandoWsService {
         }
 
         WebSocketSession session = fornoSessionRegistry.buscar(serialNumber);
+
         if (session == null || !session.isOpen()) {
             throw new RecursoNaoEncontradoException(
                     "Forno não está conectado no momento."
@@ -59,6 +60,8 @@ public class FornoComandoWsService {
 
             String json = objectMapper.writeValueAsString(dto);
             session.sendMessage(new TextMessage(json));
+            forno.setMuted(true);
+            fornoRepository.save(forno);
 
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar comando para o forno", e);
@@ -90,7 +93,7 @@ public class FornoComandoWsService {
         return FornoSilenciarBuzzerDTO.builder()
                 .serialNumber(forno.getSerialNumber())
                 .acao("MUTE")
-                .isMuted(true)
+                .muted(true)
                 .build();
     }
 

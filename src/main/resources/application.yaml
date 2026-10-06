@@ -54,3 +54,12 @@ app:
 
 firebase:
   caminho: ${FIREBASE_CAMINHO}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web:
+          socket: DEBUG
+          cors: DEBUG

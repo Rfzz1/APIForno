@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class FornoSilenciarBuzzerDTO {
 
-    private boolean isMuted;
+    private boolean muted;
     private String serialNumber;
     private String acao;
 

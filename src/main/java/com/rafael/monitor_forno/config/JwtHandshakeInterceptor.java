@@ -26,6 +26,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             WebSocketHandler wsHandler,
             Map<String, Object> attributes) {
 
+        System.out.println(">>> Tentativa de Handshake WS recebida da URL: " + request.getURI());
+
         // Pega a query string bruta da URL, ex: "token=eyJhbGc..."
         String query = request.getURI().getQuery();
 
@@ -54,6 +56,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             return true; // autoriza o handshake a continuar
 
         } catch (Exception e) {
+            System.out.println(">>> Erro no Handshake JWT: " + e.getMessage());
+            e.printStackTrace();
             return false; // token inválido ou expirado
         }
     }

@@ -54,6 +54,7 @@ public class FornoService {
         forno.setPinSeguranca(gerarPinSeguranca());
         forno.setReivindicado(false);
         forno.setAtivo(false);
+        forno.setMuted(false);
         forno.setNome(dto.getNome() != null ? dto.getNome() : "Forno sem nome");
 
         forno.setDeviceSecret(
@@ -136,6 +137,7 @@ public class FornoService {
         forno.setUsuario(usuario);
         forno.setAtivo(true);
         forno.setNome(dto.getNome() != null ? dto.getNome() : forno.getNome());
+        forno.setMuted(false);
         fornoRepository.save(forno);
     }
 
@@ -156,6 +158,7 @@ public class FornoService {
 
         forno.setUsuario(null);
         forno.setAtivo(false);
+        forno.setMuted(false);
         fornoRepository.save(forno);
     }
 
@@ -220,6 +223,7 @@ public class FornoService {
                 .nome(forno.getNome())
                 .pinSeguranca(forno.getPinSeguranca())
                 .reivindicado(forno.isReivindicado())
+                .muted(forno.isMuted())
                 .build();
     }
 

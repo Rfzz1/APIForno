@@ -32,7 +32,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        System.out.println(">>> REGISTRANDO WEBSOCKET /ws/fornos");
+        System.out.println(">>> REGISTRANDO WEBSOCKET /v1/ws/fornos");
         //Mapeia a URL e conecta com o nosso Handler
         registry.addHandler(fornoWebSocketHandler, "/ws/*/fornos").addInterceptors(jwtHandshakeInterceptor).setAllowedOrigins("*");
     }

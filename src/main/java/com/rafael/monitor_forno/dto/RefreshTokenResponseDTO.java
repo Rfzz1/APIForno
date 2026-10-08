@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.dto;
 import com.rafael.monitor_forno.database.model.Usuario;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 public class RefreshTokenResponseDTO {
 
     private String refreshToken;
-    private LocalDateTime expiration;
+    private Instant expiration;
     private String novoToken;
 
 }

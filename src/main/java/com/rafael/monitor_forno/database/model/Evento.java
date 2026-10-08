@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.enums.eventos.EventoSistema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class Evento {
     private UUID id;
 
     @Column(nullable = false)
-    private LocalDateTime criadoEm;
+    private Instant criadoEm;
 
     @Enumerated(EnumType.STRING)
     private EventoSistema tipo;

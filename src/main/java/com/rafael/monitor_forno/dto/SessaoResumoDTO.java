@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,8 +17,8 @@ import java.util.UUID;
 public class SessaoResumoDTO {
 
     private UUID id;
-    private LocalDateTime inicioSessao;
-    private LocalDateTime fimSessao;
+    private Instant inicioSessao;
+    private Instant fimSessao;
     private EstadoForno estadoFornoFinal;
     private EstadoSistema estadoSistemaFinal;
 }

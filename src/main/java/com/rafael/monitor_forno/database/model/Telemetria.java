@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ public class Telemetria {
     @Enumerated(EnumType.STRING)
     private EstadoSistema estadoSistema;
 
-    private LocalDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
     @ManyToOne
     @JoinColumn(name = "forno_id")

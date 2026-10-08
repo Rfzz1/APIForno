@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.database.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class Notificacao {
     private String nomeApp;
 
     @Column(nullable = false)
-    private LocalTime horaEnvio;
+    private Instant horaEnvio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "forno_id")

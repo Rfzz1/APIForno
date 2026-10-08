@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import com.rafael.monitor_forno.enums.eventos.EventoSistema;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,8 +24,8 @@ public class DashboardDTO {
     private Integer quantidadeSessoes;
     private Double temperaturaMaxima;
     private EventoSistema ultimoEvento;
-    private LocalDateTime proximoTemporizador;
-    private LocalDateTime atualizadoEm;
+    private Instant proximoTemporizador;
+    private Instant atualizadoEm;
     private UUID fornoId;
 
 }

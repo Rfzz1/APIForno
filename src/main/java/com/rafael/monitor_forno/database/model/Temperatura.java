@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.database.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class Temperatura {
     private Double temperaturaUltima;
 
     @Column(nullable = false)
-    private LocalDateTime registradoEm;
+    private Instant registradoEm;
 
     @ManyToOne
     @JoinColumn(name = "sessao_id")

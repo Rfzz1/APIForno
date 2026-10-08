@@ -2,6 +2,7 @@ package com.rafael.monitor_forno.dto;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,5 +17,5 @@ public class TemperaturaDTO {
     private UUID id;
     private Double temperaturaAtual;
     private Double temperaturaUltima;
-    private LocalDateTime registradoEm;
+    private Instant registradoEm;
 }

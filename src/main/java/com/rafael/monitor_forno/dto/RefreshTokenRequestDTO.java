@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,5 +13,5 @@ import java.time.LocalDateTime;
 public class RefreshTokenRequestDTO {
 
     private String refreshToken;
-    private LocalDateTime expiration;
+    private ZonedDateTime expiration;
 }

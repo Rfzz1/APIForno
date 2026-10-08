@@ -2,6 +2,7 @@ package com.rafael.monitor_forno.dto;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ public class SuporteMensagemResponseDTO {
 
     private UUID id;
     private String conteudo;
-    private LocalDateTime dataEnvio;
+    private Instant dataEnvio;
     private String nomeRemetente;
 
 }

@@ -11,6 +11,7 @@ import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class TelemetriaService {
         telemetria.setEstadoForno(dto.getEstadoForno());
         telemetria.setEstadoSistema(dto.getEstadoSistema());
         telemetria.setTempoLigadoMinutos(dto.getTempoLigadoMinutos());
-        telemetria.setAtualizadoEm(LocalDateTime.now());
+        telemetria.setAtualizadoEm(Instant.now());
 
         telemetriaRepository.save(telemetria);
     }

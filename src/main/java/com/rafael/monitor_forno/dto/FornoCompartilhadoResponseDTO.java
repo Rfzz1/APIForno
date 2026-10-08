@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.enums.compartilhamento.StatusC;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,6 +18,6 @@ public class FornoCompartilhadoResponseDTO {
     private StatusC status;
     private String serialNumber;
     private String email;
-    private LocalDateTime dataConvite;
+    private Instant dataConvite;
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class RefreshToken {
     @Column
     private String refreshToken;
 
-    private LocalDateTime expiracaoRefreshToken;
+    private Instant expiracaoRefreshToken;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

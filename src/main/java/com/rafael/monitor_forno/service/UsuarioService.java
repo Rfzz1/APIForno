@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -169,7 +171,7 @@ public class UsuarioService {
                     String token = UUID.randomUUID().toString();
 
                     usuario.setTokenRecuperacaoSenha(token);
-                    usuario.setExpiracaoToken(LocalDateTime.now().plusMinutes(30));
+                    usuario.setExpiracaoToken(Instant.now().plus(30, ChronoUnit.MINUTES));
 
                     usuarioRepository.save(usuario);
 
@@ -211,7 +213,7 @@ public class UsuarioService {
         String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
 
         usuario.setCodigoVerificacaoEmail(otp);
-        usuario.setExpiracaoCodigoEmail(LocalDateTime.now().plusMinutes(15));
+        usuario.setExpiracaoCodigoEmail(Instant.now().plus(15, ChronoUnit.MINUTES));
         usuario.setNovoEmailPendente(novoEmail);
         usuarioRepository.save(usuario);
 
@@ -242,7 +244,7 @@ public class UsuarioService {
             throw new CredenciaisInvalidasException("Código de verificação inválido");
         }
 
-        if (usuario.getExpiracaoCodigoEmail().isBefore(LocalDateTime.now())) {
+        if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
             throw new CredenciaisInvalidasException("Código de verificação expirado");
         }
 
@@ -299,7 +301,7 @@ public class UsuarioService {
                         )
                 );
 
-        if (usuario.getExpiracaoToken().isBefore(LocalDateTime.now())) {
+        if (usuario.getExpiracaoToken().isBefore(Instant.now())) {
             throw new CredenciaisInvalidasException("Token expirado");
         }
 

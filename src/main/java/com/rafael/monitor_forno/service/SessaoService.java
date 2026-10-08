@@ -20,6 +20,7 @@ import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -66,7 +67,7 @@ public class SessaoService {
 
         Sessao sessao = new Sessao();
         sessao.setForno(forno);
-        sessao.setInicioSessao(LocalDateTime.now());
+            sessao.setInicioSessao(Instant.now());
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toResumoDTO(sessaoSalva);
@@ -94,7 +95,7 @@ public class SessaoService {
             );
         }
 
-        sessao.setFimSessao(LocalDateTime.now());
+        sessao.setFimSessao(Instant.now());
 
         long duracaoSegundos = ChronoUnit.SECONDS.between(
                 sessao.getInicioSessao(),

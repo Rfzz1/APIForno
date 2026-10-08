@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,8 +24,8 @@ public class Sessao {
     private UUID id;
 
     @Column(nullable = false)
-    private LocalDateTime inicioSessao;
-    private LocalDateTime fimSessao;
+    private Instant inicioSessao;
+    private Instant fimSessao;
     private Long duracaoSegundos;
 
     @Enumerated(EnumType.STRING)

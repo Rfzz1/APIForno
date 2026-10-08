@@ -8,7 +8,7 @@ import com.rafael.monitor_forno.database.repository.EventoRepository;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
-import com.rafael.monitor_forno.dto.EventoDTO;
+import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
@@ -16,6 +16,7 @@ import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.mappers.EventoMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -72,7 +73,7 @@ public class EventoService {
         evento.setSessao(sessao);
         evento.setTipo(dto.getTipo());
         evento.setForno(forno);
-        evento.setCriadoEm(LocalDateTime.now());
+        evento.setCriadoEm(Instant.now());
         eventoRepository.save(evento);
     }
 
@@ -90,7 +91,7 @@ public class EventoService {
         eventoRepository.delete(evento);
     }
 
-    public List<EventoDTO> findAllByFornoUsuario(String email) {
+    public List<EventoResponseDTO> findAllByFornoUsuario(String email) {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
@@ -100,7 +101,7 @@ public class EventoService {
                 .toList();
     }
 
-    public List<EventoDTO> findAllByFornoAndUsuario(UUID fornoId, String email) {
+    public List<EventoResponseDTO> findAllByFornoAndUsuario(UUID fornoId, String email) {
 
         List<Evento> eventos = eventoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
 
@@ -115,7 +116,7 @@ public class EventoService {
     }
 
 
-    public EventoDTO findById(UUID id, String email) {
+    public EventoResponseDTO findById(UUID id, String email) {
 
         Usuario usuario = buscarUsuarioLogado(email);
 

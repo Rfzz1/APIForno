@@ -15,6 +15,7 @@ import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -71,7 +72,7 @@ public class    TemperaturaService {
         Temperatura temperatura = new Temperatura();
         temperatura.setTemperaturaAtual(dto.getTemperaturaAtual());
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
-        temperatura.setRegistradoEm(LocalDateTime.now());
+        temperatura.setRegistradoEm(Instant.now());
         temperatura.setUsuario(forno.getUsuario());
         temperatura.setSessao(sessao);
         temperatura.setForno(forno);

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service
@@ -48,7 +49,7 @@ public class RefreshTokenService {
         String refreshTokenUsuario = jwtService.gerarRefreshToken(usuario.getEmail(), "USUARIO", "USUARIO", usuario.getVersaoUsuario());
 
         Duration duracaoexpiracao = Duration.ofMillis(expirationRefresh);
-        LocalDateTime expiracao =  LocalDateTime.now().plus(duracaoexpiracao);
+        Instant expiracao =  Instant.now().plus(duracaoexpiracao);
 
         refreshToken.setUsuario(usuario);
         refreshToken.setRefreshToken(refreshTokenUsuario);
@@ -69,7 +70,7 @@ public class RefreshTokenService {
                         )
                 );
 
-        if (tokenDoBanco.getExpiracaoRefreshToken().isBefore(java.time.LocalDateTime.now())) {
+        if (tokenDoBanco.getExpiracaoRefreshToken().isBefore(java.time.Instant.now())) {
             throw new RecursoNaoEncontradoException("Refresh token expirado");
         }
 

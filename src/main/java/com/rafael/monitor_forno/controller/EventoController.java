@@ -1,13 +1,11 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.database.model.Evento;
-import com.rafael.monitor_forno.dto.EventoDTO;
+import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +53,7 @@ public class EventoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<EventoDTO>> getAllEventsByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<EventoResponseDTO>> getAllEventsByFornoIdAndUsuario(@PathVariable UUID fornoId) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 

@@ -15,6 +15,7 @@ import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.exception.SessaoEncerradaException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +56,7 @@ public class SuporteService {
         //Primeira mensagem do chat
         MensagemSuporte primeiraMensagem = new MensagemSuporte();
         primeiraMensagem.setConteudo(dto.getMensagem());
-        primeiraMensagem.setDataEnvio(LocalDateTime.now());
+        primeiraMensagem.setDataEnvio(Instant.now());
         primeiraMensagem.setRemetente(usuario);
         primeiraMensagem.setSuporte(suporte);
 
@@ -110,7 +111,7 @@ public class SuporteService {
 
         MensagemSuporte novaMensagem = new MensagemSuporte();
         novaMensagem.setConteudo(dto.getConteudo());
-        novaMensagem.setDataEnvio(LocalDateTime.now());
+        novaMensagem.setDataEnvio(Instant.now());
         novaMensagem.setRemetente(usuario);
         novaMensagem.setSuporte(suporte);
 

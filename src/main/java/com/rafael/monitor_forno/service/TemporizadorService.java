@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -73,29 +75,33 @@ public class TemporizadorService {
             );
         }
 
-        if (dto.getHorarioFim().isBefore(LocalDateTime.now()) || dto.getHorarioInicio().isBefore(LocalDateTime.now()) || dto.getHorarioFim().isBefore(dto.getHorarioInicio())) {
+        if (dto.getHorarioFim().toInstant().isBefore(Instant.now()) || dto.getHorarioInicio().toInstant().isBefore(Instant.now().minus(1, ChronoUnit.MINUTES)) || dto.getHorarioFim().toInstant().isBefore(dto.getHorarioInicio().toInstant())) {
             throw new IllegalArgumentException(
                     "O horário deve estar no futuro"
             );
         }
 
         Temporizador temporizador = new Temporizador();
-        temporizador.setHorarioInicio(dto.getHorarioInicio());
-        temporizador.setHorarioFim(dto.getHorarioFim());
+        temporizador.setHorarioInicio(dto.getHorarioInicio().toInstant());
+        temporizador.setHorarioFim(dto.getHorarioFim().toInstant());
         temporizador.setExecutado(false);
-        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(dto.getHorarioInicio(), dto.getHorarioFim()));
+        temporizador.setDuracaoSegundos(ChronoUnit.SECONDS.between(dto.getHorarioInicio().toInstant(), dto.getHorarioFim().toInstant()));
         temporizador.setForno(forno);
         temporizadorRepository.save(temporizador);
 
-        Instant horarioInicio = dto.getHorarioInicio().atZone(ZoneId.systemDefault()).toInstant();
+        Instant horarioFim = dto.getHorarioFim().toInstant();
 
         taskScheduler.schedule(
                 () -> {
-                    fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
-                    temporizador.setExecutado(true);
-                    temporizadorRepository.save(temporizador);
+                    try {
+                        temporizador.setExecutado(true);
+                        temporizadorRepository.save(temporizador);
+                        fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
+                    } catch(RecursoNaoEncontradoException ex) {
+                        System.out.println(ex.getMessage());
+                    }
                 },
-                horarioInicio
+                horarioFim
         );
 
     }
@@ -109,17 +115,21 @@ public class TemporizadorService {
 
         for (Temporizador temporizador : temporizadores) {
 
-            Instant horarioInicio = temporizador.getHorarioInicio().atZone(ZoneId.systemDefault()).toInstant();
-            LocalDateTime agora = LocalDateTime.now();
+            Instant horarioFim = temporizador.getHorarioFim();
+            Instant agora = Instant.now();
 
-            if (agora.isBefore(temporizador.getHorarioInicio())) {
+            if (agora.isBefore(temporizador.getHorarioFim())) {
                 taskScheduler.schedule(
                         () -> {
-                            fornoComandoWsService.dispararBuzzer(temporizador.getForno().getSerialNumber(), temporizador);
-                            temporizador.setExecutado(true);
-                            temporizadorRepository.save(temporizador);
+                            try {
+                                temporizador.setExecutado(true);
+                                temporizadorRepository.save(temporizador);
+                                fornoComandoWsService.dispararBuzzer(temporizador.getForno().getSerialNumber(), temporizador);
+                            } catch (RecursoNaoEncontradoException ex) {
+                                System.out.println(ex.getMessage());
+                            }
                         },
-                        horarioInicio
+                        horarioFim
                 );
             } else {
                 temporizador.setExecutado(true);
@@ -179,13 +189,13 @@ public class TemporizadorService {
                         )
                 );
 
-        if (dto.getHorarioFim().isBefore(LocalDateTime.now())) {
+        if (dto.getHorarioFim().toInstant().isBefore(Instant.now())) {
             throw new IllegalArgumentException(
                     "O horário deve estar no futuro"
             );
         }
 
-        temporizadorExistente.setHorarioFim(dto.getHorarioFim());
+        temporizadorExistente.setHorarioFim(dto.getHorarioFim().toInstant());
 
         return toResponseDTO(temporizadorRepository.save(temporizadorExistente));
     }

@@ -2,7 +2,9 @@ package com.rafael.monitor_forno.dto;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
@@ -13,8 +15,8 @@ import java.util.UUID;
 public class TemporizadorResponseDTO {
 
    private UUID id;
-   private LocalDateTime horarioInicio;
-   private LocalDateTime horarioFim;
+   private Instant horarioInicio;
+   private Instant horarioFim;
    private Long duracaoSegundos;
    private boolean executado;
 }

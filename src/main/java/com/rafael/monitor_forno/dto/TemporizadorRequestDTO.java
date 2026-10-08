@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -11,6 +12,6 @@ import java.time.LocalDateTime;
 @Builder
 public class TemporizadorRequestDTO {
 
-    private LocalDateTime horarioFim;
-    private LocalDateTime horarioInicio;
+    private ZonedDateTime horarioFim;
+    private ZonedDateTime horarioInicio;
 }

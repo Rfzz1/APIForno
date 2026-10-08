@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
+
 @Service
 public class FornoComandoWsService {
 
@@ -32,7 +34,7 @@ public class FornoComandoWsService {
 
     public void silenciarBuzzer(String serialNumber, String email) {
 
-        Usuario usuario =  usuarioRepository.findByEmail(email).orElseThrow(
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(
                 () -> new RuntimeException("Usuario não encontrado")
         );
 
@@ -57,35 +59,44 @@ public class FornoComandoWsService {
         FornoSilenciarBuzzerDTO dto = toFornoSilenciarBuzzerDTO(forno);
 
         try {
-
             String json = objectMapper.writeValueAsString(dto);
             session.sendMessage(new TextMessage(json));
             forno.setMuted(true);
             fornoRepository.save(forno);
-
         } catch (Exception e) {
             throw new RuntimeException("Falha ao enviar comando para o forno", e);
         }
     }
 
     public void dispararBuzzer(String serialNumber, Temporizador temporizador) {
+        boolean enviado = false;
+        WebSocketSession session;
 
-        WebSocketSession session = fornoSessionRegistry.buscar(serialNumber);
-        if (session == null || !session.isOpen()) {
-            throw new RecursoNaoEncontradoException(
-                    "Forno não está conectado no momento."
-            );
+        for (int i = 0; i < 3; i++) {
+            session = fornoSessionRegistry.buscar(serialNumber);
+
+            if (session != null && session.isOpen()) {
+                try {
+                    TemporizadorWSDTO dto = toWSDTO(temporizador);
+                    String json = objectMapper.writeValueAsString(dto);
+                    session.sendMessage(new TextMessage(json));
+                    enviado = true;
+                    break;
+                } catch (IOException e) {
+                    // Falha pontual de envio, tenta novamente na próxima iteração
+                }
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
 
-        TemporizadorWSDTO dto = toWSDTO(temporizador);
-
-        try {
-
-            String json = objectMapper.writeValueAsString(dto);
-            session.sendMessage(new TextMessage(json));
-
-        } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar comando para o forno", e);
+        if (!enviado) {
+            throw new RecursoNaoEncontradoException("Forno não está conectado no momento.");
         }
     }
 
@@ -103,5 +114,4 @@ public class FornoComandoWsService {
                 .acao("DISPARAR")
                 .build();
     }
-
 }

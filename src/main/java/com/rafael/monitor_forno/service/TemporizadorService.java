@@ -54,7 +54,7 @@ public class TemporizadorService {
                 );
     }
 
-    public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email, String serialNumber) {
+    public void criarTemporizador(TemporizadorRequestDTO dto, UUID fornoId, String email) {
 
         Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
@@ -96,7 +96,7 @@ public class TemporizadorService {
                     try {
                         temporizador.setExecutado(true);
                         temporizadorRepository.save(temporizador);
-                        fornoComandoWsService.dispararBuzzer(serialNumber, temporizador);
+                        fornoComandoWsService.dispararBuzzer(forno.getSerialNumber(), temporizador);
                     } catch(RecursoNaoEncontradoException ex) {
                         System.out.println(ex.getMessage());
                     }

@@ -11,5 +11,6 @@ public class TemporizadorWSDTO {
 
     private Long duracaoSegundos;
     private String acao;
+    private String serialNumber;
 
 }

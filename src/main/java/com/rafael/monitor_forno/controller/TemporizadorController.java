@@ -32,9 +32,8 @@ public class TemporizadorController {
     public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        temporizadorService.criarTemporizador(dto, fornoId, email, serialNumber);
+        temporizadorService.criarTemporizador(dto, fornoId, email);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

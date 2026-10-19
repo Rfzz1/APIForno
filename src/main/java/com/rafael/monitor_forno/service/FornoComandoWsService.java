@@ -112,6 +112,7 @@ public class FornoComandoWsService {
         return TemporizadorWSDTO.builder()
                 .duracaoSegundos(temporizador.getDuracaoSegundos())
                 .acao("DISPARAR")
+                .serialNumber(temporizador.getForno().getSerialNumber())
                 .build();
     }
 }

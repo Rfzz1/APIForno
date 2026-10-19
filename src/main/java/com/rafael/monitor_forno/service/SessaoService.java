@@ -138,7 +138,7 @@ public class SessaoService {
 
         long duracaoSegundos = ChronoUnit.SECONDS.between(
                 sessao.getInicioSessao(),
-                LocalDateTime.now()
+                Instant.now()
         );
         sessao.setDuracaoSegundos(duracaoSegundos);
 
@@ -174,7 +174,7 @@ public class SessaoService {
         sessaoRepository.delete(sessao);
     }
 
-    public List<SessaoDetalhesDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
+    public List<SessaoResumoDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
 
         List<Sessao> sessoes = sessaoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
 
@@ -183,25 +183,25 @@ public class SessaoService {
         }
 
         return sessoes.stream()
-            .map(this::toDetalhesDTO)
+            .map(this::toResumoDTO)
             .toList();
 
 
     }
 
-    public List<SessaoDetalhesDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
+    public List<SessaoResumoDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
         Usuario usuario = buscarUsuarioLogado(email);
 
         if (dataInicio == null || dataFim == null) {
             return sessaoRepository.findAllByFornoUsuario(usuario)
                     .stream()
-                    .map(this::toDetalhesDTO)
+                    .map(this::toResumoDTO)
                     .toList();
         }
 
         return sessaoRepository.findAllByFornoUsuarioAndInicioSessaoBetween(usuario, dataInicio, dataFim)
                 .stream()
-                .map(this::toDetalhesDTO)
+                .map(this::toResumoDTO)
                 .toList();
     }
 

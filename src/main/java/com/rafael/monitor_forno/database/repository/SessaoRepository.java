@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -21,9 +22,18 @@ public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     List<Sessao> findAllByFornoUsuario(Usuario usuario);
 
+    List<Sessao> findAllByFornoId(UUID id);
+
     List<Sessao> findAllByFornoIdAndFornoUsuarioEmail(UUID id, String email);
 
     List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, LocalDateTime dataInicio, LocalDateTime dataFim);
 
-    int countByFornoUsuario(Usuario usuario);
+    int countByFornoId(UUID fornoId);
+
+    @Query("""
+    SELECT SUM(s.duracaoSegundos)
+    FROM Sessao s
+    WHERE s.forno.id = :fornoId
+    """)
+    Long findTempoTotalLigadoByFornoId(UUID fornoId);
 }

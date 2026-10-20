@@ -21,4 +21,5 @@ public class SessaoResumoDTO {
     private Instant fimSessao;
     private EstadoForno estadoFornoFinal;
     private EstadoSistema estadoSistemaFinal;
+    private Double temperaturaMaxima;
 }

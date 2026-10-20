@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.database.model.Temperatura;
 import com.rafael.monitor_forno.database.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -16,15 +17,27 @@ import java.util.UUID;
 public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> {
 
     Optional<Temperatura> findByRegistradoEm(LocalDateTime registradoEm);
+
     Optional<Temperatura> findByIdAndFornoUsuario(UUID id, Usuario usuario);
+
     List<Temperatura> findAllByFornoUsuario(Usuario usuario);
+
     List<Temperatura> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
+
     List<Temperatura> findAllBySessaoId(UUID sessaoId);
 
     @Query("""
     SELECT MAX(t.temperaturaAtual)
     FROM Temperatura t
-    WHERE t.sessao.forno.usuario = :usuario
+    WHERE t.sessao.forno.id = :fornoId
     """)
-    Double findTemperaturaMaximaByFornoUsuario(Usuario usuario);
+    Double findTemperaturaMaximaSessaoByFornoId(UUID fornoId);
+
+    @Query("""
+    SELECT MAX(t.temperaturaAtual)
+    FROM Temperatura t
+    WHERE t.forno.id = :fornoId
+    """)
+    Double findTemperaturaMaximaByFornoId(UUID fornoId);
+
 }

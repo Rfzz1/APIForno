@@ -56,7 +56,7 @@ public class TelemetriaController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping("/estatisticas")
+    @GetMapping("forno/{fornoId}/estatisticas")
     public ResponseEntity<EstatisticasDTO> buscarEstatisticas(@PathVariable UUID fornoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 

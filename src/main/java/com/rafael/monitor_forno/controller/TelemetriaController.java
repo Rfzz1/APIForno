@@ -56,11 +56,11 @@ public class TelemetriaController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping("/estatisticas")
-    public ResponseEntity<EstatisticasDTO> buscarEstatisticas() {
+    @GetMapping("forno/{fornoId}/estatisticas")
+    public ResponseEntity<EstatisticasDTO> buscarEstatisticas(@PathVariable UUID fornoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // A estatística continua global (soma dos dados de todos os fornos do usuário)
-        return ResponseEntity.ok(telemetriaService.buscarEstatisticas(email));
+        return ResponseEntity.ok(telemetriaService.buscarEstatisticas(fornoId, email));
     }
 }

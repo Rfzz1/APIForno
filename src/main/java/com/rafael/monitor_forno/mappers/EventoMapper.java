@@ -1,15 +1,15 @@
 package com.rafael.monitor_forno.mappers;
 
 import com.rafael.monitor_forno.database.model.Evento;
-import com.rafael.monitor_forno.dto.EventoDTO;
+import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EventoMapper {
 
-    public EventoDTO toEventoDTO(Evento evento) {
+    public EventoResponseDTO toEventoDTO(Evento evento) {
 
-        return EventoDTO.builder()
+        return EventoResponseDTO.builder()
                 .id(evento.getId())
                 .criadoEm(evento.getCriadoEm())
                 .tipo(evento.getTipo())

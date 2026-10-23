@@ -30,6 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.contains("/ws/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
@@ -81,9 +87,13 @@ public class JwtFilter extends OncePerRequestFilter {
                                 new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
+                } else {
+                    System.out.println(">>> FALHOU: details=" + details + " | tokenValido=" +
+                            (details != null ? jwtService.tokenValido(token, details.getUsername()) : "N/A"));
                 }
             }
         } catch (Exception e) {
+            System.out.println(">>> ERRO NO JWT FILTER: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             SecurityContextHolder.clearContext();
         }
 

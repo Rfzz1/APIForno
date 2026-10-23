@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Getter
@@ -16,7 +17,7 @@ public class NotificacaoRequestDTO {
     private UUID id;
 
     @NotBlank (message = "Hora de envio é obrigatório")
-    private LocalTime horaEnvio;
+    private ZonedDateTime horaEnvio;
 
     @NotBlank(message = "Mensagem é obrigatória")
     private String mensagem;

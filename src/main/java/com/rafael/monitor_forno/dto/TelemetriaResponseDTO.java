@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.enums.estados.EstadoSistema;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,7 +24,7 @@ public class TelemetriaResponseDTO {
 
     private Long tempoLigadoMinutos;
 
-    private LocalDateTime atualizadoEm;
+    private Instant atualizadoEm;
 
 
 }

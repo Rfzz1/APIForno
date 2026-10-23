@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class MensagemSuporte {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String conteudo;
 
-    private LocalDateTime dataEnvio = LocalDateTime.now();
+    private Instant dataEnvio = Instant.now();
 
     @ManyToOne
     @JoinColumn(name = "usuario_remetente_id")

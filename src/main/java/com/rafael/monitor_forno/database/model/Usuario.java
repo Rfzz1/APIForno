@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class Usuario {
     @Column(unique = true)
     private String tokenRecuperacaoSenha;
 
-    private LocalDateTime expiracaoToken;
+    private Instant expiracaoToken;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -50,10 +51,13 @@ public class Usuario {
     private Long versaoUsuario;
     private String emailAnterior;
     private String codigoVerificacaoEmail;
-    private LocalDateTime expiracaoCodigoEmail;
+    private Instant expiracaoCodigoEmail;
     private String novoEmailPendente;
 
     @OneToOne(fetch = FetchType.LAZY)
     private FotoPerfil fotoPerfil;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
+    private java.util.List<RefreshToken> refreshTokens;
 
 }

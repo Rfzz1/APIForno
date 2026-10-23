@@ -70,13 +70,6 @@ public class FornoController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/mutar-buzzer/{serialNumber}")
-    public ResponseEntity<Void> mutarBuzzer(@PathVariable String serialNumber, Authentication authentication) {
-        fornoService.mutarBuzzer(authentication.getName(), serialNumber);
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus")
     public ResponseEntity<List<FornoResponseDTO>> buscarMeusFornos(Authentication authentication) {
         List<FornoResponseDTO> fornos = fornoService.buscarMeusFornos(authentication.getName());

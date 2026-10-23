@@ -20,6 +20,7 @@ import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -66,7 +67,7 @@ public class SessaoService {
 
         Sessao sessao = new Sessao();
         sessao.setForno(forno);
-        sessao.setInicioSessao(LocalDateTime.now());
+            sessao.setInicioSessao(Instant.now());
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
         return toResumoDTO(sessaoSalva);
@@ -94,7 +95,7 @@ public class SessaoService {
             );
         }
 
-        sessao.setFimSessao(LocalDateTime.now());
+        sessao.setFimSessao(Instant.now());
 
         long duracaoSegundos = ChronoUnit.SECONDS.between(
                 sessao.getInicioSessao(),
@@ -107,6 +108,7 @@ public class SessaoService {
             sessao.setEstadoSistemaFinal(dto.getEstadoSistemaFinal());
         }
         sessao.setEstadoFornoFinal(EstadoForno.FORNO_DESLIGADO);
+        sessao.setEstadoFornoAtual(EstadoForno.FORNO_DESLIGADO);
 
         Sessao sessaoSalva = sessaoRepository.save(sessao);
 
@@ -136,7 +138,7 @@ public class SessaoService {
 
         long duracaoSegundos = ChronoUnit.SECONDS.between(
                 sessao.getInicioSessao(),
-                LocalDateTime.now()
+                Instant.now()
         );
         sessao.setDuracaoSegundos(duracaoSegundos);
 
@@ -172,7 +174,7 @@ public class SessaoService {
         sessaoRepository.delete(sessao);
     }
 
-    public List<SessaoDetalhesDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
+    public List<SessaoResumoDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
 
         List<Sessao> sessoes = sessaoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
 
@@ -181,25 +183,25 @@ public class SessaoService {
         }
 
         return sessoes.stream()
-            .map(this::toDetalhesDTO)
+            .map(this::toResumoDTO)
             .toList();
 
 
     }
 
-    public List<SessaoDetalhesDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
+    public List<SessaoResumoDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
         Usuario usuario = buscarUsuarioLogado(email);
 
         if (dataInicio == null || dataFim == null) {
             return sessaoRepository.findAllByFornoUsuario(usuario)
                     .stream()
-                    .map(this::toDetalhesDTO)
+                    .map(this::toResumoDTO)
                     .toList();
         }
 
         return sessaoRepository.findAllByFornoUsuarioAndInicioSessaoBetween(usuario, dataInicio, dataFim)
                 .stream()
-                .map(this::toDetalhesDTO)
+                .map(this::toResumoDTO)
                 .toList();
     }
 

@@ -37,6 +37,7 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
+  expirationRefresh: 1209600033
 
 server:
   address: 0.0.0.0
@@ -53,3 +54,12 @@ app:
 
 firebase:
   caminho: ${FIREBASE_CAMINHO}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web:
+          socket: DEBUG
+          cors: DEBUG

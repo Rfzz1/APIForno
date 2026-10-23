@@ -74,7 +74,7 @@ public class SessaoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/minhas")
-    public ResponseEntity<List<SessaoDetalhesDTO>> minhasSessao(Authentication authentication, @RequestParam(required = false) LocalDateTime dataInicio, @RequestParam(required = false) LocalDateTime dataFim) {
+    public ResponseEntity<List<SessaoResumoDTO>> minhasSessao(Authentication authentication, @RequestParam(required = false) LocalDateTime dataInicio, @RequestParam(required = false) LocalDateTime dataFim) {
 
         return ResponseEntity.ok(sessaoService.findAllSessoesByUsuarioAndInicioSessaoBetween(authentication.getName(), dataInicio, dataFim));
     }
@@ -92,7 +92,7 @@ public class SessaoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<SessaoDetalhesDTO>> getAllSessoesByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<SessaoResumoDTO>> getAllSessoesByFornoIdAndUsuario(@PathVariable UUID fornoId) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(sessaoService.findAllSessoesByFornoIdAndUsuario(fornoId, email));

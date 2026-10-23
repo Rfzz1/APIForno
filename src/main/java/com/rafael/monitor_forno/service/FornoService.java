@@ -54,6 +54,7 @@ public class FornoService {
         forno.setPinSeguranca(gerarPinSeguranca());
         forno.setReivindicado(false);
         forno.setAtivo(false);
+        forno.setMuted(false);
         forno.setNome(dto.getNome() != null ? dto.getNome() : "Forno sem nome");
 
         forno.setDeviceSecret(
@@ -136,6 +137,7 @@ public class FornoService {
         forno.setUsuario(usuario);
         forno.setAtivo(true);
         forno.setNome(dto.getNome() != null ? dto.getNome() : forno.getNome());
+        forno.setMuted(false);
         fornoRepository.save(forno);
     }
 
@@ -156,6 +158,7 @@ public class FornoService {
 
         forno.setUsuario(null);
         forno.setAtivo(false);
+        forno.setMuted(false);
         fornoRepository.save(forno);
     }
 
@@ -193,33 +196,6 @@ public class FornoService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-
-
-    public void mutarBuzzer(String email, String serialNumber) {
-
-        Usuario usuario = buscarUsuarioLogado(email);
-
-        Forno forno =  fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
-                        )
-                );
-
-        if (forno.getUsuario() == null || !forno.getUsuario().getId().equals(usuario.getId())) {
-            throw new AcessoNegadoException("Você não tem permissão para silenciar este forno");
-        }
-
-        forno.setMuted(true);
-        fornoRepository.save(forno);
-
-        try {
-            fornoWebSocketHandler.enviarComandoParaForno(serialNumber, "{\"acao\": \"MUTE\"}");
-        } catch (IOException e) {
-            throw new FornoDesconectadoException("Falha na comunicação de rede com o forno " + serialNumber);
-        }
-    }
-
     private String gerarPinSeguranca() {
         String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!*$#";
         SecureRandom random = new SecureRandom();
@@ -247,6 +223,7 @@ public class FornoService {
                 .nome(forno.getNome())
                 .pinSeguranca(forno.getPinSeguranca())
                 .reivindicado(forno.isReivindicado())
+                .muted(forno.isMuted())
                 .build();
     }
 

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,10 +23,13 @@ public class Temporizador {
     private UUID id;
 
     @Column(nullable = false)
-    private LocalDateTime criadoEm;
+    private Instant horarioInicio;
 
     @Column(nullable = false)
-    private LocalDateTime horarioFim;
+    private Instant horarioFim;
+
+    @Column(nullable = false)
+    private Long duracaoSegundos;
 
     @Column(nullable = false)
     private boolean executado;

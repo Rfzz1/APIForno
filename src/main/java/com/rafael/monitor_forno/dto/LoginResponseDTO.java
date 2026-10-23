@@ -13,4 +13,5 @@ public class LoginResponseDTO {
 
     private UUID id;
     private String token;
+    private String refreshtoken;
 }

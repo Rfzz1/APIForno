@@ -13,6 +13,7 @@ import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +85,7 @@ public class FornoCompartilhadoService {
         FornoCompartilhado fornoCompartilhado = new FornoCompartilhado();
         fornoCompartilhado.setUsuario(usuarioExistente);
         fornoCompartilhado.setForno(forno);
-        fornoCompartilhado.setDataConvite(LocalDateTime.now());
+        fornoCompartilhado.setDataConvite(Instant.now());
         fornoCompartilhado.setStatus(StatusC.PENDENTE);
         fornoCompartilhadoRepository.save(fornoCompartilhado);
 

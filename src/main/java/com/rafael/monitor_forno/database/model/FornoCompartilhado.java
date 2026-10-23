@@ -4,6 +4,7 @@ import com.rafael.monitor_forno.enums.compartilhamento.StatusC;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,7 +25,7 @@ public class FornoCompartilhado {
     private StatusC status;
 
     @Column(nullable=false)
-    private LocalDateTime dataConvite;
+    private Instant dataConvite;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

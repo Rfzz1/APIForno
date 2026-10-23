@@ -42,7 +42,7 @@ public class NotificacaoService {
         Notificacao notificacao = new Notificacao();
         notificacao.setForno(forno);
         notificacao.setMensagem(dto.getMensagem());
-        notificacao.setHoraEnvio(dto.getHoraEnvio());
+        notificacao.setHoraEnvio(dto.getHoraEnvio().toInstant());
 
         if (Role.ADMIN == usuario.getRole()) {
             notificacao.setNomeApp(appDevName);

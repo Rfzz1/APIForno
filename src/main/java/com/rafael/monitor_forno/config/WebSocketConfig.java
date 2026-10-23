@@ -1,6 +1,13 @@
 package com.rafael.monitor_forno.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rafael.monitor_forno.database.repository.FornoRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import com.rafael.monitor_forno.dto.FornoSilenciarBuzzerDTO;
 import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
+import com.rafael.monitor_forno.service.FornoComandoWsService;
+import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -11,14 +18,22 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final FornoWebSocketHandler fornoWebSocketHandler;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
-    public WebSocketConfig(FornoWebSocketHandler fornoWebSocketHandler) {
+    public WebSocketConfig(FornoWebSocketHandler fornoWebSocketHandler,  JwtHandshakeInterceptor jwtHandshakeInterceptor) {
         this.fornoWebSocketHandler = fornoWebSocketHandler;
+        this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        System.out.println(">>> REGISTRANDO WEBSOCKET /v1/ws/fornos");
         //Mapeia a URL e conecta com o nosso Handler
-        registry.addHandler(fornoWebSocketHandler, "/ws/forno").setAllowedOrigins("*");
+        registry.addHandler(fornoWebSocketHandler, "/ws/*/fornos").addInterceptors(jwtHandshakeInterceptor).setAllowedOrigins("*");
     }
 }

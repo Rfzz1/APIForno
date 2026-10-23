@@ -11,6 +11,7 @@ import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class TelemetriaService {
         telemetria.setEstadoForno(dto.getEstadoForno());
         telemetria.setEstadoSistema(dto.getEstadoSistema());
         telemetria.setTempoLigadoMinutos(dto.getTempoLigadoMinutos());
-        telemetria.setAtualizadoEm(LocalDateTime.now());
+        telemetria.setAtualizadoEm(Instant.now());
 
         telemetriaRepository.save(telemetria);
     }
@@ -96,11 +97,11 @@ public class TelemetriaService {
                 );
 
 
-        int quantidadeSessoes = sessaoRepository.countByFornoUsuario(forno.getUsuario());
+        int quantidadeSessoes = sessaoRepository.countByFornoId(forno.getId());
 
-        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoUsuario(forno.getUsuario())).orElse(0.0);
+        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaSessaoByFornoId(forno.getId())).orElse(0.0);
 
-        Evento ultimoEvento = eventoRepository.findFirstByFornoUsuarioOrderByCriadoEmDesc(forno.getUsuario())
+        Evento ultimoEvento = eventoRepository.findFirstByFornoIdOrderByCriadoEmDesc(forno.getId())
                 .orElse(null);
 
         Temporizador proximoTemporizador = temporizadorRepository.findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(forno)
@@ -129,36 +130,18 @@ public class TelemetriaService {
                 .build();
     }
 
-    public EstatisticasDTO buscarEstatisticas(String email) {
-        Usuario usuario = buscarUsuarioLogado(email);
+    public EstatisticasDTO buscarEstatisticas(UUID fornoId, String email) {
+        Forno forno = validarFornoDoUsuario(fornoId, email);
 
-        List<Sessao> sessoes = sessaoRepository.findAllByFornoUsuario(usuario);
+        int quantidadeSessoes = sessaoRepository.countByFornoId(forno.getId());
+        long tempoTotalLigado = Optional.ofNullable(sessaoRepository.findTempoTotalLigadoByFornoId(forno.getId())).orElse(0L);
+        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoId(forno.getId())).orElse(0.0);
 
-        int quantidadeSessoes = sessoes.size();
-        long tempoTotalLigado = sessoes.stream()
-                .filter(s -> s.getDuracaoSegundos() != null)
-                .mapToLong(Sessao::getDuracaoSegundos)
-                .sum();
-        Double temperaturaMaxima = sessoes.stream()
-                .flatMap(s -> s.getTemperaturas().stream())
-                .mapToDouble(Temperatura::getTemperaturaAtual)
-                .max()
-                .orElse(0);
+        long alertas = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ALERTA_ENTRADA, EventoSistema.ALERTA_SAIDA));
 
-        long alertas = sessoes.stream()
-                .flatMap(s -> s.getEventos().stream())
-                .filter(e -> e.getTipo() == EventoSistema.ALERTA_ENTRADA || e.getTipo() == EventoSistema.ALERTA_SAIDA)
-                .count();
+        long criticos = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.CRITICO_ENTRADA, EventoSistema.CRITICO_SAIDA));
 
-        long criticos = sessoes.stream()
-                .flatMap(s -> s.getEventos().stream())
-                .filter(e -> e.getTipo() == EventoSistema.CRITICO_ENTRADA || e.getTipo() == EventoSistema.CRITICO_SAIDA)
-                .count();
-
-        long erros = sessoes.stream()
-                .flatMap(s -> s.getEventos().stream())
-                .filter(e -> e.getTipo() == EventoSistema.ERRO_SENSOR_ENTRADA || e.getTipo() == EventoSistema.ERRO_SENSOR_SAIDA)
-                .count();
+        long erros = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ERRO_SENSOR_ENTRADA, EventoSistema.ERRO_SENSOR_SAIDA));
 
         return EstatisticasDTO.builder()
                 .tempoTotalLigado(tempoTotalLigado)

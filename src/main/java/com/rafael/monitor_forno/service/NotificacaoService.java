@@ -9,6 +9,7 @@ import com.rafael.monitor_forno.database.model.Notificacao;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.NotificacaoRepository;
+import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.NotificacaoRequestDTO;
 import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
@@ -20,6 +21,7 @@ public class NotificacaoService {
 
     private final NotificacaoRepository notificacaoRepository;
     private final FornoRepository fornoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Value("${app.nome-app-dev}")
     private String appDevName;
@@ -27,43 +29,51 @@ public class NotificacaoService {
     @Value("${app.nome-app-comum}")
     private String appComumName;
 
-    public NotificacaoService(NotificacaoRepository notificacaoRepository, FornoRepository fornoRepository) {
+    public NotificacaoService(NotificacaoRepository notificacaoRepository, FornoRepository fornoRepository,UsuarioRepository usuarioRepository) {
         this.notificacaoRepository = notificacaoRepository;
         this.fornoRepository = fornoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public void enviarNotificacao(NotificacaoRequestDTO dto, String serialNumber) throws FirebaseMessagingException {
+    public void enviarNotificacao(NotificacaoRequestDTO dto, String email) throws FirebaseMessagingException {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(dto.getFornoId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum forno encontrado"));
 
-        Usuario usuario = forno.getUsuario();
+        Usuario fornoUsuario = forno.getUsuario();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum usuário encontrado"));
 
-        Notificacao notificacao = new Notificacao();
-        notificacao.setForno(forno);
-        notificacao.setMensagem(dto.getMensagem());
-        notificacao.setHoraEnvio(dto.getHoraEnvio().toInstant());
+        if (fornoUsuario == usuario) {
+            // Lógica para enviar notificação
 
-        if (Role.ADMIN == usuario.getRole()) {
-            notificacao.setNomeApp(appDevName);
-        } else {
-            notificacao.setNomeApp(appComumName);
+            Notificacao notificacao = new Notificacao();
+            notificacao.setForno(forno);
+            notificacao.setMensagem(dto.getMensagem());
+            notificacao.setHoraEnvio(dto.getHoraEnvio().toInstant());
+
+            if (Role.ADMIN == usuario.getRole()) {
+                notificacao.setNomeApp(appDevName);
+            } else {
+                notificacao.setNomeApp(appComumName);
+            }
+
+            notificacao.setLogoBase64(dto.getLogoBase64());
+
+            notificacaoRepository.save(notificacao);
+
+            Notification notification = Notification.builder()
+                    .setTitle(notificacao.getNomeApp())
+                    .setBody(notificacao.getMensagem())
+                    .setImage(notificacao.getLogoBase64())
+                    .build();
+
+            Message mensagem = Message.builder().setNotification(notification).setTopic(forno.getSerialNumber()).build();
+
+            FirebaseMessaging fmt = FirebaseMessaging.getInstance();
+            fmt.send(mensagem);
+
         }
-
-        notificacao.setLogoBase64(dto.getLogoBase64());
-
-        notificacaoRepository.save(notificacao);
-
-        Notification notification = Notification.builder()
-                .setTitle(notificacao.getNomeApp())
-                .setBody(notificacao.getMensagem())
-                .setImage(notificacao.getLogoBase64())
-                .build();
-
-        Message mensagem = Message.builder().setNotification(notification).setTopic(serialNumber).build();
-
-        FirebaseMessaging fmt = FirebaseMessaging.getInstance();
-        fmt.send(mensagem);
     }
 
 }

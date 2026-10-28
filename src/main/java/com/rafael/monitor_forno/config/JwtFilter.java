@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.config;
 
+import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
@@ -49,6 +50,13 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String token = authHeader.substring(7);
             Claims claims = jwtService.extrairTodasClaims(token);
+
+            String tokenTipo = claims.get("tokenTipo", String.class);
+
+            if (!"ACCESS".equals(tokenTipo)) {
+                filterChain.doFilter(request, response);
+                throw new CredenciaisInvalidasException("Token inválido: tipo de token não é ACCESS");
+            }
 
             String subject = claims.getSubject();
             String tipo = claims.get("tipo", String.class);

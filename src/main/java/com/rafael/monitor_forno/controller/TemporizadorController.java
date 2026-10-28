@@ -75,7 +75,10 @@ public class TemporizadorController {
             return ResponseEntity.ok(temporizadorService.findById(id, authentication.getName()));
         }
 
-        return ResponseEntity.ok(temporizadorService.findAll());
+        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(temporizadorService.findAllByFornoUsuario(serialNumber, email));
     }
 
     // ========= ROTAS DO FORNO =======

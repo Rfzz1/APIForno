@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalTime;
@@ -16,7 +17,7 @@ public class NotificacaoRequestDTO {
 
     private UUID id;
 
-    @NotBlank (message = "Hora de envio é obrigatório")
+    @NotNull(message = "Hora de envio é obrigatório")
     private ZonedDateTime horaEnvio;
 
     @NotBlank(message = "Mensagem é obrigatória")

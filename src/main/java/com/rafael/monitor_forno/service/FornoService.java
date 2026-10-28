@@ -80,7 +80,9 @@ public class FornoService {
             );
         }
 
-        forno.setReivindicado(true);
+        if (!forno.isReivindicado()) {
+            forno.setReivindicado(true);
+        }
         fornoRepository.save(forno);
 
         return toAutoProvisionamentoResponseDTO(forno);

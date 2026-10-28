@@ -61,6 +61,12 @@ public class RefreshTokenService {
     public RefreshTokenResponseDTO renovarRefreshToken(String refreshToken) {
 
         Claims claims = jwtService.extrairTodasClaims(refreshToken);
+
+        if (!"REFRESH".equals(
+                claims.get("tokenTipo", String.class))) {
+            throw new AcessoNegadoException("Token inválido para renovação");
+        }
+
         String subject = claims.getSubject();
 
         RefreshToken tokenDoBanco = refreshTokenRepository.findByRefreshToken(refreshToken)
@@ -92,7 +98,7 @@ public class RefreshTokenService {
         return RefreshTokenResponseDTO.builder()
                 .refreshToken(refreshToken.getRefreshToken())
                 .expiration(refreshToken.getExpiracaoRefreshToken())
-                .novoToken(jwtService.gerarToken(refreshToken.getUsuario().getEmail(), "USUARIO", "USUARIO"))
+                .novoToken(jwtService.gerarToken(refreshToken.getUsuario().getEmail(), "USUARIO", "USUARIO", refreshToken.getUsuario().getVersaoUsuario()))
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.database.repository;
 import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Temporizador;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -17,4 +18,5 @@ public interface TemporizadorRepository extends JpaRepository<Temporizador, UUID
     Optional<Temporizador> findByIdAndFornoUsuario(UUID id, Usuario usuario);
     List<Temporizador> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
     List<Temporizador> findAllByExecutadoFalse();
+    List<Temporizador> findAllByFornoAndUsuario(Forno forno, Usuario fornoUsuario);
 }

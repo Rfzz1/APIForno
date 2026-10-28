@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class SuporteRequestDTO {
 
-    @NotBlank(message = "Categoria e obrigatório")
+    @NotNull(message = "Categoria e obrigatório")
     private Categoria categoria;
 
     @NotBlank(message = "Titulo é obrigatório")

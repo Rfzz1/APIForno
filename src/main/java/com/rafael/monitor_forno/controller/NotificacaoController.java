@@ -26,8 +26,8 @@ public class NotificacaoController {
     @PostMapping
     public ResponseEntity<Void> enviarNotificacao (@Valid @RequestBody NotificacaoRequestDTO dto) throws FirebaseMessagingException {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        notificacaoService.enviarNotificacao(dto, serialNumber);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        notificacaoService.enviarNotificacao(dto, email);
         return ResponseEntity.ok().build();
 
     }

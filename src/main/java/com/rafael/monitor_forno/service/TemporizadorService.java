@@ -240,6 +240,21 @@ public class TemporizadorService {
                 .toList();
     }
 
+    public List<TemporizadorResponseDTO> findAllByFornoUsuario(String serialNumber, String email) {
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado"
+                        )
+                );
+        Usuario usuario = buscarUsuarioLogado(email);
+
+        return temporizadorRepository.findAllByFornoAndUsuario(forno, usuario)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
     public TemporizadorResponseDTO findById(UUID id, String email) {
 
         Usuario usuario = buscarUsuarioLogado(email);

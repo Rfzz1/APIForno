@@ -56,6 +56,22 @@ public class SessaoService {
                 );
     }
 
+    private Forno verificarFornoUsuario(String serialNumber, String email) {
+        Usuario usuario = buscarUsuarioLogado(email);
+        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+                .orElseThrow(
+                        () -> new RecursoNaoEncontradoException(
+                                "Forno não encontrado " + serialNumber
+                        )
+                );
+        if (forno.getUsuario() != usuario) {
+            throw new AcessoNegadoException(
+                    "Forno não pertence ao usuário logado"
+            );
+        }
+        return forno;
+    }
+
     public SessaoResumoDTO iniciarSessao(String serialNumber) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
@@ -155,21 +171,20 @@ public class SessaoService {
         return toDetalhesDTO(sessaoAtualizada);
     }
 
-    public void deleteById(UUID id, String serialNumber) {
+    public void deleteById(UUID id, String email) {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Sessao sessao = sessaoRepository.findById(id)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
+                                "Sessão não encontrada"
                         )
                 );
 
-        Sessao sessao = sessaoRepository.findByIdAndForno(id, forno)
-                .orElseThrow(
-                        () -> new AcessoNegadoException(
-                                "Sessão não pertence ao forno"
-                        )
-                );
+        Usuario usuarioFornoSessao = sessao.getForno().getUsuario();
+
+        if (!usuarioFornoSessao.getEmail().equals(email)) {
+            throw new AcessoNegadoException("O forno não pertence a esse usuário");
+        }
 
         sessaoRepository.delete(sessao);
     }

@@ -35,6 +35,7 @@ public class JwtService {
     private static final String VERSAO_USER = "versao";
     private static final String EMAIL_ANTIGO = "emailAntigo";
     private static final String NOVO_EMAIL = "novoEmail";
+    private static final String TOKEN_TIPO = "tokenTipo";
 
     private SecretKey getSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
@@ -47,6 +48,7 @@ public class JwtService {
         claims.put(TIPO, tipo);
         claims.put(ROLE, role);
         claims.put(VERSAO_USER, versaoUsuario);
+        claims.put(TOKEN_TIPO, "ACCESS");
 
         return Jwts.builder()
                 .claims(claims)
@@ -66,6 +68,7 @@ public class JwtService {
         claims.put(TIPO, tipo);
         claims.put(ROLE, role);
         claims.put(VERSAO_USER, versaoUsuario);
+        claims.put(TOKEN_TIPO, "REFRESH");
 
         return Jwts.builder()
                 .claims(claims)

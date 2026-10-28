@@ -1,22 +1,23 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.database.model.RefreshToken;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.enums.Role;
+import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -27,6 +28,7 @@ public class UsuarioService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -102,7 +104,6 @@ public class UsuarioService {
 
         usuarioExistente.setNome(dto.getNome());
         usuarioExistente.setNascimento(dto.getNascimento());
-        usuarioExistente.setEmail(dto.getEmail());
 
         return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
     }
@@ -118,6 +119,8 @@ public class UsuarioService {
         }
 
         usuarioExistente.setSenha(passwordEncoder.encode(dto.senhaAtualizada()));
+        usuarioExistente.setVersaoUsuario(usuarioExistente.getVersaoUsuario() + 1);
+        usuarioExistente.setRefreshTokens(null); // Invalida todos os refresh tokens existentes
 
         usuarioRepository.save(usuarioExistente);
 
@@ -210,7 +213,7 @@ public class UsuarioService {
             throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
         }
 
-        String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
+        String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
 
         usuario.setCodigoVerificacaoEmail(otp);
         usuario.setExpiracaoCodigoEmail(Instant.now().plus(15, ChronoUnit.MINUTES));
@@ -240,37 +243,52 @@ public class UsuarioService {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
-        if (!usuario.getCodigoVerificacaoEmail().equals(codigo)) {
-            throw new CredenciaisInvalidasException("Código de verificação inválido");
+        boolean acertou = false;
+
+        for (int tentativa = 1; tentativa < 3; tentativa++) {
+
+            if (!Objects.equals(usuario.getCodigoVerificacaoEmail(), codigo)) {
+                throw new CredenciaisInvalidasException("Código de verificação inválido");
+            } else {
+                acertou = true;
+                break;
+            }
+
         }
 
-        if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
-            throw new CredenciaisInvalidasException("Código de verificação expirado");
+        if (acertou) {
+
+            if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
+                throw new CredenciaisInvalidasException("Código de verificação expirado");
+            }
+
+            String novoEmail = usuario.getNovoEmailPendente();
+
+            usuario.setEmailAnterior(emailAtual);
+            usuario.setEmail(novoEmail);
+            usuario.setCodigoVerificacaoEmail(null);
+            usuario.setExpiracaoCodigoEmail(null);
+            usuario.setNovoEmailPendente(null);
+            usuario.setRefreshTokens(null);
+
+            usuarioRepository.save(usuario);
+            String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
+            String link = baseUrl + "/reverter-email?token=" + token;
+
+            emailService.enviarEmail(usuario.getEmailAnterior(),
+                    "E-mail alterado com sucesso",
+                    """
+                            Olá, %s!<br><br>
+                            
+                            O seu e-mail foi alterado para <b>%s<b>.<br><br>
+                            
+                            Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
+                            %s
+                            """.formatted(usuario.getNome(), novoEmail, link)
+            );
+        } else {
+            throw new AcessoNegadoException("Número máximo de tentativas excedido");
         }
-
-        String novoEmail = usuario.getNovoEmailPendente();
-
-        usuario.setEmailAnterior(emailAtual);
-        usuario.setEmail(novoEmail);
-        usuario.setCodigoVerificacaoEmail(null);
-        usuario.setExpiracaoCodigoEmail(null);
-        usuario.setNovoEmailPendente(null);
-
-        usuarioRepository.save(usuario);
-        String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
-        String link = baseUrl + "/reverter-email?token=" + token;
-
-        emailService.enviarEmail(usuario.getEmailAnterior() ,
-                "E-mail alterado com sucesso",
-                """
-                        Olá, %s!<br><br>
-                        
-                        O seu e-mail foi alterado para <b>%s<b>.<br><br>
-                        
-                        Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
-                        %s
-                        """.formatted(usuario.getNome(), novoEmail, link)
-        );
 
     }
 
@@ -310,6 +328,8 @@ public class UsuarioService {
 
         usuario.setTokenRecuperacaoSenha(null);
         usuario.setExpiracaoToken(null);
+        usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
+        usuario.setRefreshTokens(null);
 
         usuarioRepository.save(usuario);
     }

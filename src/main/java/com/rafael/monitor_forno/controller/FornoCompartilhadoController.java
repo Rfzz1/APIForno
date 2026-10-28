@@ -42,13 +42,19 @@
         @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
         @PutMapping("/aceitar")
         public ResponseEntity<FornoCompartilhadoResponseDTO> aceitarConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.aceitarConvite(dto.getEmail(), dto.getSerialNumber()));
+
+            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.aceitarConvite(emailLoggedUser, dto.getSerialNumber()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @PutMapping("/recusar")
         public ResponseEntity<FornoCompartilhadoResponseDTO> recusarConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.recusarConvite(dto.getEmail(), dto.getSerialNumber()));
+
+            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.recusarConvite(emailLoggedUser, dto.getSerialNumber()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

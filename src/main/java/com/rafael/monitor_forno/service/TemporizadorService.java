@@ -247,9 +247,9 @@ public class TemporizadorService {
                                 "Forno não encontrado"
                         )
                 );
-        Usuario usuario = buscarUsuarioLogado(email);
+        Usuario usuario = forno.getUsuario();
 
-        return temporizadorRepository.findAllByFornoAndUsuario(forno, usuario)
+        return temporizadorRepository.findAllByFornoAndForno_Usuario(forno, usuario)
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();

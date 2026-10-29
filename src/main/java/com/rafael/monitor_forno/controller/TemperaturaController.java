@@ -3,6 +3,8 @@ package com.rafael.monitor_forno.controller;
 import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
+import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
+import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.TemperaturaService;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -77,12 +81,17 @@ public class TemperaturaController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
-    public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) LocalDateTime registradoEm) {
+    public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) Instant registradoEm, @RequestParam(required = false) UUID fornoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        if (registradoEm != null) {
-            return ResponseEntity.ok(temperaturaService.findByDate(registradoEm));
+        if (registradoEm != null && fornoId == null) {
+            throw new CredenciaisInvalidasException("Os parâmetros são obrigatórios: registradoEm e fornoId devem ser fornecidos juntos.");
         }
+
+        if (fornoId != null && registradoEm != null) {
+            return ResponseEntity.ok(temperaturaService.findByDate(registradoEm, fornoId, email));
+        }
+
         return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(email));
     }
 }

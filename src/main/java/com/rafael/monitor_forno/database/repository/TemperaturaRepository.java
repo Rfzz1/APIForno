@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Repository
 public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> {
 
-    Optional<Temperatura> findByRegistradoEm(LocalDateTime registradoEm);
+    List<Temperatura> findByRegistradoEmBetweenAndForno(Instant inicio, Instant fim, Forno fornoU);
 
     Optional<Temperatura> findByIdAndFornoUsuario(UUID id, Usuario usuario);
 

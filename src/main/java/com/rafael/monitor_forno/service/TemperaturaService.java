@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class    TemperaturaService {
+public class TemperaturaService {
 
     private static final double THRESHOLD = 1.0;
     private final TemperaturaRepository temperaturaRepository;
@@ -141,14 +141,28 @@ public class    TemperaturaService {
                 .toList();
     }
 
-    public TemperaturaDTO findByDate(LocalDateTime registradoEm) {
-        Temperatura temperatura = temperaturaRepository.findByRegistradoEm(registradoEm)
+    public List<TemperaturaDTO> findByDate(Instant registradoEm, UUID fornoId, String email) {
+
+        Usuario usuario = buscarUsuarioLogado(email);
+        Forno forno = fornoRepository.findByIdAndUsuario(fornoId, usuario)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Data não encontrada: " + registradoEm
+                                "Forno não encontrado: " + fornoId
                         )
                 );
-        return temperaturaMapper.toTemperaturaDTO(temperatura);
+
+        Instant inicio = registradoEm.minusSeconds(3600); // Exemplo: busca por temperaturas de uma hora atrás
+        Instant fim = registradoEm;
+
+        List<Temperatura> temperaturas = temperaturaRepository.findByRegistradoEmBetweenAndForno(inicio, fim, forno);
+
+        if (temperaturas.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Nenhuma temperatura encontrada para o período especificado.");
+        }
+
+        return temperaturas.stream()
+                .map(temperaturaMapper::toTemperaturaDTO)
+                .toList();
     }
 
 }

@@ -74,17 +74,15 @@ public class FornoService {
                         )
                 );
 
-        if(forno.isReivindicado()) {
+        int linhasAfetadas = fornoRepository.reivindicarSeNaoReivindicado(dto.getSerialNumber());
+
+        if (linhasAfetadas == 0) {
             throw new CredencialJaCadastradaException(
                     "Forno já reivindicado"
             );
         }
 
-        if (!forno.isReivindicado()) {
-            forno.setReivindicado(true);
-        }
-        fornoRepository.save(forno);
-
+        forno.setReivindicado(true);
         return toAutoProvisionamentoResponseDTO(forno);
     }
 

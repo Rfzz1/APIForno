@@ -28,14 +28,15 @@
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            fornoCompartilhadoService.enviarConvite(dto.getEmail(), dto.getSerialNumber(), emailLoggedUser);
+            fornoCompartilhadoService.enviarConvite(dto.getEmail(), dto.getFornoId(), emailLoggedUser);
             return ResponseEntity.ok().build();
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @DeleteMapping
         public ResponseEntity<Void> removerConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
-            fornoCompartilhadoService.excluirConvite(dto.getEmail(), dto.getSerialNumber());
+            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+            fornoCompartilhadoService.excluirConvite(dto.getEmail(), emailLoggedUser, dto.getFornoId());
             return ResponseEntity.ok().build();
         }
 
@@ -45,7 +46,7 @@
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.aceitarConvite(emailLoggedUser, dto.getSerialNumber()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.aceitarConvite(emailLoggedUser, dto.getFornoId()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -54,7 +55,7 @@
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.recusarConvite(emailLoggedUser, dto.getSerialNumber()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.recusarConvite(emailLoggedUser, dto.getFornoId()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

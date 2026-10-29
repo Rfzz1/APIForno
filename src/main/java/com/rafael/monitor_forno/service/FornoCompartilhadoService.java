@@ -41,19 +41,19 @@ public class FornoCompartilhadoService {
                 );
     }
 
-    private Forno buscarForno(String serialNumber) {
-        return fornoRepository.findBySerialNumber(serialNumber)
+    private Forno buscarForno(UUID fornoId) {
+        return fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado: " + serialNumber
+                                "Forno não encontrado: " + fornoId
                         )
                 );
     }
 
-    private FornoCompartilhado buscarFornoCompartilhado(String email, String serialNumber) {
+    private FornoCompartilhado buscarFornoCompartilhado(String email, UUID fornoId) {
 
         Usuario usuario = buscarUsuario(email);
-        Forno forno = buscarForno(serialNumber);
+        Forno forno = buscarForno(fornoId);
 
         return fornoCompartilhadoRepository.findByFornoAndUsuario(forno, usuario)
                 .orElseThrow(
@@ -64,10 +64,10 @@ public class FornoCompartilhadoService {
 
     }
 
-    public void enviarConvite(String emailUsuario, String serialNumber, String usuarioLogado) {
+    public void enviarConvite(String emailUsuario, UUID fornoId, String usuarioLogado) {
 
         Usuario usuarioExistente = buscarUsuario(emailUsuario);
-        Forno forno = buscarForno(serialNumber);
+        Forno forno = buscarForno(fornoId);
 
         if (fornoCompartilhadoRepository.findByFornoAndUsuario(forno, usuarioExistente).isPresent()) {
             throw new CredencialJaCadastradaException(
@@ -91,15 +91,26 @@ public class FornoCompartilhadoService {
 
     }
 
-    public void excluirConvite(String emailUsuario, String serialNumber) {
-        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuario, serialNumber);
+    public void excluirConvite(String emailUsuarioConvidado, String emailUsuarioLogado, UUID fornoId) {
+
+        Forno forno = buscarForno(fornoId);
+
+        if (!forno.getUsuario().getEmail().equals(emailUsuarioLogado)) {
+            throw new AcessoNegadoException("Você não tem permissão para excluir convites deste forno");
+        }
+
+        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuarioConvidado, fornoId);
 
         fornoCompartilhadoRepository.delete(fornoCompartilhado);
     }
 
-    public FornoCompartilhadoResponseDTO aceitarConvite(String emailUsuario, String serialNumber) {
+    public FornoCompartilhadoResponseDTO aceitarConvite(String emailUsuario, UUID fornoId) {
 
-        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuario, serialNumber);
+        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuario, fornoId);
+
+        if (!fornoCompartilhado.getStatus().equals(StatusC.PENDENTE)) {
+            throw new AcessoNegadoException("Convite não está pendente e não pode ser aceito");
+        }
 
         fornoCompartilhado.setStatus(StatusC.ACEITO);
         fornoCompartilhadoRepository.save(fornoCompartilhado);
@@ -107,9 +118,13 @@ public class FornoCompartilhadoService {
         return toFornoCompartilhadoDTO(fornoCompartilhado);
     }
 
-    public FornoCompartilhadoResponseDTO recusarConvite(String emailUsuario, String serialNumber) {
+    public FornoCompartilhadoResponseDTO recusarConvite(String emailUsuarioLogado, UUID fornoId) {
 
-        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuario, serialNumber);
+        FornoCompartilhado fornoCompartilhado = buscarFornoCompartilhado(emailUsuarioLogado, fornoId);
+
+        if (!fornoCompartilhado.getStatus().equals(StatusC.PENDENTE)) {
+            throw new AcessoNegadoException("Convite não está pendente e não pode ser recusado");
+        }
 
         fornoCompartilhado.setStatus(StatusC.REJEITADO);
         fornoCompartilhadoRepository.save(fornoCompartilhado);

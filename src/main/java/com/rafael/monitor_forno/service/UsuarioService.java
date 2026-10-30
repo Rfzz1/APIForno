@@ -11,6 +11,7 @@ import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import io.jsonwebtoken.Claims;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
@@ -222,6 +223,7 @@ public class UsuarioService {
         usuario.setCodigoVerificacaoEmail(otp);
         usuario.setExpiracaoCodigoEmail(Instant.now().plus(15, ChronoUnit.MINUTES));
         usuario.setNovoEmailPendente(novoEmail);
+        usuario.setTentativasCodigoEmail(0);
         usuarioRepository.save(usuario);
 
         emailService.enviarEmail(usuario.getNovoEmailPendente(),
@@ -247,7 +249,11 @@ public class UsuarioService {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
-        if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
+        if (usuario.getExpiracaoCodigoEmail() != null || usuario.getCodigoVerificacaoEmail() != null) {
+            throw new CredenciaisInvalidasException("Código expirado ou inválido");
+        }
+
+        if (Instant.now().isAfter(usuario.getExpiracaoCodigoEmail())) {
             throw new CredenciaisInvalidasException("Código de verificação expirado");
         }
 

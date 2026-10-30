@@ -18,8 +18,8 @@ public class FornoSessionRegistry {
         sessoesAtivas.put(serialNumber, session);
     }
 
-    public void remover(String serialNumber) {
-        sessoesAtivas.remove(serialNumber);
+    public void remover(String serialNumber, WebSocketSession session) {
+        sessoesAtivas.remove(serialNumber, session);
     }
 
     public WebSocketSession buscar(String serialNumber) {

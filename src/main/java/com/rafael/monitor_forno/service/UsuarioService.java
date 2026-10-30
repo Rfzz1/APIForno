@@ -1,6 +1,8 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.database.model.RefreshToken;
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.enums.Role;
@@ -28,17 +30,19 @@ public class UsuarioService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -120,7 +124,7 @@ public class UsuarioService {
 
         usuarioExistente.setSenha(passwordEncoder.encode(dto.senhaAtualizada()));
         usuarioExistente.setVersaoUsuario(usuarioExistente.getVersaoUsuario() + 1);
-        usuarioExistente.setRefreshTokens(null); // Invalida todos os refresh tokens existentes
+        refreshTokenRepository.deleteByUsuario(usuarioExistente);
 
         usuarioRepository.save(usuarioExistente);
 
@@ -269,7 +273,7 @@ public class UsuarioService {
         usuario.setCodigoVerificacaoEmail(null);
         usuario.setExpiracaoCodigoEmail(null);
         usuario.setNovoEmailPendente(null);
-        usuario.setRefreshTokens(null);
+        refreshTokenRepository.deleteByUsuario(usuario);
         usuario.setTentativasCodigoEmail(0);
 
         usuarioRepository.save(usuario);
@@ -305,6 +309,7 @@ public class UsuarioService {
         usuario.setEmail(emailAntigo);
         usuario.setEmailAnterior(null);
         usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
+        refreshTokenRepository.deleteByUsuario(usuario);
         usuarioRepository.save(usuario);
 
     }
@@ -327,7 +332,7 @@ public class UsuarioService {
         usuario.setTokenRecuperacaoSenha(null);
         usuario.setExpiracaoToken(null);
         usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
-        usuario.setRefreshTokens(null);
+        refreshTokenRepository.deleteByUsuario(usuario);
 
         usuarioRepository.save(usuario);
     }

@@ -6,15 +6,19 @@ import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.RefreshTokenResponseDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
+import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 @Service
 public class RefreshTokenService {
@@ -41,6 +45,16 @@ public class RefreshTokenService {
                 );
     }
 
+    private String gerarHashSha256(String texto) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(texto.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar hash", e);
+        }
+    }
+
     public RefreshToken cadastrarRefreshToken(String email) {
         Usuario usuario = buscarUsuarioLogado(email);
 
@@ -48,13 +62,19 @@ public class RefreshTokenService {
 
         String refreshTokenUsuario = jwtService.gerarRefreshToken(usuario.getEmail(), "USUARIO", "USUARIO", usuario.getVersaoUsuario());
 
+        String hash = gerarHashSha256(refreshTokenUsuario);
+
         Duration duracaoexpiracao = Duration.ofMillis(expirationRefresh);
         Instant expiracao =  Instant.now().plus(duracaoexpiracao);
 
         refreshToken.setUsuario(usuario);
-        refreshToken.setRefreshToken(refreshTokenUsuario);
+        refreshToken.setRefreshToken(hash);
         refreshToken.setExpiracaoRefreshToken(expiracao);
-        return refreshTokenRepository.save(refreshToken);
+
+        RefreshToken tokenSalvo = refreshTokenRepository.save(refreshToken);
+
+        tokenSalvo.setRefreshToken(refreshTokenUsuario);
+        return tokenSalvo;
 
     }
 
@@ -62,14 +82,17 @@ public class RefreshTokenService {
 
         Claims claims = jwtService.extrairTodasClaims(refreshToken);
 
+        String hashTokenBanco = gerarHashSha256(refreshToken);
+
         if (!"REFRESH".equals(
                 claims.get("tokenTipo", String.class))) {
             throw new AcessoNegadoException("Token inválido para renovação");
         }
 
         String subject = claims.getSubject();
+        Long versaoToken = claims.get("versaoToken", Long.class);
 
-        RefreshToken tokenDoBanco = refreshTokenRepository.findByRefreshToken(refreshToken)
+        RefreshToken tokenDoBanco = refreshTokenRepository.findByRefreshToken(hashTokenBanco)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Refresh token não encontrado"
@@ -84,14 +107,24 @@ public class RefreshTokenService {
             throw new AcessoNegadoException("Usuário não correspondente com a sessão");
         }
 
-        return toRefreshToken(tokenDoBanco);
+        if (!tokenDoBanco.getUsuario().getVersaoUsuario().equals(versaoToken)) {
+            throw new CredenciaisInvalidasException("Refresh Token não corresponde à versão do usuário");
+        }
+
+        refreshTokenRepository.delete(tokenDoBanco);
+
+        RefreshToken novoRefreshToken = cadastrarRefreshToken(subject);
+
+        return toRefreshToken(novoRefreshToken);
 
     }
 
     @Transactional
     public void logout(String refreshToken) {
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        String hash = gerarHashSha256(refreshToken);
+
+        refreshTokenRepository.deleteByRefreshToken(hash);
     }
 
     public RefreshTokenResponseDTO toRefreshToken(RefreshToken refreshToken) {

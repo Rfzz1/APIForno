@@ -9,6 +9,7 @@ import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.FornoSilenciarBuzzerDTO;
 import com.rafael.monitor_forno.dto.TemporizadorWSDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
+import com.rafael.monitor_forno.exception.ServicoIndisponivelException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
 import org.springframework.stereotype.Service;
@@ -35,11 +36,11 @@ public class FornoComandoWsService {
     public void silenciarBuzzer(String serialNumber, String email) {
 
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("Usuario não encontrado")
+                () -> new RecursoNaoEncontradoException("Usuario não encontrado")
         );
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber).orElseThrow(
-                () -> new RuntimeException("Forno não encontrado")
+                () -> new RecursoNaoEncontradoException("Forno não encontrado")
         );
 
         if (forno.getUsuario() == null || !forno.getUsuario().equals(usuario)) {
@@ -64,7 +65,7 @@ public class FornoComandoWsService {
             forno.setMuted(true);
             fornoRepository.save(forno);
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar comando para o forno", e);
+            throw new ServicoIndisponivelException("Falha ao enviar comando para o forno", e);
         }
     }
 

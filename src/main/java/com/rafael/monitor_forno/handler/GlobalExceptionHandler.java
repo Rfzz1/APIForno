@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class    GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ResponseEntity<String> handleRecursoNaoEncontrado(RecursoNaoEncontradoException ex) {
@@ -25,6 +25,11 @@ public class    GlobalExceptionHandler {
 
     @ExceptionHandler(RecursoEmFormatoInvalido.class)
     public ResponseEntity<String> handleRecursoEmFormatoInvalido(RecursoEmFormatoInvalido ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(SenhaHashEmFormatoInvalido.class)
+    public ResponseEntity<String> handleSenhaHashEmFormatoInvalido(SenhaHashEmFormatoInvalido ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
     }
 
@@ -43,8 +48,8 @@ public class    GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
-    @ExceptionHandler(FornoDesconectadoException.class)
-    public ResponseEntity<String> handleFornoDesconectado(FornoDesconectadoException ex) {
+    @ExceptionHandler(ServicoIndisponivelException.class)
+    public ResponseEntity<String> handleFornoDesconectado(ServicoIndisponivelException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
     }
 

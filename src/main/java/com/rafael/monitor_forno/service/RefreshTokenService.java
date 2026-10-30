@@ -8,6 +8,7 @@ import com.rafael.monitor_forno.dto.RefreshTokenResponseDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import com.rafael.monitor_forno.exception.SenhaHashEmFormatoInvalido;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +52,7 @@ public class RefreshTokenService {
             byte[] hash = digest.digest(texto.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao gerar hash", e);
+            throw new SenhaHashEmFormatoInvalido("Erro ao gerar hash", e);
         }
     }
 

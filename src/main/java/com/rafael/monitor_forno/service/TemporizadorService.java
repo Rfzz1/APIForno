@@ -10,6 +10,7 @@ import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
+import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cglib.core.Local;
@@ -83,7 +84,7 @@ public class TemporizadorService {
         }
 
         if (dto.getHorarioFim().toInstant().isBefore(Instant.now()) || dto.getHorarioInicio().toInstant().isBefore(Instant.now().minus(1, ChronoUnit.MINUTES)) || dto.getHorarioFim().toInstant().isBefore(dto.getHorarioInicio().toInstant())) {
-            throw new IllegalArgumentException(
+            throw new RecursoEmFormatoInvalido(
                     "O horário deve estar no futuro"
             );
         }
@@ -203,7 +204,7 @@ public class TemporizadorService {
                 );
 
         if (dto.getHorarioFim().toInstant().isBefore(Instant.now())) {
-            throw new IllegalArgumentException(
+            throw new RecursoEmFormatoInvalido(
                     "O horário deve estar no futuro"
             );
         }

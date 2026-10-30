@@ -204,7 +204,7 @@ public class SessaoService {
 
     }
 
-    public List<SessaoResumoDTO> findAllSessoesByUsuarioAndInicioSessaoBetween(String email, LocalDateTime dataInicio, LocalDateTime dataFim) {
+    public List<SessaoResumoDTO>    findAllSessoesByUsuarioAndInicioSessaoBetween(String email, Instant dataInicio, Instant dataFim) {
         Usuario usuario = buscarUsuarioLogado(email);
 
         if (dataInicio == null || dataFim == null) {

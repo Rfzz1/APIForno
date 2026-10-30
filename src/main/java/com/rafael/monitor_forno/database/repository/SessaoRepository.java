@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
+public interface    SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     Optional<Sessao> findByIdAndForno(UUID id, Forno forno);
 
@@ -26,7 +27,7 @@ public interface SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     List<Sessao> findAllByFornoIdAndFornoUsuarioEmail(UUID id, String email);
 
-    List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, LocalDateTime dataInicio, LocalDateTime dataFim);
+    List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, Instant dataInicio, Instant dataFim);
 
     int countByFornoId(UUID fornoId);
 

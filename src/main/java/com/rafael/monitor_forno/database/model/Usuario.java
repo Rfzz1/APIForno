@@ -53,6 +53,7 @@ public class Usuario {
     private String codigoVerificacaoEmail;
     private Instant expiracaoCodigoEmail;
     private String novoEmailPendente;
+    private Integer tentativasCodigoEmail = 0;
 
     @OneToOne(fetch = FetchType.LAZY)
     private FotoPerfil fotoPerfil;

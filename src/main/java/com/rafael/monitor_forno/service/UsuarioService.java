@@ -243,52 +243,50 @@ public class UsuarioService {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
-        boolean acertou = false;
-
-        for (int tentativa = 1; tentativa < 3; tentativa++) {
-
-            if (!Objects.equals(usuario.getCodigoVerificacaoEmail(), codigo)) {
-                throw new CredenciaisInvalidasException("Código de verificação inválido");
-            } else {
-                acertou = true;
-                break;
-            }
-
+        if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
+            throw new CredenciaisInvalidasException("Código de verificação expirado");
         }
 
-        if (acertou) {
+        if (!Objects.equals(usuario.getCodigoVerificacaoEmail(), codigo)) {
 
-            if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
-                throw new CredenciaisInvalidasException("Código de verificação expirado");
+            int totalTentativas = usuario.getTentativasCodigoEmail() + 1;
+            usuario.setTentativasCodigoEmail(totalTentativas);
+
+            if (totalTentativas >= 3) {
+                usuario.setCodigoVerificacaoEmail(null);
+                usuarioRepository.save(usuario);
+                throw new AcessoNegadoException("Limite de tentativas excedido!");
             }
-
-            String novoEmail = usuario.getNovoEmailPendente();
-
-            usuario.setEmailAnterior(emailAtual);
-            usuario.setEmail(novoEmail);
-            usuario.setCodigoVerificacaoEmail(null);
-            usuario.setExpiracaoCodigoEmail(null);
-            usuario.setNovoEmailPendente(null);
-            usuario.setRefreshTokens(null);
 
             usuarioRepository.save(usuario);
-            String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
-            String link = baseUrl + "/reverter-email?token=" + token;
-
-            emailService.enviarEmail(usuario.getEmailAnterior(),
-                    "E-mail alterado com sucesso",
-                    """
-                            Olá, %s!<br><br>
-                            
-                            O seu e-mail foi alterado para <b>%s<b>.<br><br>
-                            
-                            Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
-                            %s
-                            """.formatted(usuario.getNome(), novoEmail, link)
-            );
-        } else {
-            throw new AcessoNegadoException("Número máximo de tentativas excedido");
+            throw new CredenciaisInvalidasException("Código de verificação inválido");
         }
+
+        String novoEmail = usuario.getNovoEmailPendente();
+
+        usuario.setEmailAnterior(emailAtual);
+        usuario.setEmail(novoEmail);
+        usuario.setCodigoVerificacaoEmail(null);
+        usuario.setExpiracaoCodigoEmail(null);
+        usuario.setNovoEmailPendente(null);
+        usuario.setRefreshTokens(null);
+        usuario.setTentativasCodigoEmail(0);
+
+        usuarioRepository.save(usuario);
+        String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
+        String link = baseUrl + "/reverter-email?token=" + token;
+
+        emailService.enviarEmail(usuario.getEmailAnterior(),
+                "E-mail alterado com sucesso",
+                """
+                        Olá, %s!<br><br>
+                        
+                        O seu e-mail foi alterado para <b>%s<b>.<br><br>
+                        
+                        Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
+                        %s
+                        """.formatted(usuario.getNome(), novoEmail, link)
+        );
 
     }
 

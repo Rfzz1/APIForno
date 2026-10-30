@@ -75,7 +75,7 @@ public class EventoController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping
+    @GetMapping("/fornos/{fornoId}/ultimos-tres")
     public ResponseEntity<List<EventoResponseDTO>> getUltimosTresEventosByFornoId(@PathVariable UUID fornoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 

@@ -74,4 +74,12 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.findAllByFornoUsuario(email));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<EventoResponseDTO>> getUltimosTresEventosByFornoId(@PathVariable UUID fornoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(eventoService.findLastThreeByFornoAndUsuario(fornoId, email));
+    }
+
 }

@@ -115,6 +115,18 @@ public class EventoService {
 
     }
 
+    public List<EventoResponseDTO> findLastThreeByFornoAndUsuario(UUID fornoId, String email) {
+
+        if (!fornoRepository.existsById(fornoId)) {
+            throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
+        }
+
+        return eventoRepository.findTopThreeByFornoIdAndFornoUsuarioEmailOrderByCriadoEmDesc(fornoId, email)
+                .stream()
+                .map(eventoMapper::toEventoDTO)
+                .toList();
+    }
+
 
     public EventoResponseDTO findById(UUID id, String email) {
 

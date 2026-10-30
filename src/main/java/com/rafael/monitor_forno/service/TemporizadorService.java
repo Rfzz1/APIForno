@@ -24,8 +24,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 @EnableScheduling
 @Service
@@ -36,6 +41,8 @@ public class TemporizadorService {
     private final FornoRepository fornoRepository;
     private final FornoComandoWsService fornoComandoWsService;
     private final TaskScheduler  taskScheduler;
+
+    private final Map<UUID, ScheduledFuture<?>> proximosTemporizadores = new ConcurrentHashMap<>();
 
     public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository,FornoComandoWsService fornoComandoWsService, TaskScheduler taskScheduler) {
         this.temporizadorRepository = temporizadorRepository;
@@ -91,7 +98,7 @@ public class TemporizadorService {
 
         Instant horarioFim = dto.getHorarioFim().toInstant();
 
-        taskScheduler.schedule(
+        ScheduledFuture<?> future = taskScheduler.schedule(
                 () -> {
                     try {
                         temporizador.setExecutado(true);
@@ -103,6 +110,8 @@ public class TemporizadorService {
                 },
                 horarioFim
         );
+
+        proximosTemporizadores.put(temporizador.getId(), future);
 
     }
 
@@ -119,7 +128,7 @@ public class TemporizadorService {
             Instant agora = Instant.now();
 
             if (agora.isBefore(temporizador.getHorarioFim())) {
-                taskScheduler.schedule(
+                ScheduledFuture<?> future = taskScheduler.schedule(
                         () -> {
                             try {
                                 temporizador.setExecutado(true);
@@ -131,9 +140,13 @@ public class TemporizadorService {
                         },
                         horarioFim
                 );
+
+                proximosTemporizadores.put(temporizador.getId(), future);
+
             } else {
                 temporizador.setExecutado(true);
                 temporizadorRepository.save(temporizador);
+                temporizadorRepository.delete(temporizador);
             }
         }
     }
@@ -197,6 +210,32 @@ public class TemporizadorService {
 
         temporizadorExistente.setHorarioFim(dto.getHorarioFim().toInstant());
 
+        Instant horarioFim = temporizadorExistente.getHorarioFim();
+        UUID temporizadorId = temporizadorExistente.getId();
+
+        ScheduledFuture<?> temporizadorPendente = proximosTemporizadores.remove(temporizadorExistente.getId());
+        if (temporizadorPendente != null) {
+            temporizadorPendente.cancel(true);
+        }
+
+        ScheduledFuture<?> future = taskScheduler.schedule(
+
+                () -> {
+                    try {
+                        temporizadorRepository.findById(temporizadorId).ifPresent(temporizador -> {
+                            temporizador.setExecutado(true);
+                            temporizadorRepository.save(temporizador);
+                            fornoComandoWsService.dispararBuzzer(temporizador.getForno().getSerialNumber(), temporizador);
+                        });
+                    } catch (RecursoNaoEncontradoException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                },
+                horarioFim
+        );
+
+        proximosTemporizadores.put(temporizadorExistente.getId(), future);
+
         return toResponseDTO(temporizadorRepository.save(temporizadorExistente));
     }
 
@@ -229,6 +268,11 @@ public class TemporizadorService {
                                 "Temporizador não pertence ao usuário logado "
                         )
                 );
+
+        ScheduledFuture<?> tarefaPendente = proximosTemporizadores.remove(temporizador.getId());
+        if (tarefaPendente != null) {
+            tarefaPendente.cancel(true);
+        }
 
         temporizadorRepository.delete(temporizador);
     }

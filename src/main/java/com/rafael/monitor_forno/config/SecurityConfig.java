@@ -2,6 +2,7 @@ package com.rafael.monitor_forno.config;
 
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -52,6 +53,13 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token ausente, inválido ou expirado");
+                    })
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error", "/ws/**","/auth/logout", "/auth/renovar-refresh-token", "/auth/reverter-email").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha", "/fornos/auto-provisionar").permitAll()

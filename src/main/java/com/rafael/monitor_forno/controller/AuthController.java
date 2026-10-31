@@ -1,16 +1,13 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.database.model.RefreshToken;
-import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
+
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.RefreshTokenService;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")

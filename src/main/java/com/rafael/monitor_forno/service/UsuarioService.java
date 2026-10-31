@@ -1,6 +1,5 @@
 package com.rafael.monitor_forno.service;
 
-import com.rafael.monitor_forno.database.model.RefreshToken;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
@@ -11,11 +10,11 @@ import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import io.jsonwebtoken.Claims;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,6 +54,7 @@ public class UsuarioService {
                 );
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void cadastrarUsuario(UserRequestDTO dto) {
 
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -113,6 +113,7 @@ public class UsuarioService {
         return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
     }
 
+    @Transactional
     public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
 
         Usuario usuarioExistente = buscarUsuarioLogado(email);
@@ -171,6 +172,7 @@ public class UsuarioService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void gerarTokenRecuperacao(String email) {
 
         usuarioRepository.findByEmail(email)
@@ -204,6 +206,7 @@ public class UsuarioService {
                 });
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void enviarCodigoRedefinirEmail(String emailAtual, String senhaAtual, String novoEmail) {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
@@ -245,6 +248,7 @@ public class UsuarioService {
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void verificarCodigoRedefinirEmail(String emailAtual, String codigo) {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
@@ -300,6 +304,7 @@ public class UsuarioService {
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void reverterEmail(ReversaoEmailDTO dto) {
 
         Claims claims = jwtService.extrairTodasClaims(dto.getToken());
@@ -319,7 +324,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
     }
-
+    @Transactional(rollbackFor = Exception.class)
     public void redefinirSenha(NovaSenhaDTO dto) {
         Usuario usuario = usuarioRepository.findByTokenRecuperacaoSenha(dto.token())
                 .orElseThrow(

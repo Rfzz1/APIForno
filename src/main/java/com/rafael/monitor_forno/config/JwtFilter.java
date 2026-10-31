@@ -55,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (!"ACCESS".equals(tokenTipo)) {
                 filterChain.doFilter(request, response);
-                throw new CredenciaisInvalidasException("Token inválido: tipo de token não é ACCESS");
+                return;
             }
 
             String subject = claims.getSubject();

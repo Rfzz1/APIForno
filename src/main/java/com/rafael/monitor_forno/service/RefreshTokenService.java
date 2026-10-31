@@ -91,7 +91,7 @@ public class RefreshTokenService {
         }
 
         String subject = claims.getSubject();
-        Long versaoToken = claims.get("versaoToken", Long.class);
+        Long versaoToken = claims.get("versao", Long.class);
 
         RefreshToken tokenDoBanco = refreshTokenRepository.findByRefreshToken(hashTokenBanco)
                 .orElseThrow(

@@ -12,9 +12,15 @@ import com.rafael.monitor_forno.database.repository.NotificacaoRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.NotificacaoRequestDTO;
 import com.rafael.monitor_forno.enums.Role;
+import com.rafael.monitor_forno.enums.notificacao.StatusN;
+import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class NotificacaoService {
@@ -44,13 +50,14 @@ public class NotificacaoService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum usuário encontrado"));
 
-        if (fornoUsuario == usuario) {
+        if (fornoUsuario.getId().equals(usuario.getId())) {
             // Lógica para enviar notificação
 
             Notificacao notificacao = new Notificacao();
             notificacao.setForno(forno);
             notificacao.setMensagem(dto.getMensagem());
             notificacao.setHoraEnvio(dto.getHoraEnvio().toInstant());
+            notificacao.setStatusN(StatusN.PENDENTE);
 
             if (Role.ADMIN == usuario.getRole()) {
                 notificacao.setNomeApp(appDevName);
@@ -58,22 +65,36 @@ public class NotificacaoService {
                 notificacao.setNomeApp(appComumName);
             }
 
-            notificacao.setLogoBase64(dto.getLogoBase64());
+            notificacao.setLogoUrl(dto.getLogoUrl());
 
             notificacaoRepository.save(notificacao);
 
+        } else {
+            throw new AcessoNegadoException("Você não possui acesso a esse forno");
+        }
+    }
+
+    @Scheduled(fixedRate = 60000) // Executa a cada minuto
+    public void verificarNotificacaoPendente() throws FirebaseMessagingException {
+
+        Instant agora = Instant.now();
+        List<Notificacao> notificacoesPendentes = notificacaoRepository.findNotificacaoPendente(agora);
+
+        for (Notificacao notificacao : notificacoesPendentes) {
             Notification notification = Notification.builder()
-                    .setTitle(notificacao.getNomeApp())
-                    .setBody(notificacao.getMensagem())
-                    .setImage(notificacao.getLogoBase64())
-                    .build();
+                .setTitle(notificacao.getNomeApp())
+                .setBody(notificacao.getMensagem())
+                .setImage(notificacao.getLogoUrl())
+                .build();
 
-            Message mensagem = Message.builder().setNotification(notification).setTopic(forno.getSerialNumber()).build();
-
+            Message mensagem = Message.builder().setNotification(notification).setTopic(notificacao.getForno().getSerialNumber()).build();
             FirebaseMessaging fmt = FirebaseMessaging.getInstance();
             fmt.send(mensagem);
 
+            notificacao.setStatusN(StatusN.ENVIADO);
+            notificacaoRepository.save(notificacao);
         }
+
     }
 
 }

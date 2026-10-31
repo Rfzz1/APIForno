@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.database.model;
 
+import com.rafael.monitor_forno.enums.notificacao.StatusN;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ public class Notificacao {
     private UUID id;
 
     @Column(columnDefinition = "TEXT")
-    private String logoBase64;
+    private String logoUrl;
 
     @Column(nullable = false)
     private String mensagem;
@@ -28,6 +29,10 @@ public class Notificacao {
 
     @Column(nullable = false)
     private Instant horaEnvio;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusN statusN;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "forno_id")

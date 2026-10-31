@@ -15,7 +15,7 @@ public class NotificacaoResponseDTO {
 
     private Instant horaEnvio;
     private String mensagem;
-    private String logoBase64;
+    private String logoUrl;
     private String nomeApp;
     private UUID fornoId;
 

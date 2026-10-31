@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.dto;
 
+import com.rafael.monitor_forno.enums.notificacao.StatusN;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -24,7 +25,7 @@ public class NotificacaoRequestDTO {
     private String mensagem;
 
     @NotBlank(message = "Imagem é obrigatória")
-    private String logoBase64;
+    private String logoUrl;
 
     private UUID fornoId;
 

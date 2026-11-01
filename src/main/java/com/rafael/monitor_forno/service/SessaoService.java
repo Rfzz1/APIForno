@@ -183,7 +183,7 @@ public class SessaoService {
         Usuario usuarioFornoSessao = sessao.getForno().getUsuario();
 
         if (!usuarioFornoSessao.getEmail().equals(email)) {
-            throw new AcessoNegadoException("O forno não pertence a esse usuário");
+            throw new AcessoNegadoException("A sessao não pertence ao usuário logado");
         }
 
         sessaoRepository.delete(sessao);

@@ -44,9 +44,9 @@ public class Sessao {
     @JoinColumn(name = "forno_id")
     private Forno forno;
 
-    @OneToMany(mappedBy = "sessao")
+    @OneToMany(mappedBy = "sessao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Evento> eventos;
 
-    @OneToMany(mappedBy = "sessao")
+    @OneToMany(mappedBy = "sessao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Temperatura> temperaturas;
 }

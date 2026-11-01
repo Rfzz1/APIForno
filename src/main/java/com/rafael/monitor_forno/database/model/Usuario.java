@@ -43,11 +43,6 @@ public class Usuario {
     private String tokenRecuperacaoSenha;
 
     private Instant expiracaoToken;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
     private Long versaoUsuario;
     private String emailAnterior;
     private String codigoVerificacaoEmail;
@@ -55,10 +50,23 @@ public class Usuario {
     private String novoEmailPendente;
     private Integer tentativasCodigoEmail = 0;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private FotoPerfil fotoPerfil;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Forno> fornos;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Suporte> suportes;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<RefreshToken> refreshTokens;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.REMOVE)
+    private java.util.List<FornoCompartilhado> fornosCompartilhados;
 
 }

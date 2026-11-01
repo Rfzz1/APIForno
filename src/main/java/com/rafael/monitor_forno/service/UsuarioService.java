@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.MensagemSuporteRepository;
 import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
@@ -32,17 +33,19 @@ public class UsuarioService {
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final MensagemSuporteRepository mensagemSuporteRepository;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository, MensagemSuporteRepository mensagemSuporteRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.mensagemSuporteRepository = mensagemSuporteRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -134,6 +137,9 @@ public class UsuarioService {
 
     public void deleteByEmail(String email) {
         Usuario usuario = buscarUsuarioLogado(email);
+
+        mensagemSuporteRepository.anularRemetentePorUsuarioId(usuario.getId());
+
         usuarioRepository.delete(usuario);
     }
 

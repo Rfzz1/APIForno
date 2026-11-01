@@ -85,7 +85,7 @@ public class TemperaturaService {
         Temperatura temperatura = temperaturaRepository.findByIdAndSessaoFornoId(id, fornoId)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
-                                "Temperatura não pertence ao forno"
+                                "Temperatura não encontrada ou não pertence ao forno: " + id
                         )
                 );
 

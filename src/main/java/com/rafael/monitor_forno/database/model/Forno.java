@@ -39,4 +39,20 @@ public class Forno {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "forno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Sessao> sessoes;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "forno", cascade = CascadeType.REMOVE)
+    private java.util.List<FornoCompartilhado> fornosCompartilhados;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "forno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Notificacao> notificacoes;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "forno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Telemetria> telemetrias;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "forno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Temporizador> temporizadores;
+
 }

@@ -53,6 +53,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+        String mensagem;
+
+        if(ex.getMessage() != null && ex.getMessage().contains("constraint [uk_usuario_cpf]")) {
+            mensagem = "CPF já cadastrado";
+        } else if (ex.getMessage() != null && ex.getMessage().contains("constraint [usuarios_email_key]")) {
+            mensagem = "Email já cadastrado";
+        } else {
+            mensagem = "Violação de integridade de dados";
+        }
+
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(mensagem);
+    }
+
     //Validação de Beans das credenciais
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidacao(

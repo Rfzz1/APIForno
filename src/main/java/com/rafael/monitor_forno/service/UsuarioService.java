@@ -66,12 +66,21 @@ public class UsuarioService {
             );
         }
 
+        if (dto.getCpf() != null && usuarioRepository.findByCpf(dto.getCpf()).isPresent()) {
+            throw new CredencialJaCadastradaException(
+                    "CPF já cadastrado"
+            );
+        }
+
+        String cpfSemMascara = dto.getCpf().replaceAll("[^\\d]", "");
+        String emailNormalizado = dto.getEmail().trim().toLowerCase();
+
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
+        usuario.setEmail(emailNormalizado);
         usuario.setNascimento(dto.getNascimento());
         usuario.setRole(Role.USER);
-        usuario.setCpf(dto.getCpf());
+        usuario.setCpf(cpfSemMascara);
         usuario.setVersaoUsuario(1L);
 
         String senhaHash = passwordEncoder.encode(dto.getSenha());
@@ -122,7 +131,7 @@ public class UsuarioService {
         Usuario usuarioExistente = buscarUsuarioLogado(email);
 
         if (!passwordEncoder.matches(dto.senhaAtual(), usuarioExistente.getSenha())) {
-            throw new RecursoNaoEncontradoException(
+            throw new AcessoNegadoException(
                     "Senha atual incorreta"
             );
         }
@@ -155,7 +164,7 @@ public class UsuarioService {
         Usuario usuario = buscarUsuarioLogado(email);
 
         if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-            throw new CredenciaisInvalidasException(
+            throw new AcessoNegadoException(
                     "Email ou senha inválidos"
             );
         }
@@ -218,7 +227,7 @@ public class UsuarioService {
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
         if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
-            throw new CredenciaisInvalidasException(
+            throw new AcessoNegadoException(
                     "Email ou senha inválidos"
             );
         }

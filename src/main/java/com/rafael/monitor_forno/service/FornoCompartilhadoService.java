@@ -75,6 +75,12 @@ public class FornoCompartilhadoService {
             );
         }
 
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException(
+                    "Este forno não possui um usuário associado."
+            );
+        }
+
         if (!forno.getUsuario().getEmail().equals(usuarioLogado)) {
             throw new AcessoNegadoException(
                     "Você não tem permissão para enviar convites para este forno"
@@ -94,6 +100,10 @@ public class FornoCompartilhadoService {
     public void excluirConvite(String emailUsuarioConvidado, String emailUsuarioLogado, UUID fornoId) {
 
         Forno forno = buscarForno(fornoId);
+
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException("Este forno não possui um usuário associado.");
+        }
 
         if (!forno.getUsuario().getEmail().equals(emailUsuarioLogado)) {
             throw new AcessoNegadoException("Você não tem permissão para excluir convites deste forno");

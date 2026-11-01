@@ -4,6 +4,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,8 +28,7 @@ public class EventoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
-    public ResponseEntity<Void> registrarEvento(
-            @RequestBody EventoRequestDTO dto) throws FirebaseMessagingException {
+    public ResponseEntity<Void> registrarEvento(@Valid @RequestBody EventoRequestDTO dto) throws FirebaseMessagingException {
 
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 

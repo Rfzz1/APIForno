@@ -137,11 +137,11 @@ public class TelemetriaService {
         long tempoTotalLigado = Optional.ofNullable(sessaoRepository.findTempoTotalLigadoByFornoId(forno.getId())).orElse(0L);
         Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoId(forno.getId())).orElse(0.0);
 
-        long alertas = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ALERTA_ENTRADA, EventoSistema.ALERTA_SAIDA));
+        long alertas = eventoRepository.countEventosBySessaoFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ALERTA_ENTRADA, EventoSistema.ALERTA_SAIDA));
 
-        long criticos = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.CRITICO_ENTRADA, EventoSistema.CRITICO_SAIDA));
+        long criticos = eventoRepository.countEventosBySessaoFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.CRITICO_ENTRADA, EventoSistema.CRITICO_SAIDA));
 
-        long erros = eventoRepository.countEventosByFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ERRO_SENSOR_ENTRADA, EventoSistema.ERRO_SENSOR_SAIDA));
+        long erros = eventoRepository.countEventosBySessaoFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ERRO_SENSOR_ENTRADA, EventoSistema.ERRO_SENSOR_SAIDA));
 
         return EstatisticasDTO.builder()
                 .tempoTotalLigado(tempoTotalLigado)
@@ -158,6 +158,10 @@ public class TelemetriaService {
 
         Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Forno não encontrado"));
+
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException("Este forno não possui um usuário associado.");
+        }
 
         if (!forno.getUsuario().getId().equals(usuario.getId())) {
             throw new AcessoNegadoException("Este forno não pertence ao usuário logado.");

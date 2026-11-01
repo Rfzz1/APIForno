@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.service.TemporizadorService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +30,7 @@ public class TemporizadorController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/forno/{fornoId}")
-    public ResponseEntity<Void> criarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId) {
+    public ResponseEntity<Void> criarTemporizador(@Valid @RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -47,7 +48,7 @@ public class TemporizadorController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<TemporizadorResponseDTO> editarTemporizador(@RequestBody TemporizadorRequestDTO dto, @PathVariable UUID id, Authentication authentication) {
+    public ResponseEntity<TemporizadorResponseDTO> editarTemporizador(@Valid @RequestBody TemporizadorRequestDTO dto, @PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(temporizadorService.atualizarTemporizador(dto, id, authentication.getName()));
     }
 

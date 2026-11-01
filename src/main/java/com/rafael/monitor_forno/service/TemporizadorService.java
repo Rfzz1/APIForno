@@ -67,6 +67,12 @@ public class TemporizadorService {
                         )
                 );
 
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException(
+                    "Este forno não possui um usuário associado."
+            );
+        }
+
         if (!forno.getUsuario().getEmail().equals(email)) {
             throw new AcessoNegadoException(
                     "Temporizador não pertence ao usuário logado"

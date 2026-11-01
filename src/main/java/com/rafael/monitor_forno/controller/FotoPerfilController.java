@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.controller;
 import com.rafael.monitor_forno.dto.FotoPerfilRequestDTO;
 import com.rafael.monitor_forno.dto.FotoPerfilResponseDTO;
 import com.rafael.monitor_forno.service.FotoPerfilService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,7 @@ public class FotoPerfilController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/set-img")
-    public ResponseEntity<FotoPerfilResponseDTO> setProfileImage(@RequestBody FotoPerfilRequestDTO dto) {
+    public ResponseEntity<FotoPerfilResponseDTO> setProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -34,7 +35,7 @@ public class FotoPerfilController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/update-img")
-    public ResponseEntity<FotoPerfilResponseDTO> updateProfileImage(@RequestBody FotoPerfilRequestDTO dto) {
+    public ResponseEntity<FotoPerfilResponseDTO> updateProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         FotoPerfilResponseDTO responseDTO = fotoPerfilService.changeProfileImage(dto, email);

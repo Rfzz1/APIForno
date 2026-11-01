@@ -47,6 +47,10 @@ public class NotificacaoService {
         Forno forno = fornoRepository.findById(dto.getFornoId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum forno encontrado"));
 
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException("Este forno não possui um usuário associado.");
+        }
+
         Usuario fornoUsuario = forno.getUsuario();
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum usuário encontrado"));
@@ -106,6 +110,10 @@ public class NotificacaoService {
         notificacao.setMensagem(mensagem);
         notificacao.setHoraEnvio(Instant.now());
         notificacao.setStatusN(StatusN.ENVIADO);
+
+        if (forno.getUsuario() == null) {
+            throw new AcessoNegadoException("Este forno não possui um usuário associado.");
+        }
 
         if (Role.ADMIN == forno.getUsuario().getRole()) {
             notificacao.setNomeApp(appDevName);

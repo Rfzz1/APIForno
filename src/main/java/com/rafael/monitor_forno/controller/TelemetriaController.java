@@ -5,6 +5,7 @@ import com.rafael.monitor_forno.dto.EstatisticasDTO;
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
 import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
 import com.rafael.monitor_forno.service.TelemetriaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +29,7 @@ public class TelemetriaController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
-    public ResponseEntity<Void> registrarTelemetria(@RequestBody TelemetriaRequestDTO dto) {
+    public ResponseEntity<Void> registrarTelemetria(@Valid @RequestBody TelemetriaRequestDTO dto) {
 
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 

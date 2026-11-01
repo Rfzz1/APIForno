@@ -24,8 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(
-            @RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
 
         LoginResponseDTO response = usuarioService.login(dto.getEmail(), dto.getSenha());
 
@@ -46,9 +45,7 @@ public class AuthController {
     }
 
     @PostMapping("/esqueci-minha-senha")
-    public ResponseEntity<String> esqueciSenha(
-            @RequestBody UserRequestDTO dto
-            ) {
+    public ResponseEntity<String> esqueciSenha(@Valid @RequestBody UserRequestDTO dto) {
         usuarioService.gerarTokenRecuperacao(dto.getEmail());
 
         return ResponseEntity.ok("Se o e-mail existir, enviaremos instruções para recuperação.");
@@ -70,14 +67,14 @@ public class AuthController {
     }
 
     @PostMapping("/verificar-codigo-redefinir-email")
-    public ResponseEntity<String> verificarCodigoRedefinirEmail(@RequestBody ConfirmarTrocaEmailDTO dto, java.security.Principal principal) {
+    public ResponseEntity<String> verificarCodigoRedefinirEmail(@Valid @RequestBody ConfirmarTrocaEmailDTO dto, java.security.Principal principal) {
         String emailAtual = principal.getName();
         usuarioService.verificarCodigoRedefinirEmail(emailAtual, dto.codigo());
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
 
     @PutMapping("/reverter-email")
-    public ResponseEntity<Void> reverterMudancaEmail(@RequestBody ReversaoEmailDTO dto) {
+    public ResponseEntity<Void> reverterMudancaEmail(@Valid @RequestBody ReversaoEmailDTO dto) {
 
         usuarioService.reverterEmail(dto);
         return ResponseEntity.ok().build();

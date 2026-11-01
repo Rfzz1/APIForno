@@ -28,10 +28,10 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
     @Query("""
     SELECT COUNT(e)
     FROM Evento e
-    WHERE e.forno.id = :fornoId
+    WHERE e.sessao.forno.id = :fornoId
         AND e.tipo IN :tipos
     """)
-    Long countEventosByFornoIdAndTipoIn(UUID fornoId, List<EventoSistema> tipos);
+    Long countEventosBySessaoFornoIdAndTipoIn(UUID fornoId, List<EventoSistema> tipos);
 
     void deleteAllBySessaoFornoId(UUID fornoId);
 

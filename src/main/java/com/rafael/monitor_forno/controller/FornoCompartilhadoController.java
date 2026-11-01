@@ -4,6 +4,7 @@
     import com.rafael.monitor_forno.dto.FornoCompartilhadoResponseDTO;
     import com.rafael.monitor_forno.enums.compartilhamento.StatusC;
     import com.rafael.monitor_forno.service.FornoCompartilhadoService;
+    import jakarta.validation.Valid;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +25,7 @@
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @PostMapping
-        public ResponseEntity<Void> enviarConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<Void> enviarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -34,7 +35,7 @@
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @DeleteMapping
-        public ResponseEntity<Void> removerConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<Void> removerConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
             fornoCompartilhadoService.excluirConvite(dto.getEmail(), emailLoggedUser, dto.getFornoId());
             return ResponseEntity.ok().build();
@@ -42,7 +43,7 @@
 
         @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
         @PutMapping("/aceitar")
-        public ResponseEntity<FornoCompartilhadoResponseDTO> aceitarConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<FornoCompartilhadoResponseDTO> aceitarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -51,7 +52,7 @@
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @PutMapping("/recusar")
-        public ResponseEntity<FornoCompartilhadoResponseDTO> recusarConvite (@RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<FornoCompartilhadoResponseDTO> recusarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
 
             String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
 

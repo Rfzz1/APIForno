@@ -254,12 +254,12 @@ public class UsuarioService {
 
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = {RecursoNaoEncontradoException.class, CredenciaisInvalidasException.class, AcessoNegadoException.class})
     public void verificarCodigoRedefinirEmail(String emailAtual, String codigo) {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
-        if (usuario.getExpiracaoCodigoEmail() != null || usuario.getCodigoVerificacaoEmail() != null) {
+        if (usuario.getExpiracaoCodigoEmail() == null || usuario.getCodigoVerificacaoEmail() == null) {
             throw new CredenciaisInvalidasException("Código expirado ou inválido");
         }
 
@@ -274,6 +274,8 @@ public class UsuarioService {
 
             if (totalTentativas >= 3) {
                 usuario.setCodigoVerificacaoEmail(null);
+                usuario.setExpiracaoCodigoEmail(null);
+                usuario.setNovoEmailPendente(null);
                 usuarioRepository.save(usuario);
                 throw new AcessoNegadoException("Limite de tentativas excedido!");
             }
@@ -323,6 +325,10 @@ public class UsuarioService {
                                 )
                         );
 
+        if (usuario.getVersaoUsuario() == null) {
+            throw new CredenciaisInvalidasException("Token inválido");
+        }
+
         usuario.setEmail(emailAntigo);
         usuario.setEmailAnterior(null);
         usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
@@ -345,6 +351,10 @@ public class UsuarioService {
 
         String senhaHash = passwordEncoder.encode(dto.novaSenha());
         usuario.setSenha(senhaHash);
+
+        if (usuario.getVersaoUsuario() == null) {
+            throw new CredenciaisInvalidasException("Token inválido");
+        }
 
         usuario.setTokenRecuperacaoSenha(null);
         usuario.setExpiracaoToken(null);

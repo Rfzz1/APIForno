@@ -23,6 +23,8 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
 
     List<Evento> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
 
+    List<Evento> findTopThreeByFornoIdAndFornoUsuarioEmailOrderByCriadoEmDesc(UUID fornoId, String email);
+
     @Query("""
     SELECT COUNT(e)
     FROM Evento e

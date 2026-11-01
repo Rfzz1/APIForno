@@ -51,6 +51,10 @@ app:
   base-url: ${APP_BASE_URL:https://monitoramentoforno.com.br}
   nome-app-dev: "MONITORAMENTO FORNO - DEV"
   nome-app-comum: "MONITORAMENTO FORNO"
+  notificacao:
+    icone:
+      critico: ${URL_ICONE_CRITICO:http://localhost:8080/icone-critico.png}
+      alerta: ${URL_ICONE_ALERTA:http://localhost:8080/icone-alerta.png}
 
 firebase:
   caminho: ${FIREBASE_CAMINHO}

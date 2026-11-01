@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.rafael.monitor_forno.database.model.Evento;
 import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
@@ -14,12 +15,16 @@ import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import com.rafael.monitor_forno.mappers.EventoMapper;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static com.rafael.monitor_forno.enums.eventos.EventoSistema.ALERTA_ENTRADA;
+import static com.rafael.monitor_forno.enums.eventos.EventoSistema.CRITICO_ENTRADA;
 
 @Service
 public class EventoService {
@@ -29,13 +34,21 @@ public class EventoService {
     private final SessaoRepository sessaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final FornoRepository fornoRepository;
+    private final NotificacaoService notificacaoService;
 
-    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository) {
+    @Value("${app.notificacao.icone.critico}")
+    private String logoCriticoUrl;
+
+    @Value("${app.notificacao.icone.alerta}")
+    private String logoAlertaUrl;
+
+    public EventoService(EventoRepository eventoRepository, SessaoRepository sessaoRepository, EventoMapper eventoMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository, NotificacaoService notificacaoService) {
         this.eventoRepository = eventoRepository;
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.usuarioRepository = usuarioRepository;
         this.fornoRepository = fornoRepository;
+        this.notificacaoService = notificacaoService;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -47,7 +60,8 @@ public class EventoService {
                 );
     }
 
-    public void registrarEvento(EventoRequestDTO dto, String serialNumber) {
+    @Transactional
+    public void registrarEvento(EventoRequestDTO dto, String serialNumber) throws FirebaseMessagingException {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
                 .orElseThrow(
@@ -75,6 +89,17 @@ public class EventoService {
         evento.setForno(forno);
         evento.setCriadoEm(Instant.now());
         eventoRepository.save(evento);
+
+        if(dto.getTipo().equals(CRITICO_ENTRADA)) {
+            // Enviar notificação para o usuário do forno
+            notificacaoService.dispararNotificacaoInterna(forno, "Evento crítico detectado no forno: " + forno.getNome(), logoCriticoUrl);
+        } else if (dto.getTipo().equals(ALERTA_ENTRADA)) {
+            // Enviar notificação para o usuário do forno
+            notificacaoService.dispararNotificacaoInterna(forno, "Evento de alerta detectado no forno: " + forno.getNome(), logoAlertaUrl);
+        } else {
+            return; // Não enviar notificação para outros tipos de eventos
+        }
+
     }
 
     public void deleteById(UUID id, String email) {
@@ -113,6 +138,18 @@ public class EventoService {
                 .map(eventoMapper::toEventoDTO)
                 .toList();
 
+    }
+
+    public List<EventoResponseDTO> findLastThreeByFornoAndUsuario(UUID fornoId, String email) {
+
+        if (!fornoRepository.existsById(fornoId)) {
+            throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
+        }
+
+        return eventoRepository.findTopThreeByFornoIdAndFornoUsuarioEmailOrderByCriadoEmDesc(fornoId, email)
+                .stream()
+                .map(eventoMapper::toEventoDTO)
+                .toList();
     }
 
 

@@ -42,7 +42,7 @@ public class FornoWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession sessao, CloseStatus status) throws Exception {
 
         String serialNumber =  (String) sessao.getAttributes().get("serialNumber");
-        fornoSessionRegistry.remover(serialNumber);
+        fornoSessionRegistry.remover(serialNumber, sessao);
         System.out.println("Forno desconectado: " + serialNumber + " - " + status);
 
     }

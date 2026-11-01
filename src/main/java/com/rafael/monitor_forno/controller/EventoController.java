@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
@@ -27,7 +28,7 @@ public class EventoController {
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarEvento(
-            @RequestBody EventoRequestDTO dto) {
+            @RequestBody EventoRequestDTO dto) throws FirebaseMessagingException {
 
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -72,6 +73,14 @@ public class EventoController {
         }
 
         return ResponseEntity.ok(eventoService.findAllByFornoUsuario(email));
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/fornos/{fornoId}/ultimos-tres")
+    public ResponseEntity<List<EventoResponseDTO>> getUltimosTresEventosByFornoId(@PathVariable UUID fornoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(eventoService.findLastThreeByFornoAndUsuario(fornoId, email));
     }
 
 }

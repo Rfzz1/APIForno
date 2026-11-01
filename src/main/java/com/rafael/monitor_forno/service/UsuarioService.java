@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Usuario;
+import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.enums.Role;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,17 +30,19 @@ public class UsuarioService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
         this.refreshTokenService = refreshTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -50,6 +54,7 @@ public class UsuarioService {
                 );
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void cadastrarUsuario(UserRequestDTO dto) {
 
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
@@ -108,6 +113,7 @@ public class UsuarioService {
         return toUserResponseDTO(usuarioRepository.save(usuarioExistente));
     }
 
+    @Transactional
     public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
 
         Usuario usuarioExistente = buscarUsuarioLogado(email);
@@ -120,7 +126,7 @@ public class UsuarioService {
 
         usuarioExistente.setSenha(passwordEncoder.encode(dto.senhaAtualizada()));
         usuarioExistente.setVersaoUsuario(usuarioExistente.getVersaoUsuario() + 1);
-        usuarioExistente.setRefreshTokens(null); // Invalida todos os refresh tokens existentes
+        refreshTokenRepository.deleteByUsuario(usuarioExistente);
 
         usuarioRepository.save(usuarioExistente);
 
@@ -166,6 +172,7 @@ public class UsuarioService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void gerarTokenRecuperacao(String email) {
 
         usuarioRepository.findByEmail(email)
@@ -199,6 +206,7 @@ public class UsuarioService {
                 });
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void enviarCodigoRedefinirEmail(String emailAtual, String senhaAtual, String novoEmail) {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
@@ -218,6 +226,7 @@ public class UsuarioService {
         usuario.setCodigoVerificacaoEmail(otp);
         usuario.setExpiracaoCodigoEmail(Instant.now().plus(15, ChronoUnit.MINUTES));
         usuario.setNovoEmailPendente(novoEmail);
+        usuario.setTentativasCodigoEmail(0);
         usuarioRepository.save(usuario);
 
         emailService.enviarEmail(usuario.getNovoEmailPendente(),
@@ -239,11 +248,16 @@ public class UsuarioService {
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void verificarCodigoRedefinirEmail(String emailAtual, String codigo) {
 
         Usuario usuario = buscarUsuarioLogado(emailAtual);
 
-        if (usuario.getExpiracaoCodigoEmail().isBefore(Instant.now())) {
+        if (usuario.getExpiracaoCodigoEmail() != null || usuario.getCodigoVerificacaoEmail() != null) {
+            throw new CredenciaisInvalidasException("Código expirado ou inválido");
+        }
+
+        if (Instant.now().isAfter(usuario.getExpiracaoCodigoEmail())) {
             throw new CredenciaisInvalidasException("Código de verificação expirado");
         }
 
@@ -269,7 +283,7 @@ public class UsuarioService {
         usuario.setCodigoVerificacaoEmail(null);
         usuario.setExpiracaoCodigoEmail(null);
         usuario.setNovoEmailPendente(null);
-        usuario.setRefreshTokens(null);
+        refreshTokenRepository.deleteByUsuario(usuario);
         usuario.setTentativasCodigoEmail(0);
 
         usuarioRepository.save(usuario);
@@ -290,6 +304,7 @@ public class UsuarioService {
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void reverterEmail(ReversaoEmailDTO dto) {
 
         Claims claims = jwtService.extrairTodasClaims(dto.getToken());
@@ -305,10 +320,11 @@ public class UsuarioService {
         usuario.setEmail(emailAntigo);
         usuario.setEmailAnterior(null);
         usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
+        refreshTokenRepository.deleteByUsuario(usuario);
         usuarioRepository.save(usuario);
 
     }
-    
+    @Transactional(rollbackFor = Exception.class)
     public void redefinirSenha(NovaSenhaDTO dto) {
         Usuario usuario = usuarioRepository.findByTokenRecuperacaoSenha(dto.token())
                 .orElseThrow(
@@ -327,7 +343,7 @@ public class UsuarioService {
         usuario.setTokenRecuperacaoSenha(null);
         usuario.setExpiracaoToken(null);
         usuario.setVersaoUsuario(usuario.getVersaoUsuario() + 1);
-        usuario.setRefreshTokens(null);
+        refreshTokenRepository.deleteByUsuario(usuario);
 
         usuarioRepository.save(usuario);
     }

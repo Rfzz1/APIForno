@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.exception.ServicoIndisponivelException;
 import jakarta.mail.*;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -34,7 +35,7 @@ public class EmailService {
 
         } catch (MessagingException e) {
             // Trata o erro caso o e-mail falhe na montagem
-            throw new RuntimeException("Falha ao enviar e-mail para " + destinatario, e);
+            throw new ServicoIndisponivelException("Falha ao enviar e-mail para " + destinatario, e);
         }
     }
 }

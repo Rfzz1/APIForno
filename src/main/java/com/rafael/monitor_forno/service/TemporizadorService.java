@@ -10,6 +10,7 @@ import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
+import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cglib.core.Local;
@@ -19,13 +20,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 @EnableScheduling
 @Service
@@ -36,6 +38,8 @@ public class TemporizadorService {
     private final FornoRepository fornoRepository;
     private final FornoComandoWsService fornoComandoWsService;
     private final TaskScheduler  taskScheduler;
+
+    private final Map<UUID, ScheduledFuture<?>> proximosTemporizadores = new ConcurrentHashMap<>();
 
     public TemporizadorService(TemporizadorRepository temporizadorRepository, UsuarioRepository usuarioRepository, FornoRepository fornoRepository,FornoComandoWsService fornoComandoWsService, TaskScheduler taskScheduler) {
         this.temporizadorRepository = temporizadorRepository;
@@ -76,7 +80,7 @@ public class TemporizadorService {
         }
 
         if (dto.getHorarioFim().toInstant().isBefore(Instant.now()) || dto.getHorarioInicio().toInstant().isBefore(Instant.now().minus(1, ChronoUnit.MINUTES)) || dto.getHorarioFim().toInstant().isBefore(dto.getHorarioInicio().toInstant())) {
-            throw new IllegalArgumentException(
+            throw new RecursoEmFormatoInvalido(
                     "O horário deve estar no futuro"
             );
         }
@@ -91,7 +95,7 @@ public class TemporizadorService {
 
         Instant horarioFim = dto.getHorarioFim().toInstant();
 
-        taskScheduler.schedule(
+        ScheduledFuture<?> future = taskScheduler.schedule(
                 () -> {
                     try {
                         temporizador.setExecutado(true);
@@ -103,6 +107,8 @@ public class TemporizadorService {
                 },
                 horarioFim
         );
+
+        proximosTemporizadores.put(temporizador.getId(), future);
 
     }
 
@@ -119,7 +125,7 @@ public class TemporizadorService {
             Instant agora = Instant.now();
 
             if (agora.isBefore(temporizador.getHorarioFim())) {
-                taskScheduler.schedule(
+                ScheduledFuture<?> future = taskScheduler.schedule(
                         () -> {
                             try {
                                 temporizador.setExecutado(true);
@@ -131,9 +137,13 @@ public class TemporizadorService {
                         },
                         horarioFim
                 );
+
+                proximosTemporizadores.put(temporizador.getId(), future);
+
             } else {
                 temporizador.setExecutado(true);
                 temporizadorRepository.save(temporizador);
+                temporizadorRepository.delete(temporizador);
             }
         }
     }
@@ -190,12 +200,38 @@ public class TemporizadorService {
                 );
 
         if (dto.getHorarioFim().toInstant().isBefore(Instant.now())) {
-            throw new IllegalArgumentException(
+            throw new RecursoEmFormatoInvalido(
                     "O horário deve estar no futuro"
             );
         }
 
         temporizadorExistente.setHorarioFim(dto.getHorarioFim().toInstant());
+
+        Instant horarioFim = temporizadorExistente.getHorarioFim();
+        UUID temporizadorId = temporizadorExistente.getId();
+
+        ScheduledFuture<?> temporizadorPendente = proximosTemporizadores.remove(temporizadorExistente.getId());
+        if (temporizadorPendente != null) {
+            temporizadorPendente.cancel(true);
+        }
+
+        ScheduledFuture<?> future = taskScheduler.schedule(
+
+                () -> {
+                    try {
+                        temporizadorRepository.findById(temporizadorId).ifPresent(temporizador -> {
+                            temporizador.setExecutado(true);
+                            temporizadorRepository.save(temporizador);
+                            fornoComandoWsService.dispararBuzzer(temporizador.getForno().getSerialNumber(), temporizador);
+                        });
+                    } catch (RecursoNaoEncontradoException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                },
+                horarioFim
+        );
+
+        proximosTemporizadores.put(temporizadorExistente.getId(), future);
 
         return toResponseDTO(temporizadorRepository.save(temporizadorExistente));
     }
@@ -230,6 +266,11 @@ public class TemporizadorService {
                         )
                 );
 
+        ScheduledFuture<?> tarefaPendente = proximosTemporizadores.remove(temporizador.getId());
+        if (tarefaPendente != null) {
+            tarefaPendente.cancel(true);
+        }
+
         temporizadorRepository.delete(temporizador);
     }
 
@@ -240,16 +281,9 @@ public class TemporizadorService {
                 .toList();
     }
 
-    public List<TemporizadorResponseDTO> findAllByFornoUsuario(String serialNumber, String email) {
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado"
-                        )
-                );
-        Usuario usuario = forno.getUsuario();
-
-        return temporizadorRepository.findAllByFornoAndForno_Usuario(forno, usuario)
+    public List<TemporizadorResponseDTO> findAllByFornoUsuario(String email) {
+        Usuario usuario = buscarUsuarioLogado(email);
+        return temporizadorRepository.findAllByForno_Usuario(usuario)
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();

@@ -6,6 +6,7 @@ import com.rafael.monitor_forno.database.repository.FotoPerfilRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.FotoPerfilRequestDTO;
 import com.rafael.monitor_forno.dto.FotoPerfilResponseDTO;
+import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class FotoPerfilService {
         Usuario usuario = buscarUsuarioLogado(email);
 
         if (fotoPerfilRepository.findByUsuario(usuario).isPresent()) {
-            throw new IllegalArgumentException("O usuário já possui uma foto de perfil. Use a rota de atualização.");
+            throw new CredencialJaCadastradaException("O usuário já possui uma foto de perfil. Use a rota de atualização.");
         }
 
         FotoPerfil fotoPerfil = new FotoPerfil();

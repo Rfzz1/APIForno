@@ -21,7 +21,7 @@ public interface FornoRepository extends JpaRepository<Forno, UUID> {
     Optional<Forno> findByIdAndUsuario(UUID id, Usuario usuario);
 
     @Modifying
-    @Query("UPDATE FORNO f SET f.reivindicado = true WHERE f.serialNumber = :serialNumber AND f.reivindicado = false")
+    @Query("UPDATE Forno f SET f.reivindicado = true WHERE f.serialNumber = :serialNumber AND f.reivindicado = false")
     int reivindicarSeNaoReivindicado(@Param("serialNumber") String serialNumber);
 
 }

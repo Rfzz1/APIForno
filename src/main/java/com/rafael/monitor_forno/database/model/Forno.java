@@ -27,6 +27,9 @@ public class Forno {
 
     @Column(nullable = false, length = 20)
     private String pinSeguranca;
+
+    @Version
+    private Long version;
     
     private boolean ativo;
     private boolean reivindicado;

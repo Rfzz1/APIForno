@@ -308,7 +308,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
 
     }
-
+    
     public void redefinirSenha(NovaSenhaDTO dto) {
         Usuario usuario = usuarioRepository.findByTokenRecuperacaoSenha(dto.token())
                 .orElseThrow(

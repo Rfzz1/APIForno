@@ -12,6 +12,9 @@ public class FornoMapper {
         return FornoResponseDTO.builder()
                 .id(forno.getId())
                 .serialNumber(forno.getSerialNumber())
+                .nome(forno.getNome())
+                .ativo(forno.isAtivo())
+                .muted(forno.isMuted())
                 .build();
     }
 

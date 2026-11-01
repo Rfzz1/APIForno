@@ -112,6 +112,7 @@ public class FornoService {
                 .build();
     }
 
+    @Transactional
     public void vincularFornoaoUsuario(VincularFornoDTO dto, String email) {
         Usuario usuario = buscarUsuarioLogado(email);
 
@@ -159,6 +160,7 @@ public class FornoService {
         forno.setUsuario(null);
         forno.setAtivo(false);
         forno.setMuted(false);
+        forno.setPinSeguranca(gerarPinSeguranca());
         fornoRepository.save(forno);
     }
 
@@ -221,7 +223,6 @@ public class FornoService {
                 .serialNumber(forno.getSerialNumber())
                 .ativo(forno.isAtivo())
                 .nome(forno.getNome())
-                .pinSeguranca(forno.getPinSeguranca())
                 .reivindicado(forno.isReivindicado())
                 .muted(forno.isMuted())
                 .build();

@@ -15,7 +15,6 @@ public class FornoResponseDTO {
     private String serialNumber;
     private boolean ativo;
     private String nome;
-    private String pinSeguranca;
     private boolean reivindicado;
     private boolean muted;
 }

@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
 import com.rafael.monitor_forno.service.EventoService;
@@ -27,7 +28,7 @@ public class EventoController {
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
     public ResponseEntity<Void> registrarEvento(
-            @RequestBody EventoRequestDTO dto) {
+            @RequestBody EventoRequestDTO dto) throws FirebaseMessagingException {
 
         String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
 

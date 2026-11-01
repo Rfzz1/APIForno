@@ -15,6 +15,7 @@ import com.rafael.monitor_forno.enums.Role;
 import com.rafael.monitor_forno.enums.notificacao.StatusN;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class NotificacaoService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public void enviarNotificacao(NotificacaoRequestDTO dto, String email) throws FirebaseMessagingException {
+    public void enviarNotificacao(NotificacaoRequestDTO dto, String email) {
 
         Forno forno = fornoRepository.findById(dto.getFornoId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Nenhum forno encontrado"));
@@ -94,6 +95,37 @@ public class NotificacaoService {
             notificacao.setStatusN(StatusN.ENVIADO);
             notificacaoRepository.save(notificacao);
         }
+
+    }
+
+    @Transactional
+    public void dispararNotificacaoInterna(Forno forno, String mensagem, String logoUrl) throws FirebaseMessagingException {
+
+        Notificacao notificacao = new Notificacao();
+        notificacao.setForno(forno);
+        notificacao.setMensagem(mensagem);
+        notificacao.setHoraEnvio(Instant.now());
+        notificacao.setStatusN(StatusN.ENVIADO);
+
+        if (Role.ADMIN == forno.getUsuario().getRole()) {
+            notificacao.setNomeApp(appDevName);
+        } else {
+            notificacao.setNomeApp(appComumName);
+        }
+
+        notificacao.setLogoUrl(logoUrl);
+        notificacaoRepository.save(notificacao);
+
+        Notification notification = Notification.builder()
+                .setTitle(notificacao.getNomeApp())
+                .setBody(notificacao.getMensagem())
+                .setImage(notificacao.getLogoUrl())
+                .build();
+
+        Message message = Message.builder().setNotification(notification).setTopic(notificacao.getForno().getSerialNumber()).build();
+        FirebaseMessaging fmt = FirebaseMessaging.getInstance();
+        fmt.send(message);
+
 
     }
 

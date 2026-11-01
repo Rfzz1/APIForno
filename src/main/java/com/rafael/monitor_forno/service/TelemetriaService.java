@@ -99,9 +99,9 @@ public class TelemetriaService {
 
         int quantidadeSessoes = sessaoRepository.countByFornoId(forno.getId());
 
-        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaSessaoByFornoId(forno.getId())).orElse(0.0);
+        Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaBySessaoId(forno.getId())).orElse(0.0);
 
-        Evento ultimoEvento = eventoRepository.findFirstByFornoIdOrderByCriadoEmDesc(forno.getId())
+        Evento ultimoEvento = eventoRepository.findFirstBySessaoFornoIdOrderByCriadoEmDesc(forno.getId())
                 .orElse(null);
 
         Temporizador proximoTemporizador = temporizadorRepository.findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(forno)

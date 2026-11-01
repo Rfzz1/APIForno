@@ -15,15 +15,15 @@ import java.util.UUID;
 @Repository
 public interface EventoRepository extends JpaRepository<Evento, UUID> {
 
-    Optional<Evento> findByIdAndFornoUsuario(UUID id, Usuario usuario);
+    Optional<Evento> findByIdAndSessaoFornoUsuario(UUID id, Usuario usuario);
 
-    List<Evento> findAllByFornoUsuario(Usuario usuario);
+    List<Evento> findAllBySessaoFornoUsuario(Usuario usuario);
 
-    Optional<Evento> findFirstByFornoIdOrderByCriadoEmDesc(UUID fornoId);
+    Optional<Evento> findFirstBySessaoFornoIdOrderByCriadoEmDesc(UUID fornoId);
 
-    List<Evento> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
+    List<Evento> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(UUID fornoId, String email);
 
-    List<Evento> findTopThreeByFornoIdAndFornoUsuarioEmailOrderByCriadoEmDesc(UUID fornoId, String email);
+    List<Evento> findTopThreeBySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDesc(UUID fornoId, String email);
 
     @Query("""
     SELECT COUNT(e)
@@ -32,5 +32,7 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
         AND e.tipo IN :tipos
     """)
     Long countEventosByFornoIdAndTipoIn(UUID fornoId, List<EventoSistema> tipos);
+
+    void deleteAllBySessaoFornoId(UUID fornoId);
 
 }

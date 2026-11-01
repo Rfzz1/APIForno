@@ -48,10 +48,9 @@ public class TemperaturaController {
     // ========= ROTAS COMPARTILHADAS =======
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        temperaturaService.deleteById(id, email);
+    @DeleteMapping("/fornos/{fornoId}/temperaturas/{id}")
+    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id, @PathVariable UUID fornoId) {
+        temperaturaService.deleteById(id, fornoId);
         return ResponseEntity.noContent().build();
     }
 

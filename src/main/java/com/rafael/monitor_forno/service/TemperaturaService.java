@@ -73,20 +73,16 @@ public class TemperaturaService {
         temperatura.setTemperaturaAtual(dto.getTemperaturaAtual());
         temperatura.setTemperaturaUltima(dto.getTemperaturaUltima());
         temperatura.setRegistradoEm(Instant.now());
-        temperatura.setUsuario(forno.getUsuario());
         temperatura.setSessao(sessao);
-        temperatura.setForno(forno);
 
         temperaturaRepository.save(temperatura);
 
         return true;
     }
 
-    public void deleteById(UUID id, String email) {
+    public void deleteById(UUID id, UUID fornoId) {
 
-        Usuario usuario = buscarUsuarioLogado(email);
-
-        Temperatura temperatura = temperaturaRepository.findByIdAndFornoUsuario(id, usuario)
+        Temperatura temperatura = temperaturaRepository.findByIdAndSessaoFornoId(id, fornoId)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Temperatura não pertence ao forno"
@@ -98,7 +94,7 @@ public class TemperaturaService {
 
     public List<TemperaturaDTO> findAllByFornoIdAndUsuario(UUID fornoId, String email) {
 
-        List<Temperatura> temperaturas = temperaturaRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+        List<Temperatura> temperaturas = temperaturaRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(fornoId, email);
 
         if (!fornoRepository.existsById(fornoId)) {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
@@ -135,7 +131,7 @@ public class TemperaturaService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        return temperaturaRepository.findAllByFornoUsuario(usuario)
+        return temperaturaRepository.findAllBySessaoFornoUsuario(usuario)
                 .stream()
                 .map(temperaturaMapper::toTemperaturaDTO)
                 .toList();
@@ -154,7 +150,7 @@ public class TemperaturaService {
         Instant inicio = registradoEm.minusSeconds(3600); // Exemplo: busca por temperaturas de uma hora atrás
         Instant fim = registradoEm;
 
-        List<Temperatura> temperaturas = temperaturaRepository.findByRegistradoEmBetweenAndForno(inicio, fim, forno);
+        List<Temperatura> temperaturas = temperaturaRepository.findByRegistradoEmBetweenAndSessaoForno(inicio, fim, forno);
 
         if (temperaturas.isEmpty()) {
             throw new RecursoNaoEncontradoException("Nenhuma temperatura encontrada para o período especificado.");

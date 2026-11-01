@@ -29,12 +29,4 @@ public class Temperatura {
     @JoinColumn(name = "sessao_id")
     private Sessao sessao;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
-
-    @ManyToOne
-    @JoinColumn(name="forno_id")
-    private Forno forno;
-
 }

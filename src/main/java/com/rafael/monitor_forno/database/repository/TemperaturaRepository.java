@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.database.repository;
 
 import com.rafael.monitor_forno.database.model.Forno;
+import com.rafael.monitor_forno.database.model.Sessao;
 import com.rafael.monitor_forno.database.model.Temperatura;
 import com.rafael.monitor_forno.database.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,13 +18,13 @@ import java.util.UUID;
 @Repository
 public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> {
 
-    List<Temperatura> findByRegistradoEmBetweenAndForno(Instant inicio, Instant fim, Forno fornoU);
+    List<Temperatura> findByRegistradoEmBetweenAndSessaoForno(Instant inicio, Instant fim, Forno fornoU);
 
-    Optional<Temperatura> findByIdAndFornoUsuario(UUID id, Usuario usuario);
+    Optional<Temperatura> findByIdAndSessaoFornoId(UUID id, UUID fornoId);
 
-    List<Temperatura> findAllByFornoUsuario(Usuario usuario);
+    List<Temperatura> findAllBySessaoFornoUsuario(Usuario usuario);
 
-    List<Temperatura> findAllByFornoIdAndFornoUsuarioEmail(UUID fornoId, String email);
+    List<Temperatura> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(UUID fornoId, String email);
 
     List<Temperatura> findAllBySessaoId(UUID sessaoId);
 
@@ -32,13 +33,16 @@ public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> 
     FROM Temperatura t
     WHERE t.sessao.forno.id = :fornoId
     """)
-    Double findTemperaturaMaximaSessaoByFornoId(UUID fornoId);
+    Double findTemperaturaMaximaByFornoId(UUID fornoId);
 
+    //TemperaturaMaxima de Sessao
     @Query("""
     SELECT MAX(t.temperaturaAtual)
     FROM Temperatura t
-    WHERE t.forno.id = :fornoId
+    WHERE t.sessao.id = :sessaoId
     """)
-    Double findTemperaturaMaximaByFornoId(UUID fornoId);
+    Double findTemperaturaMaximaBySessaoId(UUID sessaoId);
+
+    void deleteAllBySessaoFornoId(UUID fornoId);
 
 }

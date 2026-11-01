@@ -2,8 +2,7 @@ package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Usuario;
-import com.rafael.monitor_forno.database.repository.FornoRepository;
-import com.rafael.monitor_forno.database.repository.UsuarioRepository;
+import com.rafael.monitor_forno.database.repository.*;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.exception.*;
 import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
@@ -23,12 +22,18 @@ public class FornoService {
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
     private final FornoWebSocketHandler fornoWebSocketHandler;
+    private final SessaoRepository sessaoRepository;;
+    private final TemperaturaRepository temperaturaRepository;
+    private final EventoRepository eventoRepository;
 
-    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler) {
+    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler, SessaoRepository sessaoRepository, TemperaturaRepository temperaturaRepository, EventoRepository eventoRepository) {
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
         this.fornoWebSocketHandler = fornoWebSocketHandler;
+        this.sessaoRepository = sessaoRepository;
+        this.temperaturaRepository = temperaturaRepository;
+        this.eventoRepository = eventoRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -156,6 +161,10 @@ public class FornoService {
         if (forno.getUsuario() == null || !forno.getUsuario().getId().equals(usuario.getId())) {
             throw new AcessoNegadoException("Você não tem permissão para desvincular este forno");
         }
+
+        temperaturaRepository.deleteAllBySessaoFornoId(forno.getId());
+        eventoRepository.deleteAllBySessaoFornoId(forno.getId());
+        sessaoRepository.deleteAllByFornoId(forno.getId());
 
         forno.setUsuario(null);
         forno.setAtivo(false);

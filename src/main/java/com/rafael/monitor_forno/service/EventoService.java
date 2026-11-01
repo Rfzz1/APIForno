@@ -86,7 +86,6 @@ public class EventoService {
         Evento evento = new Evento();
         evento.setSessao(sessao);
         evento.setTipo(dto.getTipo());
-        evento.setForno(forno);
         evento.setCriadoEm(Instant.now());
         eventoRepository.save(evento);
 
@@ -106,7 +105,7 @@ public class EventoService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
+        Evento evento = eventoRepository.findByIdAndSessaoFornoUsuario(id, usuario)
                 .orElseThrow(() ->
                         new AcessoNegadoException(
                                 "Evento não pertence ao forno"
@@ -120,7 +119,7 @@ public class EventoService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        return eventoRepository.findAllByFornoUsuario(usuario)
+        return eventoRepository.findAllBySessaoFornoUsuario(usuario)
                 .stream()
                 .map(eventoMapper::toEventoDTO)
                 .toList();
@@ -128,7 +127,7 @@ public class EventoService {
 
     public List<EventoResponseDTO> findAllByFornoAndUsuario(UUID fornoId, String email) {
 
-        List<Evento> eventos = eventoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+        List<Evento> eventos = eventoRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(fornoId, email);
 
         if (!fornoRepository.existsById(fornoId)) {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
@@ -146,7 +145,7 @@ public class EventoService {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
         }
 
-        return eventoRepository.findTopThreeByFornoIdAndFornoUsuarioEmailOrderByCriadoEmDesc(fornoId, email)
+        return eventoRepository.findTopThreeBySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDesc(fornoId, email)
                 .stream()
                 .map(eventoMapper::toEventoDTO)
                 .toList();
@@ -157,7 +156,7 @@ public class EventoService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Evento evento = eventoRepository.findByIdAndFornoUsuario(id, usuario)
+        Evento evento = eventoRepository.findByIdAndSessaoFornoUsuario(id, usuario)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException("Evento não pertence ao forno")
                 );

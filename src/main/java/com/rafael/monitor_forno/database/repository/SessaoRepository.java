@@ -37,4 +37,7 @@ public interface    SessaoRepository extends JpaRepository<Sessao, UUID> {
     WHERE s.forno.id = :fornoId
     """)
     Long findTempoTotalLigadoByFornoId(UUID fornoId);
+
+
+    void deleteAllByFornoId(UUID fornoId);
 }

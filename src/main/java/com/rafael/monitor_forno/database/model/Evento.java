@@ -26,8 +26,4 @@ public class Evento {
     @ManyToOne
     @JoinColumn(name = "sessao_id")
     private Sessao sessao;
-
-    @ManyToOne
-    @JoinColumn(name = "forno_id")
-    private Forno forno;
 }

@@ -1,6 +1,5 @@
 package com.rafael.monitor_forno.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -13,12 +12,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final FornoWebSocketHandler fornoWebSocketHandler;
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
-    private final ObjectMapper objectMapper;
 
-    public WebSocketConfig(FornoWebSocketHandler fornoWebSocketHandler,  JwtHandshakeInterceptor jwtHandshakeInterceptor, ObjectMapper objectMapper) {
+    public WebSocketConfig(FornoWebSocketHandler fornoWebSocketHandler,  JwtHandshakeInterceptor jwtHandshakeInterceptor) {
         this.fornoWebSocketHandler = fornoWebSocketHandler;
         this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
-        this.objectMapper = objectMapper;
     }
 
     @Override

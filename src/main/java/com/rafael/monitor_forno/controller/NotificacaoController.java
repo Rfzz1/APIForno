@@ -6,7 +6,7 @@ import com.rafael.monitor_forno.service.NotificacaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,10 +24,9 @@ public class NotificacaoController {
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping
-    public ResponseEntity<Void> enviarNotificacao (@Valid @RequestBody NotificacaoRequestDTO dto) throws FirebaseMessagingException {
+    public ResponseEntity<Void> enviarNotificacao (@Valid @RequestBody NotificacaoRequestDTO dto, Authentication authentication) throws FirebaseMessagingException {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        notificacaoService.enviarNotificacao(dto, email);
+        notificacaoService.enviarNotificacao(dto, authentication.getName());
         return ResponseEntity.ok().build();
 
     }

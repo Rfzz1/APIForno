@@ -44,8 +44,7 @@ public class UsuarioController {
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/meu-perfil")
     public ResponseEntity<UserResponseDTO> atualizarMeuPerfil(@Valid @RequestBody AtualizarMeuPerfilDTO dto, Authentication authentication) {
-        UserResponseDTO usuarioAtualizado =
-                usuarioService.atualizarUsuario(dto, authentication.getName());
+        UserResponseDTO usuarioAtualizado = usuarioService.atualizarUsuario(dto, authentication.getName());
 
         return ResponseEntity.ok(usuarioAtualizado);
     }

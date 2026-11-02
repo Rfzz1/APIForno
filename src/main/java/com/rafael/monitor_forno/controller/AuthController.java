@@ -6,6 +6,7 @@ import com.rafael.monitor_forno.service.RefreshTokenService;
 import com.rafael.monitor_forno.service.UsuarioService;
 import jakarta.validation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,6 +24,7 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
 
@@ -32,18 +34,21 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequestDTO dto) {
         refreshTokenService.logout(dto.getRefreshToken());
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/renovar-refresh-token")
     public ResponseEntity<RefreshTokenResponseDTO> renovar(@RequestBody RefreshTokenRequestDTO dto) {
         RefreshTokenResponseDTO response = refreshTokenService.renovarRefreshToken(dto.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/esqueci-minha-senha")
     public ResponseEntity<String> esqueciSenha(@Valid @RequestBody UserRequestDTO dto) {
         usuarioService.gerarTokenRecuperacao(dto.getEmail());
@@ -51,6 +56,7 @@ public class AuthController {
         return ResponseEntity.ok("Se o e-mail existir, enviaremos instruções para recuperação.");
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/redefinir-senha")
     public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody NovaSenhaDTO dto) {
         usuarioService.redefinirSenha(dto);
@@ -58,6 +64,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/enviar-codigo-redefinir-email")
     public ResponseEntity<String> enviarCodigoRedefinirEmail(@Valid @RequestBody SolicitarTrocaEmailDTO dto, java.security.Principal principal) {
 
@@ -66,6 +73,7 @@ public class AuthController {
         return ResponseEntity.ok("Código de redefinição enviado com sucesso.");
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/verificar-codigo-redefinir-email")
     public ResponseEntity<String> verificarCodigoRedefinirEmail(@Valid @RequestBody ConfirmarTrocaEmailDTO dto, java.security.Principal principal) {
         String emailAtual = principal.getName();
@@ -73,6 +81,7 @@ public class AuthController {
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
 
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/reverter-email")
     public ResponseEntity<Void> reverterMudancaEmail(@Valid @RequestBody ReversaoEmailDTO dto) {
 

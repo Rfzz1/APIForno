@@ -1,7 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
-import com.rafael.monitor_forno.database.model.Usuario;
-import com.rafael.monitor_forno.dto.TemperaturaDTO;
+import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.TemporizadorRequestDTO;
 import com.rafael.monitor_forno.dto.TemporizadorResponseDTO;
 import com.rafael.monitor_forno.service.TemporizadorService;
@@ -10,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +28,9 @@ public class TemporizadorController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/forno/{fornoId}")
-    public ResponseEntity<Void> criarTemporizador(@Valid @RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId) {
+    public ResponseEntity<Void> criarTemporizador(@Valid @RequestBody TemporizadorRequestDTO dto, @PathVariable UUID fornoId, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        temporizadorService.criarTemporizador(dto, fornoId, email);
+        temporizadorService.criarTemporizador(dto, fornoId, authentication.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -61,11 +57,9 @@ public class TemporizadorController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<TemporizadorResponseDTO>> getAllTemporizadoresByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<TemporizadorResponseDTO>> getAllTemporizadoresByFornoIdAndUsuario(@PathVariable UUID fornoId, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(temporizadorService.buscarTemporizadoresFornoUsuario(fornoId, email));
+        return ResponseEntity.ok(temporizadorService.buscarTemporizadoresFornoUsuario(fornoId, authentication.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -76,20 +70,18 @@ public class TemporizadorController {
             return ResponseEntity.ok(temporizadorService.findById(id, authentication.getName()));
         }
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(temporizadorService.findAllByFornoUsuario(email));
+        return ResponseEntity.ok(temporizadorService.findAllByFornoUsuario(authentication.getName()));
     }
 
     // ========= ROTAS DO FORNO =======
 
     @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/encerrar")
-    public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id) {
+    public ResponseEntity<Void> executarTemporizador(@PathVariable UUID id, Authentication authentication) {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        UUID fornoId = ((FornoDetails) authentication.getPrincipal()).getId();
 
-        temporizadorService.marcarComoExecutado(id, serialNumber);
+        temporizadorService.marcarComoExecutado(id, fornoId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -220,9 +220,9 @@ public class TemporizadorService {
         return toResponseDTO(temporizadorRepository.save(temporizadorExistente));
     }
 
-    public void marcarComoExecutado(UUID id, String serialNumber) {
+    public void marcarComoExecutado(UUID id, UUID fornoId) {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
                                 "Forno não encontrado"

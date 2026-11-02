@@ -4,23 +4,20 @@ import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.TemperaturaDTO;
 import com.rafael.monitor_forno.dto.TemperaturaRequestDTO;
 import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
-import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
-import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.TemperaturaService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/temperaturas")
 public class TemperaturaController {
@@ -35,7 +32,7 @@ public class TemperaturaController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
-    public ResponseEntity<Void> registrarLeitura(@Valid @RequestBody TemperaturaRequestDTO dto, Authentication authentication) {
+    public ResponseEntity<Void> registerTemperature(@Valid @RequestBody TemperaturaRequestDTO dto, Authentication authentication) {
 
         FornoDetails fornoDetails = (FornoDetails) authentication.getPrincipal();
 
@@ -43,6 +40,7 @@ public class TemperaturaController {
 
         boolean salva = temperaturaService.registrarLeitura(dto, fornoDetails.getId());
 
+        log.info("Temperatura registrada para o forno: {}", dto.getFornoId());
         return salva ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.noContent().build();
     }
 
@@ -50,48 +48,43 @@ public class TemperaturaController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/fornos/{fornoId}/temperaturas/{id}")
-    public ResponseEntity<Void> deletarLeitura(@PathVariable UUID id, @PathVariable UUID fornoId) {
+    public ResponseEntity<Void> deleteTemperature(@PathVariable UUID id, @PathVariable UUID fornoId) {
         temperaturaService.deleteById(id, fornoId);
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<TemperaturaDTO>> gettAllTemperatureByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<TemperaturaDTO>> getAllTemperaturesByOvenIdAndUser(@PathVariable UUID fornoId, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(temperaturaService.findAllByFornoIdAndUsuario(fornoId, email));
+        return ResponseEntity.ok(temperaturaService.findAllByFornoIdAndUsuario(fornoId, authentication.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/minhas")
-    public ResponseEntity<List<TemperaturaDTO>> minhasTemperaturas() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(email));
+    public ResponseEntity<List<TemperaturaDTO>> myTemperatures(Authentication authentication) {
+        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/sessoes/{sessaoId}/temperaturas")
-    public ResponseEntity<List<TemperaturaDTO>> buscarTemperaturasPorSessao(@PathVariable UUID sessaoId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<TemperaturaDTO> temperaturas = temperaturaService.buscarTemperaturasPorSessao(sessaoId, email);
+    public ResponseEntity<List<TemperaturaDTO>> searchTemperaturesBySession(@PathVariable UUID sessaoId, Authentication authentication) {
+        List<TemperaturaDTO> temperaturas = temperaturaService.buscarTemperaturasPorSessao(sessaoId, authentication.getName());
         return ResponseEntity.ok(temperaturas);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
-    public ResponseEntity<?> buscarTemperaturas(@RequestParam(required = false) Instant registradoEm, @RequestParam(required = false) UUID fornoId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<?> searchTemperatures(@RequestParam(required = false) Instant createdAt, @RequestParam(required = false) UUID ovenId, Authentication authentication) {
 
-        if (registradoEm != null && fornoId == null) {
-            throw new CredenciaisInvalidasException("Os parâmetros são obrigatórios: registradoEm e fornoId devem ser fornecidos juntos.");
+        if (createdAt != null && ovenId == null) {
+            throw new CredenciaisInvalidasException("Os parâmetros são obrigatórios: createdAt e ovenId devem ser fornecidos juntos.");
         }
 
-        if (fornoId != null && registradoEm != null) {
-            return ResponseEntity.ok(temperaturaService.findByDate(registradoEm, fornoId, email));
+        if (ovenId != null && createdAt != null) {
+            return ResponseEntity.ok(temperaturaService.findByDate(createdAt, ovenId, authentication.getName()));
         }
 
-        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(email));
+        return ResponseEntity.ok(temperaturaService.findAllByFornoUsuario(authentication.getName()));
     }
 }

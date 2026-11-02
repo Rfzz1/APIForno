@@ -60,12 +60,12 @@ public class EventoService {
     }
 
     @Transactional
-    public void registrarEvento(EventoRequestDTO dto, String serialNumber) throws FirebaseMessagingException {
+    public void registrarEvento(EventoRequestDTO dto, UUID fornoId) throws FirebaseMessagingException {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado: " + serialNumber
+                                "Forno não encontrado: " + fornoId
                         )
                 );
 

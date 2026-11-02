@@ -1,18 +1,21 @@
 package com.rafael.monitor_forno.controller;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.rafael.monitor_forno.dto.EventoResponseDTO;
+import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.EventoRequestDTO;
+import com.rafael.monitor_forno.dto.EventoResponseDTO;
 import com.rafael.monitor_forno.service.EventoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/eventos")
@@ -28,11 +31,13 @@ public class EventoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping
-    public ResponseEntity<Void> registrarEvento(@Valid @RequestBody EventoRequestDTO dto) throws FirebaseMessagingException {
+    public ResponseEntity<Void> registerEvent(@Valid @RequestBody EventoRequestDTO dto, Authentication authentication) throws FirebaseMessagingException {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        FornoDetails fornoDetails = (FornoDetails) authentication.getPrincipal();
 
-        eventoService.registrarEvento(dto, serialNumber);
+        dto.setFornoId(Objects.requireNonNull(fornoDetails).getId());
+
+        eventoService.registrarEvento(dto, fornoDetails.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .build();
@@ -42,45 +47,36 @@ public class EventoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvento(
-            @PathVariable UUID id) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable UUID id, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        eventoService.deleteById(id, email);
+        eventoService.deleteById(id, authentication.getName());
 
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<EventoResponseDTO>> getAllEventsByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<EventoResponseDTO>> getAllEventsByOvenIdAndUser(@PathVariable UUID fornoId, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(eventoService.findAllByFornoAndUsuario(fornoId, email));
+        return ResponseEntity.ok(eventoService.findAllByFornoAndUsuario(fornoId, authentication.getName()));
     }
 
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getAllEventos(@RequestParam(required = false) UUID id) {
-
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<?> getAllEvents(@RequestParam(required = false) UUID id, Authentication authentication) {
 
         if (id != null) {
-            return ResponseEntity.ok(eventoService.findById(id, email));
+            return ResponseEntity.ok(eventoService.findById(id, authentication.getName()));
         }
 
-        return ResponseEntity.ok(eventoService.findAllByFornoUsuario(email));
+        return ResponseEntity.ok(eventoService.findAllByFornoUsuario(authentication.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}/ultimos-tres")
-    public ResponseEntity<List<EventoResponseDTO>> getUltimosTresEventosByFornoId(@PathVariable UUID fornoId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(eventoService.findLastThreeByFornoAndUsuario(fornoId, email));
+    public ResponseEntity<List<EventoResponseDTO>> getLastThreeEventsByOvenId(@PathVariable UUID fornoId, Authentication authentication) {
+        return ResponseEntity.ok(eventoService.findLastThreeByFornoAndUsuario(fornoId, authentication.getName()));
     }
 
 }

@@ -1,15 +1,14 @@
 package com.rafael.monitor_forno.controller;
 
 import com.rafael.monitor_forno.dto.SuporteNovaMensagemRequestDTO;
+import com.rafael.monitor_forno.dto.SuporteRequestDTO;
 import com.rafael.monitor_forno.dto.SuporteResponseDTO;
 import com.rafael.monitor_forno.service.SuporteService;
-import jakarta.validation.*;
-import com.rafael.monitor_forno.dto.SuporteRequestDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,50 +28,45 @@ public class SuporteController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<Void> criarTicket(@Valid @RequestBody SuporteRequestDTO dto) {
+    public ResponseEntity<Void> criarTicket(@Valid @RequestBody SuporteRequestDTO dto, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        suporteService.criarTicket(dto, email);
+        suporteService.criarTicket(dto, authentication.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{id}/buscar-ticket")
-    public ResponseEntity<SuporteResponseDTO> buscarTicket(@PathVariable UUID id) {
+    public ResponseEntity<SuporteResponseDTO> buscarTicket(@PathVariable UUID id, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        SuporteResponseDTO ticket = suporteService.buscarTicket(email, id);
+        SuporteResponseDTO ticket = suporteService.buscarTicket(authentication.getName(), id);
 
         return ResponseEntity.ok(ticket);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus-tickets")
-    public ResponseEntity<List<SuporteResponseDTO>> listarMeusTickets() {
+    public ResponseEntity<List<SuporteResponseDTO>> listarMeusTickets(Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<SuporteResponseDTO> tickets = suporteService.findAllBySuporteUsuario(email);
+        List<SuporteResponseDTO> tickets = suporteService.findAllBySuporteUsuario(authentication.getName());
 
         return ResponseEntity.ok(tickets);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/{id}/mensagens")
-    public ResponseEntity<Void> responderTicket(@PathVariable UUID id, @Valid @RequestBody SuporteNovaMensagemRequestDTO dto) {
+    public ResponseEntity<Void> responderTicket(@PathVariable UUID id, @Valid @RequestBody SuporteNovaMensagemRequestDTO dto, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        suporteService.adicionarMensagemChat(id, dto, email);
+        suporteService.adicionarMensagemChat(id, dto, authentication.getName());
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}/deletar-ticket")
-    public ResponseEntity<Void> deletarTicket(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletarTicket(@PathVariable UUID id, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        suporteService.deletarTicket(id, email);
+        suporteService.deletarTicket(id, authentication.getName());
 
         return ResponseEntity.noContent().build();
     }

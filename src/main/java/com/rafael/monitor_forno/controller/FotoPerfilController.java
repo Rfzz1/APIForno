@@ -6,7 +6,7 @@ import com.rafael.monitor_forno.service.FotoPerfilService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,38 +25,33 @@ public class FotoPerfilController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/set-img")
-    public ResponseEntity<FotoPerfilResponseDTO> setProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto) {
+    public ResponseEntity<FotoPerfilResponseDTO> setProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        FotoPerfilResponseDTO responseDTO = fotoPerfilService.setProfileImage(dto, email);
+        FotoPerfilResponseDTO responseDTO = fotoPerfilService.setProfileImage(dto, authentication.getName());
         return ResponseEntity.ok(responseDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/update-img")
-    public ResponseEntity<FotoPerfilResponseDTO> updateProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto) {
+    public ResponseEntity<FotoPerfilResponseDTO> updateProfileImage(@Valid @RequestBody FotoPerfilRequestDTO dto, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        FotoPerfilResponseDTO responseDTO = fotoPerfilService.changeProfileImage(dto, email);
+        FotoPerfilResponseDTO responseDTO = fotoPerfilService.changeProfileImage(dto, authentication.getName());
         return ResponseEntity.ok(responseDTO);
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/delete-img")
-    public ResponseEntity<Void> deleteProfileImage() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<Void> deleteProfileImage(Authentication authentication) {
 
-        fotoPerfilService.deleteProfileImage(email);
+        fotoPerfilService.deleteProfileImage(authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/visualizar-img")
-    public ResponseEntity<FotoPerfilResponseDTO> getProfileImage() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<FotoPerfilResponseDTO> getProfileImage(Authentication authentication) {
 
-        FotoPerfilResponseDTO responseDTO = fotoPerfilService.getFotoPerfilByUsuario(email);
+        FotoPerfilResponseDTO responseDTO = fotoPerfilService.getFotoPerfilByUsuario(authentication.getName());
         return ResponseEntity.ok(responseDTO);
     }
 

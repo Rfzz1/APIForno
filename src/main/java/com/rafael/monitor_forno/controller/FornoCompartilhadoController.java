@@ -8,10 +8,8 @@
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.access.prepost.PreAuthorize;
-    import org.springframework.security.core.context.SecurityContextHolder;
+    import org.springframework.security.core.Authentication;
     import org.springframework.web.bind.annotation.*;
-
-    import java.util.UUID;
 
     @RestController
     @RequestMapping("/forno-compartilhado")
@@ -25,47 +23,38 @@
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @PostMapping
-        public ResponseEntity<Void> enviarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<Void> enviarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto, Authentication authentication) {
 
-            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
-
-            fornoCompartilhadoService.enviarConvite(dto.getEmail(), dto.getFornoId(), emailLoggedUser);
+            fornoCompartilhadoService.enviarConvite(dto.getEmail(), dto.getFornoId(), authentication.getName());
             return ResponseEntity.ok().build();
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @DeleteMapping
-        public ResponseEntity<Void> removerConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
-            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
-            fornoCompartilhadoService.excluirConvite(dto.getEmail(), emailLoggedUser, dto.getFornoId());
+        public ResponseEntity<Void> removerConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto, Authentication authentication) {
+            fornoCompartilhadoService.excluirConvite(dto.getEmail(), authentication.getName(), dto.getFornoId());
             return ResponseEntity.ok().build();
         }
 
         @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
         @PutMapping("/aceitar")
-        public ResponseEntity<FornoCompartilhadoResponseDTO> aceitarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<FornoCompartilhadoResponseDTO> aceitarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto, Authentication authentication) {
 
-            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.aceitarConvite(emailLoggedUser, dto.getFornoId()));
+            return ResponseEntity.status(HttpStatus.OK).body(fornoCompartilhadoService.aceitarConvite(authentication.getName(), dto.getFornoId()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @PutMapping("/recusar")
-        public ResponseEntity<FornoCompartilhadoResponseDTO> recusarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto) {
+        public ResponseEntity<FornoCompartilhadoResponseDTO> recusarConvite (@Valid @RequestBody FornoCompartilhadoRequestDTO dto, Authentication authentication) {
 
-            String emailLoggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(fornoCompartilhadoService.recusarConvite(emailLoggedUser, dto.getFornoId()));
+            return ResponseEntity.status(HttpStatus.OK).body(fornoCompartilhadoService.recusarConvite(authentication.getName(), dto.getFornoId()));
         }
 
         @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
         @GetMapping("/listar")
-        public ResponseEntity<?> listarConvites (@RequestParam StatusC status) {
+        public ResponseEntity<?> listarConvites (@RequestParam StatusC status, Authentication authentication) {
 
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-            return ResponseEntity.ok(fornoCompartilhadoService.findAllByUsuarioAndStatus(email, status));
+            return ResponseEntity.ok(fornoCompartilhadoService.findAllByUsuarioAndStatus(authentication.getName(), status));
         }
 
     }

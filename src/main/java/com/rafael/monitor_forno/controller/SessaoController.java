@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.config.FornoDetails;
 import com.rafael.monitor_forno.dto.SessaoAtualizarDTO;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
 import com.rafael.monitor_forno.dto.SessaoEncerrarDTO;
@@ -10,13 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,10 +31,11 @@ public class SessaoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PostMapping("/iniciar")
-    public ResponseEntity<SessaoResumoDTO> criarSessao() {
+    public ResponseEntity<SessaoResumoDTO> criarSessao(Authentication authentication) {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        SessaoResumoDTO sessao = sessaoService.iniciarSessao(serialNumber);
+        UUID fornoId = ((FornoDetails) authentication.getPrincipal()).getId();
+
+        SessaoResumoDTO sessao = sessaoService.iniciarSessao(fornoId);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(sessao);
@@ -45,10 +43,10 @@ public class SessaoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/encerrar")
-    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id, @Valid @RequestBody SessaoEncerrarDTO dto) {
+    public ResponseEntity<SessaoDetalhesDTO> encerrarSessao(@PathVariable UUID id, @Valid @RequestBody SessaoEncerrarDTO dto, Authentication authentication) {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, serialNumber, dto);
+        UUID fornoId = ((FornoDetails) authentication.getPrincipal()).getId();
+        SessaoDetalhesDTO sessao = sessaoService.encerrarSessao(id, fornoId, dto);
 
         return ResponseEntity.ok(sessao);
 
@@ -56,10 +54,10 @@ public class SessaoController {
 
     @PreAuthorize("hasRole('FORNO')")
     @PutMapping("/{id}/atualizar")
-    public ResponseEntity<SessaoDetalhesDTO> atualizarSessao(@PathVariable UUID id, @Valid @RequestBody SessaoAtualizarDTO dto) {
+    public ResponseEntity<SessaoDetalhesDTO> atualizarSessao(@PathVariable UUID id, @Valid @RequestBody SessaoAtualizarDTO dto, Authentication authentication) {
 
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        SessaoDetalhesDTO sessao = sessaoService.atualizarSessao(id, serialNumber, dto);
+        UUID fornoId = ((FornoDetails) authentication.getPrincipal()).getId();
+        SessaoDetalhesDTO sessao = sessaoService.atualizarSessao(id, fornoId, dto);
 
         return ResponseEntity.ok(sessao);
     }
@@ -68,9 +66,8 @@ public class SessaoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarSessao(@PathVariable UUID id) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        sessaoService.deleteById(id, email);
+    public ResponseEntity<Void> deletarSessao(@PathVariable UUID id, Authentication authentication) {
+        sessaoService.deleteById(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
@@ -83,21 +80,19 @@ public class SessaoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id) {
+    public ResponseEntity<SessaoDetalhesDTO> pegarSessaoPorId(@PathVariable UUID id, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(
-                sessaoService.findById(id, email)
+                sessaoService.findById(id, authentication.getName())
         );
 
     }
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/fornos/{fornoId}")
-    public ResponseEntity<List<SessaoResumoDTO>> getAllSessoesByFornoIdAndUsuario(@PathVariable UUID fornoId) {
+    public ResponseEntity<List<SessaoResumoDTO>> getAllSessoesByFornoIdAndUsuario(@PathVariable UUID fornoId, Authentication authentication) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(sessaoService.findAllSessoesByFornoIdAndUsuario(fornoId, email));
+        return ResponseEntity.ok(sessaoService.findAllSessoesByFornoIdAndUsuario(fornoId, authentication.getName()));
 
     }
 

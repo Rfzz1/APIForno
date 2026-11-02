@@ -12,7 +12,6 @@ import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,12 +48,12 @@ public class TelemetriaService {
                 );
     }
 
-    public void registrar(TelemetriaRequestDTO dto, String serialNumber) {
+    public void registrar(TelemetriaRequestDTO dto, UUID fornoId) {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " +serialNumber
+                                "Forno não encontrado " + fornoId
                         )
                 );
 

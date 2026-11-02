@@ -53,12 +53,12 @@ public class SessaoService {
                 );
     }
 
-    public SessaoResumoDTO iniciarSessao(String serialNumber) {
+    public SessaoResumoDTO iniciarSessao(UUID fornoId) {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
+                                "Forno não encontrado " + fornoId
                         )
                 );
 
@@ -79,12 +79,12 @@ public class SessaoService {
         return toResumoDTO(sessaoSalva);
     }
 
-    public SessaoDetalhesDTO encerrarSessao(UUID id, String serialNumber, SessaoEncerrarDTO dto) {
+    public SessaoDetalhesDTO encerrarSessao(UUID id, UUID fornoId, SessaoEncerrarDTO dto) {
 
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
+                                "Forno não encontrado " + fornoId
                         )
                 );
 
@@ -121,11 +121,11 @@ public class SessaoService {
         return toDetalhesDTO(sessaoSalva);
     }
 
-    public SessaoDetalhesDTO atualizarSessao(UUID id, String serialNumber, SessaoAtualizarDTO dto) {
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
+    public SessaoDetalhesDTO atualizarSessao(UUID id, UUID fornoId, SessaoAtualizarDTO dto) {
+        Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(
                         () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
+                                "Forno não encontrado " + fornoId
                         )
                 );
 

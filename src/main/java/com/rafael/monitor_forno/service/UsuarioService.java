@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.config.utils.UsuarioCreatedEvent;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.MensagemSuporteRepository;
 import com.rafael.monitor_forno.database.repository.RefreshTokenRepository;
@@ -12,10 +13,15 @@ import com.rafael.monitor_forno.exception.CredencialJaCadastradaException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -34,11 +40,12 @@ public class UsuarioService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SecureRandom secureRandom = new SecureRandom();
     private final MensagemSuporteRepository mensagemSuporteRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository, MensagemSuporteRepository mensagemSuporteRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository, MensagemSuporteRepository mensagemSuporteRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -46,6 +53,7 @@ public class UsuarioService {
         this.refreshTokenService = refreshTokenService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.mensagemSuporteRepository = mensagemSuporteRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -87,7 +95,18 @@ public class UsuarioService {
         usuario.setSenha(senhaHash);
         usuarioRepository.save(usuario);
 
-        String link = baseUrl;
+        applicationEventPublisher.publishEvent(new UsuarioCreatedEvent(usuario));
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleUsuarioCreated(UsuarioCreatedEvent event) {
+
+        Usuario usuario = event.usuario();
+
+        String linkSanitizado = HtmlUtils.htmlEscape(baseUrl);
+        String nomeSanitizado = HtmlUtils.htmlEscape(usuario.getNome());
+        String emailSanitizado = HtmlUtils.htmlEscape(usuario.getEmail());
 
         emailService.enviarEmail(usuario.getEmail(),
                 "Bem vindo(a) ao nosso monitoramento de forno! Seu cadastro foi concluído!",
@@ -105,8 +124,9 @@ public class UsuarioService {
                         
                         Abraços,<br>
                         Equipe Monitoramento de Forno
-                        """.formatted(usuario.getNome(), usuario.getEmail(), link)
+                        """.formatted(nomeSanitizado, emailSanitizado, linkSanitizado)
         );
+
     }
 
     public UserResponseDTO atualizarUsuario(AtualizarMeuPerfilDTO dto, String email) {

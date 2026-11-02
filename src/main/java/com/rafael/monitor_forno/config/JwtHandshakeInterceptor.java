@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -28,14 +29,17 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         System.out.println(">>> Tentativa de Handshake WS recebida da URL: " + request.getURI());
 
-        // Pega a query string bruta da URL, ex: "token=eyJhbGc..."
-        String query = request.getURI().getQuery();
+        List<String> tokens = request.getHeaders().get("Authorization");
 
-        if (query == null || !query.startsWith("token=")) {
-            return false; // rejeita o handshake — nem vira WebSocket
+        if (tokens == null || tokens.isEmpty()) {
+            return false;
         }
 
-        String token = query.substring("token=".length());
+        if (!tokens.get(0).startsWith("Bearer ")) {
+            return false;
+        }
+
+        String token = tokens.get(0).replace("Bearer ", ""); // Remove "Bearer " do início
 
         try {
             Claims claims = jwtService.extrairTodasClaims(token);

@@ -66,10 +66,10 @@ public class FornoCompartilhadoService {
 
     public void enviarConvite(String emailUsuario, UUID fornoId, String usuarioLogado) {
 
-        Usuario usuarioExistente = buscarUsuario(emailUsuario);
+        Usuario usuarioExistente = usuarioRepository.findByEmail(emailUsuario).orElse(null);
         Forno forno = buscarForno(fornoId);
 
-        if (fornoCompartilhadoRepository.findByFornoAndUsuario(forno, usuarioExistente).isPresent()) {
+        if (usuarioExistente == null || fornoCompartilhadoRepository.findByFornoAndUsuario(forno, usuarioExistente).isPresent()) {
             throw new CredencialJaCadastradaException(
                     "Convite já enviado"
             );

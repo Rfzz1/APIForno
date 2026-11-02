@@ -181,9 +181,10 @@ public class UsuarioService {
 
     public LoginResponseDTO login(String email, String senha) {
 
-        Usuario usuario = buscarUsuarioLogado(email);
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElse(null);
 
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+        if (usuario == null || !passwordEncoder.matches(senha, usuario.getSenha())) {
             throw new AcessoNegadoException(
                     "Email ou senha inválidos"
             );

@@ -23,8 +23,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static com.rafael.monitor_forno.enums.eventos.EventoSistema.ALERTA_ENTRADA;
-import static com.rafael.monitor_forno.enums.eventos.EventoSistema.CRITICO_ENTRADA;
+import static com.rafael.monitor_forno.enums.eventos.EventoSistema.*;
 
 @Service
 public class EventoService {
@@ -95,8 +94,17 @@ public class EventoService {
         } else if (dto.getTipo().equals(ALERTA_ENTRADA)) {
             // Enviar notificação para o usuário do forno
             notificacaoService.dispararNotificacaoInterna(forno, "Evento de alerta detectado no forno: " + forno.getNome(), logoAlertaUrl);
-        } else {
+        } else if (dto.getTipo().equals(ERRO_SENSOR_ENTRADA)) {
             return; // Não enviar notificação para outros tipos de eventos
+        } else {
+
+            if (forno.isMuted()) {
+                forno.setMuted(false);
+                fornoRepository.save(forno);
+                return; // Não enviar notificação se o forno estiver silenciado
+            }
+
+            return;
         }
 
     }

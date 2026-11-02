@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface FornoCompartilhadoRepository extends JpaRepository<FornoCompartilhado, UUID> {
 
-    Optional<FornoCompartilhado> findByFornoAndUsuario(Forno forno, Usuario usuario);
+    Optional<FornoCompartilhado> findByFornoAndUsuario(Forno forno, Usuario usuario);;
     List<FornoCompartilhado> findAllByUsuarioAndStatus(Usuario usuario, StatusC status);
 
 }

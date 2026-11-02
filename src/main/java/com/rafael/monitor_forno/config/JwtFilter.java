@@ -41,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        System.out.println(">>> JWT FILTER: authHeader=" + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -49,6 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String token = authHeader.substring(7);
+            System.out.println(">>> JWT FILTER: token=" + token);
             Claims claims = jwtService.extrairTodasClaims(token);
 
             String tokenTipo = claims.get("tokenTipo", String.class);

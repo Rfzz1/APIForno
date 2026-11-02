@@ -77,29 +77,24 @@ public class SuporteService {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Suporte Suporte = suporteRepository.findByIdAndUsuario(id, usuario)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Ticket não encontrado: " + id
-                        )
-                );
+        boolean isAdmin = usuario.getRole().toString().equals("ADMIN");
 
-        return toSuporteResponseDTO(Suporte);
+        Suporte suporte = isAdmin ? suporteRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ticket não encontrado: " + id))
+                : suporteRepository.findByIdAndUsuario(id, usuario).orElseThrow(() -> new RecursoNaoEncontradoException("Ticket não encontrado: " + id));
+
+        return toSuporteResponseDTO(suporte);
     }
 
     public void adicionarMensagemChat (UUID id, SuporteNovaMensagemRequestDTO dto, String email) {
 
         Usuario usuario = buscarUsuarioLogado(email);
 
-        Suporte suporte = suporteRepository.findByIdAndUsuario(id, usuario)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Ticket não encontrado: " + id
-                        )
-                );
+        boolean isAdmin = usuario.getRole().toString().equals("ADMIN");
+
+        Suporte suporte = isAdmin ? suporteRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Ticket não encontrado: " + id))
+                : suporteRepository.findByIdAndUsuario(id, usuario).orElseThrow(() -> new RecursoNaoEncontradoException("Ticket não encontrado: " + id));
 
         boolean isDono = suporte.getUsuario().getId().equals(usuario.getId());
-        boolean isAdmin = usuario.getRole().toString().equals("ADMIN");
 
         if (!isDono && !isAdmin) {
             throw new AcessoNegadoException("Você não tem permissão para adicionar uma mensagem a este ticket.");
@@ -113,6 +108,7 @@ public class SuporteService {
         novaMensagem.setConteudo(dto.getConteudo());
         novaMensagem.setDataEnvio(Instant.now());
         novaMensagem.setRemetente(usuario);
+
         novaMensagem.setSuporte(suporte);
 
         suporte.getMensagens().add(novaMensagem);

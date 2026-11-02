@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Forno;
+import com.rafael.monitor_forno.database.model.FornoCompartilhado;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.*;
 import com.rafael.monitor_forno.dto.*;
@@ -25,8 +26,9 @@ public class FornoService {
     private final SessaoRepository sessaoRepository;;
     private final TemperaturaRepository temperaturaRepository;
     private final EventoRepository eventoRepository;
+    private final FornoCompartilhadoRepository fornoCompartilhadoRepository;
 
-    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler, SessaoRepository sessaoRepository, TemperaturaRepository temperaturaRepository, EventoRepository eventoRepository) {
+    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler, SessaoRepository sessaoRepository, TemperaturaRepository temperaturaRepository, EventoRepository eventoRepository, FornoCompartilhadoRepository fornoCompartilhadoRepository) {
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
@@ -34,6 +36,7 @@ public class FornoService {
         this.sessaoRepository = sessaoRepository;
         this.temperaturaRepository = temperaturaRepository;
         this.eventoRepository = eventoRepository;
+        this.fornoCompartilhadoRepository = fornoCompartilhadoRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -42,6 +45,21 @@ public class FornoService {
                         "Usuário não encontrado " + email
                 )
         );
+    }
+
+    public boolean verificarAcessoAoForno(Forno forno, Usuario usuario) {
+
+        if (forno.getUsuario() != null && forno.getUsuario().getId().equals(usuario.getId())) {
+            return true; // O usuário é o proprietário do forno
+        }
+
+        Optional<FornoCompartilhado> fornoCompartilhado = fornoCompartilhadoRepository.findByFornoAndUsuario(forno, usuario);
+
+        if (fornoCompartilhado.isPresent() && fornoCompartilhado.get().getStatus() == com.rafael.monitor_forno.enums.compartilhamento.StatusC.ACEITO) {
+            return true; // O usuário tem acesso compartilhado ao forno
+        }
+
+        return false;
     }
 
     public FornoResponseDTO preRegistro (PreRegistroFornoDTO dto) {
@@ -201,7 +219,17 @@ public class FornoService {
 
     public List<FornoResponseDTO> buscarMeusFornos(String email) {
         Usuario usuario = buscarUsuarioLogado(email);
-        return fornoRepository.findByUsuario(usuario)
+
+        List<Forno> fornosProprios = fornoRepository.findByUsuario(usuario);
+        List<FornoCompartilhado> fornosCompartilhados = fornoCompartilhadoRepository.findAllByUsuarioAndStatus(usuario, com.rafael.monitor_forno.enums.compartilhamento.StatusC.ACEITO);
+
+        List<Forno> todosFornos = new java.util.ArrayList<>(fornosProprios);
+
+        for (FornoCompartilhado compartilhado : fornosCompartilhados) {
+            todosFornos.add(compartilhado.getForno());
+        }
+
+        return  todosFornos
                 .stream()
                 .map(this::toFornoResponseDTO)
                 .collect(java.util.stream.Collectors.toList());

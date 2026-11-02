@@ -27,8 +27,9 @@ public class TelemetriaService {
     private final TemporizadorRepository temporizadorRepository;
     private final TemperaturaRepository temperaturaRepository;
     private final FornoRepository fornoRepository;
+    private final FornoService fornoService;
 
-    public TelemetriaService(TelemetriaRepository telemetriaRepository, UsuarioRepository usuarioRepository, SessaoRepository sessaoRepository, EventoRepository eventoRepository,TemporizadorRepository temporizadorRepository, TemperaturaRepository temperaturaRepository, FornoRepository fornoRepository) {
+    public TelemetriaService(TelemetriaRepository telemetriaRepository, UsuarioRepository usuarioRepository, SessaoRepository sessaoRepository, EventoRepository eventoRepository,TemporizadorRepository temporizadorRepository, TemperaturaRepository temperaturaRepository, FornoRepository fornoRepository, FornoService fornoService) {
         this.telemetriaRepository = telemetriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.sessaoRepository = sessaoRepository;
@@ -36,6 +37,7 @@ public class TelemetriaService {
         this.temporizadorRepository = temporizadorRepository;
         this.temperaturaRepository = temperaturaRepository;
         this.fornoRepository = fornoRepository;
+        this.fornoService = fornoService;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -74,7 +76,11 @@ public class TelemetriaService {
 
     public TelemetriaResponseDTO buscarAtual(UUID fornoId, String email) {
 
-        Forno forno = validarFornoDoUsuario(fornoId, email);
+        Forno forno = buscarForno(fornoId);
+
+        if(!fornoService.verificarAcessoAoForno(forno, buscarUsuarioLogado(email))) {
+            throw new AcessoNegadoException("Você não tem permissão para acessar este forno");
+        }
 
         Telemetria telemetria = telemetriaRepository.findFirstByFornoOrderByAtualizadoEmDesc(forno)
                 .orElseThrow(
@@ -87,7 +93,11 @@ public class TelemetriaService {
     }
 
     public DashboardDTO buscarDashboard(UUID fornoId, String email) {
-        Forno forno = validarFornoDoUsuario(fornoId, email);
+        Forno forno = buscarForno(fornoId);
+
+        if(!fornoService.verificarAcessoAoForno(forno, buscarUsuarioLogado(email))) {
+            throw new AcessoNegadoException("Você não tem permissão para acessar este forno");
+        }
 
         Telemetria telemetria = telemetriaRepository.findFirstByFornoOrderByAtualizadoEmDesc(forno)
                 .orElseThrow(
@@ -131,7 +141,11 @@ public class TelemetriaService {
     }
 
     public EstatisticasDTO buscarEstatisticas(UUID fornoId, String email) {
-        Forno forno = validarFornoDoUsuario(fornoId, email);
+        Forno forno = buscarForno(fornoId);
+
+        if(!fornoService.verificarAcessoAoForno(forno, buscarUsuarioLogado(email))) {
+            throw new AcessoNegadoException("Você não tem permissão para acessar este forno");
+        }
 
         int quantidadeSessoes = sessaoRepository.countByFornoId(forno.getId());
         long tempoTotalLigado = Optional.ofNullable(sessaoRepository.findTempoTotalLigadoByFornoId(forno.getId())).orElse(0L);
@@ -153,9 +167,7 @@ public class TelemetriaService {
                 .build();
     }
 
-    private Forno validarFornoDoUsuario(UUID fornoId, String email) {
-        Usuario usuario = buscarUsuarioLogado(email);
-
+    private Forno buscarForno(UUID fornoId) {
         Forno forno = fornoRepository.findById(fornoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Forno não encontrado"));
 
@@ -163,9 +175,6 @@ public class TelemetriaService {
             throw new AcessoNegadoException("Este forno não possui um usuário associado.");
         }
 
-        if (!forno.getUsuario().getId().equals(usuario.getId())) {
-            throw new AcessoNegadoException("Este forno não pertence ao usuário logado.");
-        }
         return forno;
     }
 

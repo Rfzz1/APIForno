@@ -3,6 +3,7 @@ package com.rafael.monitor_forno.controller;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.FornoService;
 import jakarta.validation.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/fornos")
@@ -71,8 +73,11 @@ public class FornoController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/meus")
-    public ResponseEntity<List<FornoResponseDTO>> buscarMeusFornos(Authentication authentication) {
-        List<FornoResponseDTO> fornos = fornoService.buscarMeusFornos(authentication.getName());
+    public ResponseEntity<List<FornoResponseDTO>> buscarMeusFornos() {
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<FornoResponseDTO> fornos = fornoService.buscarMeusFornos(email);
         return ResponseEntity.ok(fornos);
     }
 

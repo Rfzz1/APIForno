@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -56,22 +57,6 @@ public class SessaoService {
                 );
     }
 
-    private Forno verificarFornoUsuario(String serialNumber, String email) {
-        Usuario usuario = buscarUsuarioLogado(email);
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado " + serialNumber
-                        )
-                );
-        if (forno.getUsuario() != usuario) {
-            throw new AcessoNegadoException(
-                    "Forno não pertence ao usuário logado"
-            );
-        }
-        return forno;
-    }
-
     public SessaoResumoDTO iniciarSessao(String serialNumber) {
 
         Forno forno = fornoRepository.findBySerialNumber(serialNumber)
@@ -80,6 +65,15 @@ public class SessaoService {
                                 "Forno não encontrado " + serialNumber
                         )
                 );
+
+        Optional<Sessao> sessaoAtiva = forno.getSessoes().stream()
+                .filter(sessao -> sessao.getFimSessao() == null)
+                .findFirst();
+
+        sessaoAtiva.ifPresent(sessao -> {
+            sessao.setFimSessao(Instant.now());
+            sessaoRepository.save(sessao);
+        });
 
         Sessao sessao = new Sessao();
         sessao.setForno(forno);

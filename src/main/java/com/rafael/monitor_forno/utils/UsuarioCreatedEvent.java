@@ -1,4 +1,4 @@
-package com.rafael.monitor_forno.config.utils;
+package com.rafael.monitor_forno.utils;
 
 import com.rafael.monitor_forno.database.model.Usuario;
 

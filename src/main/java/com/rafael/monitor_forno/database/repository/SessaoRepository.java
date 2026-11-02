@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,8 +21,6 @@ public interface    SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     List<Sessao> findAllByFornoUsuario(Usuario usuario);
 
-    List<Sessao> findAllByFornoId(UUID id);
-
     List<Sessao> findAllByFornoIdAndFornoUsuarioEmail(UUID id, String email);
 
     List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, Instant dataInicio, Instant dataFim);
@@ -37,6 +33,8 @@ public interface    SessaoRepository extends JpaRepository<Sessao, UUID> {
     WHERE s.forno.id = :fornoId
     """)
     Long findTempoTotalLigadoByFornoId(UUID fornoId);
+
+    List<Sessao> findAllByFimSessaoIsNull();
 
 
     void deleteAllByFornoId(UUID fornoId);

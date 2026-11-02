@@ -2,9 +2,11 @@ package com.rafael.monitor_forno.service;
 
 import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Sessao;
+import com.rafael.monitor_forno.database.model.Telemetria;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.FornoRepository;
 import com.rafael.monitor_forno.database.repository.SessaoRepository;
+import com.rafael.monitor_forno.database.repository.TelemetriaRepository;
 import com.rafael.monitor_forno.database.repository.UsuarioRepository;
 import com.rafael.monitor_forno.dto.SessaoAtualizarDTO;
 import com.rafael.monitor_forno.dto.SessaoDetalhesDTO;
@@ -17,6 +19,8 @@ import com.rafael.monitor_forno.exception.SessaoEncerradaException;
 import com.rafael.monitor_forno.mappers.EventoMapper;
 import com.rafael.monitor_forno.mappers.FornoMapper;
 import com.rafael.monitor_forno.mappers.TemperaturaMapper;
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -34,14 +38,16 @@ public class SessaoService {
     private final UsuarioRepository usuarioRepository;
     private final FornoRepository fornoRepository;
     private final FornoMapper fornoMapper;
+    private final TelemetriaRepository telemetriaRepository;
 
-    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository, FornoMapper fornoMapper) {
+    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository, FornoMapper fornoMapper, TelemetriaRepository telemetriaRepository) {
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.temperaturaMapper = temperaturaMapper;
         this.usuarioRepository = usuarioRepository;
         this.fornoRepository = fornoRepository;
         this.fornoMapper = fornoMapper;
+        this.telemetriaRepository = telemetriaRepository;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -159,6 +165,34 @@ public class SessaoService {
         Sessao sessaoAtualizada = sessaoRepository.save(sessao);
 
         return toDetalhesDTO(sessaoAtualizada);
+    }
+
+    @Transactional
+    @Scheduled(fixedRate = 300000)
+    public void limparSessoesNaoFinalizadas() {
+
+        List<Sessao> sessoes = sessaoRepository.findAllByFimSessaoIsNull();
+
+        for (Sessao sessao : sessoes) {
+
+            Telemetria telemetria = telemetriaRepository
+                    .findFirstByFornoOrderByAtualizadoEmDesc(sessao.getForno())
+                    .orElse(null);
+
+            if (telemetria == null) {
+                continue;
+            }
+
+            Instant agora = Instant.now();
+            Instant ultimaAtualizacao = telemetria.getAtualizadoEm();
+
+            if (agora.isAfter(ultimaAtualizacao.plusSeconds(300))) {
+                sessao.setEstadoFornoFinal(EstadoForno.OFFLINE);
+                sessao.setFimSessao(Instant.now());
+                sessaoRepository.save(sessao);
+            }
+        }
+
     }
 
     public void deleteById(UUID id, String email) {

@@ -6,6 +6,7 @@ import com.rafael.monitor_forno.dto.DashboardDTO;
 import com.rafael.monitor_forno.dto.EstatisticasDTO;
 import com.rafael.monitor_forno.dto.TelemetriaRequestDTO;
 import com.rafael.monitor_forno.dto.TelemetriaResponseDTO;
+import com.rafael.monitor_forno.enums.estados.EstadoForno;
 import com.rafael.monitor_forno.enums.eventos.EventoSistema;
 import com.rafael.monitor_forno.exception.AcessoNegadoException;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
@@ -120,7 +121,9 @@ public class TelemetriaService {
                 .fornoId(forno.getId())
                 .temperaturaAtual(telemetria.getTemperaturaAtual())
                 .temperaturaUltima(telemetria.getTemperaturaUltima())
-                .estadoForno(telemetria.getEstadoForno())
+                .estadoForno(
+                        Instant.now().isAfter(telemetria.getAtualizadoEm().plusSeconds(30)) ? EstadoForno.OFFLINE : telemetria.getEstadoForno()
+                )
                 .estadoSistema(telemetria.getEstadoSistema())
                 .tempoLigadoMinutos(telemetria.getTempoLigadoMinutos())
                 .quantidadeSessoes(quantidadeSessoes)
@@ -181,7 +184,9 @@ public class TelemetriaService {
         return TelemetriaResponseDTO.builder()
                 .temperaturaAtual(telemetria.getTemperaturaAtual())
                 .temperaturaUltima(telemetria.getTemperaturaUltima())
-                .estadoForno(telemetria.getEstadoForno())
+                .estadoForno(
+                        Instant.now().isAfter(telemetria.getAtualizadoEm().plusSeconds(30)) ? EstadoForno.OFFLINE : telemetria.getEstadoForno()
+                )
                 .estadoSistema(telemetria.getEstadoSistema())
                 .tempoLigadoMinutos(telemetria.getTempoLigadoMinutos())
                 .atualizadoEm(telemetria.getAtualizadoEm())

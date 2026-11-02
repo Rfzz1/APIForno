@@ -346,6 +346,11 @@ public class UsuarioService {
 
         Claims claims = jwtService.extrairTodasClaims(dto.getToken());
         String emailAntigo = claims.get("emailAntigo", String.class);
+        String tokenTipo = claims.get("tokenTipo", String.class);
+
+        if (!"REVERSAO_EMAIL".equals(tokenTipo)) {
+            throw new CredenciaisInvalidasException("Token inválido");
+        }
 
         Usuario usuario = usuarioRepository.findByEmailAnterior(emailAntigo)
                         .orElseThrow(

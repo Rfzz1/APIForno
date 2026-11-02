@@ -82,6 +82,7 @@ public class JwtService {
     public String gerarTokenReversaoEmail(String emailAntigo, String novoEmail) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TIPO, "ReversaoEmail");
+        claims.put(TOKEN_TIPO, "REVERSAO_EMAIL");
         claims.put(EMAIL_ANTIGO, emailAntigo);
         claims.put(NOVO_EMAIL, novoEmail);
 
@@ -95,11 +96,20 @@ public class JwtService {
     }
 
     public Claims extrairTodasClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSecretKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.warn("Token expirado: {}", e.getMessage());
+            throw new SessaoEncerradaException("Token expirado");
+        } catch (JwtException e) {
+            log.warn("Token inválido: {}", e.getMessage());
+            throw new RecursoNaoEncontradoException("Token inválido");
+        }
     }
 
     public String extrairSubject(String token) {

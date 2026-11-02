@@ -29,7 +29,7 @@ public class Forno {
     private String pinSeguranca;
 
     @Version
-    private Long version;
+    private Long version = 0L;
     
     private boolean ativo;
     private boolean reivindicado;

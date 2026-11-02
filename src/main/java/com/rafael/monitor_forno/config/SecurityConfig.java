@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,13 +24,23 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, FornoDetailsService fornoDetailsService, UsuarioDetailsService usuarioDetailsService, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            FornoDetailsService fornoDetailsService,
+            UsuarioDetailsService usuarioDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider fornoProvider = new DaoAuthenticationProvider(fornoDetailsService);
+        fornoProvider.setPasswordEncoder(passwordEncoder);
+
+        DaoAuthenticationProvider usuarioProvider = new DaoAuthenticationProvider(usuarioDetailsService);
+        usuarioProvider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(fornoProvider, usuarioProvider);
     }
 
     @Bean

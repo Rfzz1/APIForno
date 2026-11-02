@@ -1,5 +1,6 @@
 package com.rafael.monitor_forno.service;
 
+import com.rafael.monitor_forno.config.CustomUserDetails;
 import com.rafael.monitor_forno.config.utils.UsuarioCreatedEvent;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.MensagemSuporteRepository;
@@ -15,6 +16,8 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
@@ -41,11 +44,12 @@ public class UsuarioService {
     private final SecureRandom secureRandom = new SecureRandom();
     private final MensagemSuporteRepository mensagemSuporteRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final AuthenticationManager authenticationManager;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository, MensagemSuporteRepository mensagemSuporteRepository, ApplicationEventPublisher applicationEventPublisher) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService,  EmailService emailService, RefreshTokenService refreshTokenService, RefreshTokenRepository refreshTokenRepository, MensagemSuporteRepository mensagemSuporteRepository, ApplicationEventPublisher applicationEventPublisher, AuthenticationManager authenticationManager) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -54,6 +58,7 @@ public class UsuarioService {
         this.refreshTokenRepository = refreshTokenRepository;
         this.mensagemSuporteRepository = mensagemSuporteRepository;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.authenticationManager = authenticationManager;
     }
 
     private Usuario buscarUsuarioLogado(String email) {
@@ -80,7 +85,13 @@ public class UsuarioService {
             );
         }
 
-        String cpfSemMascara = dto.getCpf().replaceAll("[^\\d]", "");
+        if (dto.getCpf() == null || dto.getCpf().trim().isEmpty()) {
+            throw new CredenciaisInvalidasException(
+                    "CPF é obrigatório"
+            );
+        }
+
+        String cpfSemMascara = dto.getCpf().replaceAll("\\D", "");
         String emailNormalizado = dto.getEmail().trim().toLowerCase();
 
         Usuario usuario = new Usuario();
@@ -147,7 +158,6 @@ public class UsuarioService {
 
     @Transactional
     public void atualizarSenha(NovaSenhaLogadoDTO dto, String email) {
-
         Usuario usuarioExistente = buscarUsuarioLogado(email);
 
         if (!passwordEncoder.matches(dto.senhaAtual(), usuarioExistente.getSenha())) {
@@ -181,28 +191,33 @@ public class UsuarioService {
 
     public LoginResponseDTO login(String email, String senha) {
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElse(null);
+        Authentication authentication = authenticationManager.authenticate(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(email, senha)
+        );
 
-        if (usuario == null || !passwordEncoder.matches(senha, usuario.getSenha())) {
-            throw new AcessoNegadoException(
-                    "Email ou senha inválidos"
-            );
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+
+        if (role == null) {
+            throw new CredenciaisInvalidasException("Usuário sem role definida");
         }
 
-        String role = usuario.getRole().toString();
-        String emailU = usuario.getEmail();
+        String emailU = authentication.getName();
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        Long versaoUsuario = userDetails.getVersaoUsuario();
+        UUID idUsuario = userDetails.getId();
 
         // ALTERAÇÃO AQUI: Passando "USUARIO" como tipo
         String token = jwtService.gerarToken(
-                usuario.getEmail(),
-                "USUARIO", role, usuario.getVersaoUsuario()
+                emailU,
+                "USUARIO", role, versaoUsuario
         );
 
         String refreshToken = refreshTokenService.cadastrarRefreshToken(emailU).getRefreshToken();
 
         return LoginResponseDTO.builder()
-                .id(usuario.getId())
+                .id(idUsuario)
                 .token(token)
                 .refreshtoken(refreshToken)
                 .build();

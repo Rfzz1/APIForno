@@ -33,7 +33,8 @@ public class UsuarioDetailsService
                 usuario.getEmail(),
                 usuario.getSenha(),
                 authorities,
-                usuario.getVersaoUsuario() // <-- Pegando do banco
+                usuario.getVersaoUsuario(), // <-- Pegando do banco
+                usuario.getId()
         );
     }
 }

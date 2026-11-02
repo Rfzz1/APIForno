@@ -68,5 +68,4 @@ public class Usuario {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario", cascade = CascadeType.REMOVE)
     private java.util.List<FornoCompartilhado> fornosCompartilhados;
-
 }

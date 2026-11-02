@@ -1,13 +1,14 @@
 package com.rafael.monitor_forno.controller;
 
+import com.rafael.monitor_forno.config.CustomUserDetails;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.service.UsuarioService;
-import jakarta.validation.*;
-import org.springframework.security.core.Authentication;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,11 +59,9 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/alterar-minha-senha")
-    public ResponseEntity<Void> alterarSenha(@Valid @RequestBody NovaSenhaLogadoDTO dto) {
+    public ResponseEntity<Void> alterarSenha(@Valid @RequestBody NovaSenhaLogadoDTO dto, @AuthenticationPrincipal CustomUserDetails usuarioExistente) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        usuarioService.atualizarSenha(dto, email);
+        usuarioService.atualizarSenha(dto, usuarioExistente.getUsername());
 
         return ResponseEntity.ok().build();
     }

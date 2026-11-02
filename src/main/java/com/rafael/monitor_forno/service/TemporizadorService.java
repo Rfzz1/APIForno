@@ -13,7 +13,6 @@ import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.exception.RecursoEmFormatoInvalido;
 import com.rafael.monitor_forno.exception.RecursoNaoEncontradoException;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -21,12 +20,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 @EnableScheduling
@@ -154,25 +151,6 @@ public class TemporizadorService {
         }
     }
 
-    public TemporizadorResponseDTO buscarProximoTemporizador(String serialNumber) {
-
-        Forno forno = fornoRepository.findBySerialNumber(serialNumber)
-                .orElseThrow(
-                        () -> new RecursoNaoEncontradoException(
-                                "Forno não encontrado"
-                        )
-                );
-
-        Temporizador temporizador = temporizadorRepository.findFirstByFornoAndExecutadoFalseOrderByHorarioFimAsc(forno)
-                .orElseThrow(   
-                        () -> new RecursoNaoEncontradoException(
-                                "Nenhum temporizador encontrado"
-                        )
-                );
-
-        return toResponseDTO(temporizador);
-    }
-
     public List<TemporizadorResponseDTO> buscarTemporizadoresUsuario(String email) {
 
         Usuario usuario = buscarUsuarioLogado(email);
@@ -278,13 +256,6 @@ public class TemporizadorService {
         }
 
         temporizadorRepository.delete(temporizador);
-    }
-
-    public List<TemporizadorResponseDTO> findAll() {
-        return temporizadorRepository.findAll()
-                .stream()
-                .map(this:: toResponseDTO)
-                .toList();
     }
 
     public List<TemporizadorResponseDTO> findAllByFornoUsuario(String email) {

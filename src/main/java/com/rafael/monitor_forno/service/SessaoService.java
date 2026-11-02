@@ -17,11 +17,9 @@ import com.rafael.monitor_forno.exception.SessaoEncerradaException;
 import com.rafael.monitor_forno.mappers.EventoMapper;
 import com.rafael.monitor_forno.mappers.FornoMapper;
 import com.rafael.monitor_forno.mappers.TemperaturaMapper;
-import com.rafael.monitor_forno.mappers.UserMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -34,16 +32,14 @@ public class SessaoService {
     private final EventoMapper eventoMapper;
     private final TemperaturaMapper temperaturaMapper;
     private final UsuarioRepository usuarioRepository;
-    private final UserMapper userMapper;
     private final FornoRepository fornoRepository;
     private final FornoMapper fornoMapper;
 
-    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, UserMapper userMapper, FornoRepository fornoRepository, FornoMapper fornoMapper) {
+    public SessaoService(SessaoRepository sessaoRepository, EventoMapper eventoMapper, TemperaturaMapper temperaturaMapper, UsuarioRepository usuarioRepository, FornoRepository fornoRepository, FornoMapper fornoMapper) {
         this.sessaoRepository = sessaoRepository;
         this.eventoMapper = eventoMapper;
         this.temperaturaMapper = temperaturaMapper;
         this.usuarioRepository = usuarioRepository;
-        this.userMapper = userMapper;
         this.fornoRepository = fornoRepository;
         this.fornoMapper = fornoMapper;
     }

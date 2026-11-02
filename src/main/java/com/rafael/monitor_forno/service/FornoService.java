@@ -6,11 +6,9 @@ import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.database.repository.*;
 import com.rafael.monitor_forno.dto.*;
 import com.rafael.monitor_forno.exception.*;
-import com.rafael.monitor_forno.handler.FornoWebSocketHandler;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
@@ -22,17 +20,15 @@ public class FornoService {
     private final FornoRepository fornoRepository;
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
-    private final FornoWebSocketHandler fornoWebSocketHandler;
     private final SessaoRepository sessaoRepository;;
     private final TemperaturaRepository temperaturaRepository;
     private final EventoRepository eventoRepository;
     private final FornoCompartilhadoRepository fornoCompartilhadoRepository;
 
-    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, FornoWebSocketHandler fornoWebSocketHandler, SessaoRepository sessaoRepository, TemperaturaRepository temperaturaRepository, EventoRepository eventoRepository, FornoCompartilhadoRepository fornoCompartilhadoRepository) {
+    public FornoService(FornoRepository fornoRepository, UsuarioRepository usuarioRepository, JwtService jwtService, SessaoRepository sessaoRepository, TemperaturaRepository temperaturaRepository, EventoRepository eventoRepository, FornoCompartilhadoRepository fornoCompartilhadoRepository) {
         this.fornoRepository = fornoRepository;
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
-        this.fornoWebSocketHandler = fornoWebSocketHandler;
         this.sessaoRepository = sessaoRepository;
         this.temperaturaRepository = temperaturaRepository;
         this.eventoRepository = eventoRepository;

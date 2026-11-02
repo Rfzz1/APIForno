@@ -3,15 +3,12 @@ package com.rafael.monitor_forno.config;
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.*;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,27 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final FornoDetailsService fornoDetailsService;
-    private final UsuarioDetailsService usuarioDetailsService;
-    private final PasswordEncoder passwordEncoder;
 
     public SecurityConfig(JwtFilter jwtFilter, FornoDetailsService fornoDetailsService, UsuarioDetailsService usuarioDetailsService, PasswordEncoder passwordEncoder) {
         this.jwtFilter = jwtFilter;
-        this.fornoDetailsService = fornoDetailsService;
-        this.usuarioDetailsService = usuarioDetailsService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
-
-        DaoAuthenticationProvider fornoProvider = new DaoAuthenticationProvider(fornoDetailsService);
-        fornoProvider.setPasswordEncoder(passwordEncoder);
-
-        DaoAuthenticationProvider usuarioProvider = new DaoAuthenticationProvider(usuarioDetailsService);
-        usuarioProvider.setPasswordEncoder(passwordEncoder);
-
-        return new ProviderManager(fornoProvider, usuarioProvider);
     }
 
     @Bean

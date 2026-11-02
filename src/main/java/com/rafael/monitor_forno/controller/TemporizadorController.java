@@ -92,18 +92,4 @@ public class TemporizadorController {
         temporizadorService.marcarComoExecutado(id, serialNumber);
         return ResponseEntity.noContent().build();
     }
-
-    @PreAuthorize("hasRole('FORNO')")
-    @GetMapping("/proximo")
-    public ResponseEntity<TemporizadorResponseDTO>
-    buscarProximoTemporizador() {
-
-        String serialNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return ResponseEntity.ok(
-                temporizadorService.buscarProximoTemporizador(
-                        serialNumber
-                )
-        );
-    }
 }

@@ -16,7 +16,6 @@ import com.rafael.monitor_forno.mappers.TemperaturaMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,18 +55,22 @@ public class TemperaturaService {
                         )
                 );
 
-        Double diferenca = Math.abs(dto.getTemperaturaAtual() - dto.getTemperaturaUltima());
-
-        if (diferenca <= THRESHOLD) {
-            return false;
-        }
-
         Sessao sessao = sessaoRepository.findByIdAndForno(dto.getSessaoId(), forno)
                 .orElseThrow(
                         () -> new AcessoNegadoException(
                                 "Sessao não pertence ao dispositivo " + forno.getNome()
                         )
                 );
+
+        Temperatura ultimaTemperaturaSalva = temperaturaRepository.findTopBySessaoOrderByRegistradoEmDesc(sessao).orElse(null);
+
+        if (ultimaTemperaturaSalva != null) {
+            Double diferenca = Math.abs(dto.getTemperaturaAtual() - ultimaTemperaturaSalva.getTemperaturaAtual());
+
+            if (diferenca <= THRESHOLD) {
+                return false;
+            }
+        }
 
         Temperatura temperatura = new Temperatura();
         temperatura.setTemperaturaAtual(dto.getTemperaturaAtual());

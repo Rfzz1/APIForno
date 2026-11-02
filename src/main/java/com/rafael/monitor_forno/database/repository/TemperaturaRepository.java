@@ -6,11 +6,9 @@ import com.rafael.monitor_forno.database.model.Temperatura;
 import com.rafael.monitor_forno.database.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +23,8 @@ public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> 
     List<Temperatura> findAllBySessaoFornoUsuario(Usuario usuario);
 
     List<Temperatura> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(UUID fornoId, String email);
+
+    Optional<Temperatura> findTopBySessaoOrderByRegistradoEmDesc(Sessao sessao);
 
     List<Temperatura> findAllBySessaoId(UUID sessaoId);
 

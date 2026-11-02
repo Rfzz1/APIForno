@@ -24,7 +24,6 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
 
@@ -34,21 +33,18 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequestDTO dto) {
         refreshTokenService.logout(dto.getRefreshToken());
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/renovar-refresh-token")
     public ResponseEntity<RefreshTokenResponseDTO> renovar(@RequestBody RefreshTokenRequestDTO dto) {
         RefreshTokenResponseDTO response = refreshTokenService.renovarRefreshToken(dto.getRefreshToken());
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/esqueci-minha-senha")
     public ResponseEntity<String> esqueciSenha(@Valid @RequestBody UserRequestDTO dto) {
         usuarioService.gerarTokenRecuperacao(dto.getEmail());
@@ -56,7 +52,6 @@ public class AuthController {
         return ResponseEntity.ok("Se o e-mail existir, enviaremos instruções para recuperação.");
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/redefinir-senha")
     public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody NovaSenhaDTO dto) {
         usuarioService.redefinirSenha(dto);

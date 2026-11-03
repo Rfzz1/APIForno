@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error", "/ws/**","/auth/logout", "/auth/renovar-refresh-token", "/auth/reverter-email").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login", "/fornos/auth", "/usuario", "/auth/esqueci-minha-senha", "/auth/redefinir-senha", "/fornos/auto-provisionar").permitAll()
-                        .requestMatchers("/temperaturas/**").hasAnyRole("FORNO", "USER", "ADMIN")
+                        .requestMatchers("/temperaturas/**").hasAnyAuthority("ROLE_FORNO", "USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

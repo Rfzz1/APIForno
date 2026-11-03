@@ -1,12 +1,13 @@
 package com.rafael.monitor_forno.config;
 
-import com.rafael.monitor_forno.exception.CredenciaisInvalidasException;
 import com.rafael.monitor_forno.service.FornoDetailsService;
 import com.rafael.monitor_forno.service.JwtService;
 import com.rafael.monitor_forno.service.UsuarioDetailsService;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -72,8 +73,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 try {
                     if ("FORNO".equals(tipo)) {
                         details = fornoDetailsService.loadUserByUsername(subject);
+                        System.out.println(">>> Carregou FORNO para o serial: " + subject);
                     } else if ("USUARIO".equals(tipo)) {
                         details = usuarioDetailsService.loadUserByUsername(subject);
+                        System.out.println(">>> Carregou USUARIO para o email: " + subject);
                     }
                 } catch (UsernameNotFoundException e) {
                     System.out.println("Entidade não encontrada para: " + subject);

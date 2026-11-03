@@ -76,7 +76,6 @@ public class AuthController {
         return ResponseEntity.ok("E-mail alterado com sucesso.");
     }
 
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PutMapping("/reverter-email")
     public ResponseEntity<Void> reverterMudancaEmail(@Valid @RequestBody ReversaoEmailDTO dto) {
 

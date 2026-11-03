@@ -83,7 +83,7 @@ public class TemperaturaService {
         return true;
     }
 
-    public void deleteById(UUID id, UUID fornoId) {
+    public void deleteById(UUID id, UUID fornoId, String emailUsuarioLogado) {
 
         Temperatura temperatura = temperaturaRepository.findByIdAndSessaoFornoId(id, fornoId)
                 .orElseThrow(
@@ -91,6 +91,14 @@ public class TemperaturaService {
                                 "Temperatura não encontrada ou não pertence ao forno: " + id
                         )
                 );
+
+        String emailDono = temperatura.getSessao().getForno().getUsuario().getEmail();
+
+        if (!emailDono.equals(emailUsuarioLogado)) {
+            throw new AcessoNegadoException(
+                    "Você não tem permissão para apagar este registro."
+            );
+        }
 
         temperaturaRepository.delete(temperatura);
     }

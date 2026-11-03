@@ -18,6 +18,5 @@ public class TemperaturaRequestDTO {
     @NotNull(message = "Sessão é obrigatória")
     private UUID sessaoId;
 
-    @NotNull(message = "Forno é obrigatório")
     private UUID fornoId;
 }

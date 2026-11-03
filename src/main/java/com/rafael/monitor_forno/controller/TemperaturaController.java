@@ -48,8 +48,8 @@ public class TemperaturaController {
 
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/fornos/{fornoId}/temperaturas/{id}")
-    public ResponseEntity<Void> deleteTemperature(@PathVariable UUID id, @PathVariable UUID fornoId) {
-        temperaturaService.deleteById(id, fornoId);
+    public ResponseEntity<Void> deleteTemperature(@PathVariable UUID id, @PathVariable UUID fornoId, Authentication authentication) {
+        temperaturaService.deleteById(id, fornoId, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 

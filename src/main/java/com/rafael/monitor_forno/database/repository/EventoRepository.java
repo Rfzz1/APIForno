@@ -1,7 +1,6 @@
 package com.rafael.monitor_forno.database.repository;
 
 import com.rafael.monitor_forno.database.model.Evento;
-import com.rafael.monitor_forno.database.model.Forno;
 import com.rafael.monitor_forno.database.model.Usuario;
 import com.rafael.monitor_forno.enums.eventos.EventoSistema;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,9 +20,36 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
 
     Optional<Evento> findFirstBySessaoFornoIdOrderByCriadoEmDesc(UUID fornoId);
 
-    List<Evento> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(UUID fornoId, String email);
+    @Query("""
+        SELECT e FROM Evento e
+        WHERE e.sessao.forno.id = :fornoId
+        AND (
+            e.sessao.forno.usuario.email = :email
+            OR EXISTS (
+                SELECT fc FROM FornoCompartilhado fc
+                WHERE fc.forno.id = :fornoId
+                AND fc.usuario.email = :email
+                AND fc.status = 'ACEITO'
+            )
+        )
+    """)
+    List<Evento> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmailOuCompartilhado(UUID fornoId, String email);
 
-    List<Evento> findTopThreeBySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDesc(UUID fornoId, String email);
+    @Query("""
+        SELECT e FROM Evento e
+        WHERE e.sessao.forno.id = :fornoId
+        AND (
+            e.sessao.forno.usuario.email = :email
+            OR EXISTS (
+                SELECT fc FROM FornoCompartilhado fc
+                WHERE fc.forno.id = :fornoId
+                AND fc.usuario.email = :email
+                AND fc.status = 'ACEITO'
+            )
+        )
+        ORDER BY criadoEm DESC
+    """)
+    List<Evento> findTop3BySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDescOuCompartilhado(UUID fornoId, String email);
 
     @Query("""
     SELECT COUNT(e)

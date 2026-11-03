@@ -22,7 +22,20 @@ public interface TemperaturaRepository extends JpaRepository<Temperatura, UUID> 
 
     List<Temperatura> findAllBySessaoFornoUsuario(Usuario usuario);
 
-    List<Temperatura> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(UUID fornoId, String email);
+    @Query("""
+        SELECT t FROM Temperatura t
+        WHERE t.sessao.forno.id = :fornoId
+        AND (
+            t.sessao.forno.usuario.email = :email
+            OR EXISTS (
+                SELECT fc FROM FornoCompartilhado fc
+                WHERE fc.forno.id = :fornoId
+                AND fc.usuario.email = :email
+                AND fc.status = 'ACEITO'
+            )
+        )
+    """)
+    List<Temperatura> findAllBySessaoFornoIdAndSessaoFornoUsuarioEmailOrCompartilhado(UUID fornoId, String email);
 
     Optional<Temperatura> findTopBySessaoOrderByRegistradoEmDesc(Sessao sessao);
 

@@ -93,6 +93,12 @@ public class FornoService {
                         )
                 );
 
+        if(!forno.getPinSeguranca().equals(dto.getPin())) {
+            throw new AcessoNegadoException(
+                    "Você não tem autorização pra provisionar esse forno"
+            );
+        }
+
         int linhasAfetadas = fornoRepository.reivindicarSeNaoReivindicado(dto.getSerialNumber());
 
         if (linhasAfetadas == 0) {

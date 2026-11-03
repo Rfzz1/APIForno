@@ -105,7 +105,7 @@ public class TemperaturaService {
 
     public List<TemperaturaDTO> findAllByFornoIdAndUsuario(UUID fornoId, String email) {
 
-        List<Temperatura> temperaturas = temperaturaRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(fornoId, email);
+        List<Temperatura> temperaturas = temperaturaRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmailOrCompartilhado(fornoId, email);
 
         if (!fornoRepository.existsById(fornoId)) {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);

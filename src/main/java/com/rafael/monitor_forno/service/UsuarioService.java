@@ -272,6 +272,10 @@ public class UsuarioService {
             throw new CredencialJaCadastradaException("Este e-mail já está sendo usado por outro usuário");
         }
 
+        if (usuario.getTentativasCodigoEmail() == null) {
+            usuario.setTentativasCodigoEmail(0);
+        }
+
         String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
 
         usuario.setCodigoVerificacaoEmail(otp);
@@ -280,12 +284,16 @@ public class UsuarioService {
         usuario.setTentativasCodigoEmail(0);
         usuarioRepository.save(usuario);
 
+        String nomeSanitizado = HtmlUtils.htmlEscape(usuario.getNome());
+        String novoEmailSanitizado = HtmlUtils.htmlEscape(novoEmail);
+        String codigoSanitizado = HtmlUtils.htmlEscape(otp);
+
         emailService.enviarEmail(usuario.getNovoEmailPendente(),
                 "Código de Verificação para Alteração de E-mail",
                 """
                         Olá, %s!<br><br>
                         
-                        Recebemos uma solicitação para alterar o e-mail da sua conta para <b>%s<b>.<br><br>
+                        Recebemos uma solicitação para alterar o e-mail da sua conta para <b>%s</b>.<br><br>
                         
                         Seu código de verificação é:<br><br>
                         
@@ -294,7 +302,7 @@ public class UsuarioService {
                         Este código expira em 15 minutos.<br><br>
                         
                         Caso você não tenha solicitado esta alteração, ignore este e-mail e altere sua senha.
-                        """.formatted(usuario.getNome(), novoEmail, otp)
+                        """.formatted(nomeSanitizado, novoEmailSanitizado, codigoSanitizado)
         );
 
     }
@@ -310,6 +318,10 @@ public class UsuarioService {
 
         if (Instant.now().isAfter(usuario.getExpiracaoCodigoEmail())) {
             throw new CredenciaisInvalidasException("Código de verificação expirado");
+        }
+
+        if (usuario.getTentativasCodigoEmail() == null) {
+            usuario.setTentativasCodigoEmail(0);
         }
 
         if (!Objects.equals(usuario.getCodigoVerificacaoEmail(), codigo)) {
@@ -343,16 +355,20 @@ public class UsuarioService {
         String token = jwtService.gerarTokenReversaoEmail(emailAtual, novoEmail);
         String link = baseUrl + "/reverter-email?token=" + token;
 
+        String nomeSanitizado = HtmlUtils.htmlEscape(usuario.getNome());
+        String novoEmailSanitizado = HtmlUtils.htmlEscape(novoEmail);
+
+
         emailService.enviarEmail(usuario.getEmailAnterior(),
                 "E-mail alterado com sucesso",
                 """
                         Olá, %s!<br><br>
                         
-                        O seu e-mail foi alterado para <b>%s<b>.<br><br>
+                        O seu e-mail foi alterado para <b>%s</b>.<br><br>
                         
                         Caso você não tenha solicitado esta alteração, clique no link para reverter a ação e altere sua senha.
                         %s
-                        """.formatted(usuario.getNome(), novoEmail, link)
+                        """.formatted(nomeSanitizado, novoEmailSanitizado, link)
         );
 
     }
@@ -376,7 +392,7 @@ public class UsuarioService {
                         );
 
         if (usuario.getVersaoUsuario() == null) {
-            throw new CredenciaisInvalidasException("Token inválido");
+            usuario.setVersaoUsuario(0L);
         }
 
         usuario.setEmail(emailAntigo);
@@ -403,7 +419,7 @@ public class UsuarioService {
         usuario.setSenha(senhaHash);
 
         if (usuario.getVersaoUsuario() == null) {
-            throw new CredenciaisInvalidasException("Token inválido");
+            usuario.setVersaoUsuario(0L);
         }
 
         usuario.setTokenRecuperacaoSenha(null);

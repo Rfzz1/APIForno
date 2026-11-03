@@ -16,7 +16,6 @@ import com.rafael.monitor_forno.exception.SessaoEncerradaException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -171,7 +170,7 @@ public class SuporteService {
                         .id(mensagem.getId())
                         .conteudo(mensagem.getConteudo())
                         .dataEnvio(mensagem.getDataEnvio())
-                        .nomeRemetente(mensagem.getRemetente().getNome())
+                        .nomeRemetente(mensagem.getRemetente() == null ? "Usuário deletado" : mensagem.getRemetente().getNome())
                         .build())
                 .collect(Collectors.toList());
 

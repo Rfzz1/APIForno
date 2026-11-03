@@ -19,6 +19,12 @@ public class FornoSessionRegistry {
     }
 
     public void remover(String serialNumber, WebSocketSession session) {
+        WebSocketSession sessaoSalva = sessoesAtivas.get(serialNumber);
+
+        if (sessaoSalva != null && sessaoSalva.getId().equals(session.getId())) {
+            sessoesAtivas.remove(serialNumber);
+        }
+
         sessoesAtivas.remove(serialNumber, session);
     }
 

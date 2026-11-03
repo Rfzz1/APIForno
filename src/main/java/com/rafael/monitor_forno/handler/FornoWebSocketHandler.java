@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.handler;
 
 import com.rafael.monitor_forno.websocket.FornoSessionRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -8,9 +9,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+@Slf4j
 @Component
 public class FornoWebSocketHandler extends TextWebSocketHandler {
 
@@ -24,8 +23,7 @@ public class FornoWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession sessao, TextMessage mensagem) throws Exception {
 
         String textoRecebido = mensagem.getPayload();
-        System.out.println("Mensagem recebida: " + textoRecebido);
-
+        log.info("Mensagem recebida: {}", textoRecebido);
         sessao.sendMessage(new TextMessage(textoRecebido));
 
     }
@@ -50,7 +48,6 @@ public class FornoWebSocketHandler extends TextWebSocketHandler {
 
         String serialNumber =  (String) sessao.getAttributes().get("serialNumber");
         fornoSessionRegistry.remover(serialNumber, sessao);
-        sessao.sendMessage(new TextMessage("Forno desconectado: " + serialNumber + " - " + status));
 
     }
 

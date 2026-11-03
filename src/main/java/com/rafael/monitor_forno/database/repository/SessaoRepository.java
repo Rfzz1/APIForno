@@ -21,7 +21,20 @@ public interface    SessaoRepository extends JpaRepository<Sessao, UUID> {
 
     List<Sessao> findAllByFornoUsuario(Usuario usuario);
 
-    List<Sessao> findAllByFornoIdAndFornoUsuarioEmail(UUID id, String email);
+    @Query("""
+        SELECT s FROM Sessao s
+        WHERE s.forno.id = :fornoId
+        AND (
+            s.forno.usuario.email = :email
+            OR EXISTS (
+                SELECT fc FROM FornoCompartilhado fc
+                WHERE fc.forno.id = :fornoId
+                AND fc.usuario.email = :email
+                AND fc.status = 'ACEITO'
+            )
+        )
+    """)
+    List<Sessao> findAllByFornoIdAndFornoUsuarioEmailOrCompartilhado(UUID fornoId, String email);
 
     List<Sessao> findAllByFornoUsuarioAndInicioSessaoBetween(Usuario usuario, Instant dataInicio, Instant dataFim);
 

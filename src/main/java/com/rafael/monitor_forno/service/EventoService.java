@@ -135,7 +135,7 @@ public class EventoService {
 
     public List<EventoResponseDTO> findAllByFornoAndUsuario(UUID fornoId, String email) {
 
-        List<Evento> eventos = eventoRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmail(fornoId, email);
+        List<Evento> eventos = eventoRepository.findAllBySessaoFornoIdAndSessaoFornoUsuarioEmailOuCompartilhado(fornoId, email);
 
         if (!fornoRepository.existsById(fornoId)) {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
@@ -153,7 +153,7 @@ public class EventoService {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);
         }
 
-        return eventoRepository.findTopThreeBySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDesc(fornoId, email)
+        return eventoRepository.findTop3BySessaoFornoIdAndSessaoFornoUsuarioEmailOrderByCriadoEmDescOuCompartilhado(fornoId, email)
                 .stream()
                 .map(eventoMapper::toEventoDTO)
                 .toList();

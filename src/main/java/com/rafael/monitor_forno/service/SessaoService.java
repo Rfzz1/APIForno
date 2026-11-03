@@ -102,23 +102,37 @@ public class SessaoService {
                 );
 
         if (sessao.getFimSessao() != null) {
-            throw new SessaoEncerradaException(
-                    "Sessão já encerrada."
+            long duracaoSegundos = ChronoUnit.SECONDS.between(
+                    sessao.getInicioSessao(),
+                    sessao.getFimSessao()
             );
+
+            sessao.setDuracaoSegundos(
+                    Math.max(0L, duracaoSegundos)
+            );
+
+            Sessao sessaoSalva = sessaoRepository.save(sessao);
+
+            return toDetalhesDTO(sessaoSalva);
         }
 
-        sessao.setFimSessao(Instant.now());
+        Instant fim = Instant.now();
+
+        sessao.setFimSessao(fim);
 
         long duracaoSegundos = ChronoUnit.SECONDS.between(
                 sessao.getInicioSessao(),
                 sessao.getFimSessao()
         );
 
-        sessao.setDuracaoSegundos(duracaoSegundos);
+        sessao.setDuracaoSegundos(
+                Math.max(0L, duracaoSegundos)
+        );
 
         if(dto.getEstadoSistemaFinal() != null) {
             sessao.setEstadoSistemaFinal(dto.getEstadoSistemaFinal());
         }
+
         sessao.setEstadoFornoFinal(EstadoForno.FORNO_DESLIGADO);
         sessao.setEstadoFornoAtual(EstadoForno.FORNO_DESLIGADO);
 
@@ -179,16 +193,29 @@ public class SessaoService {
                     .findFirstByFornoOrderByAtualizadoEmDesc(sessao.getForno())
                     .orElse(null);
 
-            if (telemetria == null) {
-                continue;
-            }
-
             Instant agora = Instant.now();
             Instant ultimaAtualizacao = telemetria.getAtualizadoEm();
 
+            if (telemetria != null && telemetria.getAtualizadoEm() != null && telemetria.getAtualizadoEm().isAfter(ultimaAtualizacao)) {
+
+                ultimaAtualizacao = telemetria.getAtualizadoEm();
+
+            }
+
             if (agora.isAfter(ultimaAtualizacao.plusSeconds(300))) {
+
                 sessao.setEstadoFornoFinal(EstadoForno.OFFLINE);
-                sessao.setFimSessao(Instant.now());
+
+                Instant fim = Instant.now();
+
+                sessao.setFimSessao(fim);
+
+                long duracao = ChronoUnit.SECONDS.between(
+                        sessao.getInicioSessao(),
+                        fim
+                );
+
+                sessao.setDuracaoSegundos(Math.max(0L,duracao));
                 sessaoRepository.save(sessao);
             }
         }
@@ -215,7 +242,7 @@ public class SessaoService {
 
     public List<SessaoResumoDTO> findAllSessoesByFornoIdAndUsuario(UUID fornoId, String email) {
 
-        List<Sessao> sessoes = sessaoRepository.findAllByFornoIdAndFornoUsuarioEmail(fornoId, email);
+        List<Sessao> sessoes = sessaoRepository.findAllByFornoIdAndFornoUsuarioEmailOrCompartilhado(fornoId, email);
 
         if (!fornoRepository.existsById(fornoId)) {
             throw new RecursoNaoEncontradoException("Forno não encontrado: " + fornoId);

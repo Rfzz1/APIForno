@@ -19,9 +19,9 @@ public interface TemporizadorRepository extends JpaRepository<Temporizador, UUID
 
     @Query("""
         SELECT t FROM Temporizador t
-        WHERE t.sessao.forno.id = :fornoId
+        WHERE t.forno.id = :fornoId
         AND (
-            t.sessao.forno.usuario.email = :email
+            t.forno.usuario.email = :email
             OR EXISTS (
                 SELECT fc FROM FornoCompartilhado fc
                 WHERE fc.forno.id = :fornoId

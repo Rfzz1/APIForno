@@ -174,6 +174,7 @@ public class UsuarioService {
 
     }
 
+    @Transactional
     public void deleteByEmail(String email) {
         Usuario usuario = buscarUsuarioLogado(email);
 

@@ -1,6 +1,7 @@
 package com.rafael.monitor_forno.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,9 +14,9 @@ import java.time.ZonedDateTime;
 @Builder
 public class TemporizadorRequestDTO {
 
-    @NotBlank(message = "horarioFim é obrigatório")
+    @NotNull(message = "horarioFim é obrigatório")
     private ZonedDateTime horarioFim;
 
-    @NotBlank(message = "horarioInicio é obrigatório")
+    @NotNull(message = "horarioInicio é obrigatório")
     private ZonedDateTime horarioInicio;
 }

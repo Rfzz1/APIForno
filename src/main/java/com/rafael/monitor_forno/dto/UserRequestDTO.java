@@ -19,6 +19,9 @@ public class UserRequestDTO {
     @Email(message = "Email inválido")
     @NotBlank(message = "Email é obrigatório")
     private String email;
+
+    @NotNull(message = "Data de nascimento é obrigatória")
+    @Past(message = "Data de nascimento deve estar no passado")
     private LocalDate nascimento;
 
     @NotBlank(message = "Senha é obrigatória")

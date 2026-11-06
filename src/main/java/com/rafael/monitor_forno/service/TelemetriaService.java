@@ -151,6 +151,7 @@ public class TelemetriaService {
 
         int quantidadeSessoes = sessaoRepository.countByFornoId(forno.getId());
         long tempoTotalLigado = Optional.ofNullable(sessaoRepository.findTempoTotalLigadoByFornoId(forno.getId())).orElse(0L);
+
         Double temperaturaMaxima = Optional.ofNullable(temperaturaRepository.findTemperaturaMaximaByFornoId(forno.getId())).orElse(0.0);
 
         long alertas = eventoRepository.countEventosBySessaoFornoIdAndTipoIn(forno.getId(), List.of(EventoSistema.ALERTA_ENTRADA, EventoSistema.ALERTA_SAIDA));

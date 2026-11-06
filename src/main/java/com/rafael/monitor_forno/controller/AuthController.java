@@ -46,9 +46,8 @@ public class AuthController {
     }
 
     @PostMapping("/esqueci-minha-senha")
-    public ResponseEntity<String> esqueciSenha(@Valid @RequestBody UserRequestDTO dto) {
-        usuarioService.gerarTokenRecuperacao(dto.getEmail());
-
+    public ResponseEntity<String> esqueciSenha(@Valid @RequestBody EsqueciSenhaDTO dto) {
+        usuarioService.gerarTokenRecuperacao(dto.email());
         return ResponseEntity.ok("Se o e-mail existir, enviaremos instruções para recuperação.");
     }
 

@@ -22,4 +22,5 @@ public class SessaoResumoDTO {
     private EstadoForno estadoFornoFinal;
     private EstadoSistema estadoSistemaFinal;
     private Double temperaturaMaxima;
+    private long duracaoSegundos;
 }

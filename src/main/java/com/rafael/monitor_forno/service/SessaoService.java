@@ -73,7 +73,16 @@ public class SessaoService {
                 .findFirst();
 
         sessaoAtiva.ifPresent(sessao -> {
-            sessao.setFimSessao(Instant.now());
+            Instant fim = Instant.now();
+
+            long duracaoSegundos = ChronoUnit.SECONDS.between(
+                    sessao.getInicioSessao(),
+                    fim
+            );
+
+            sessao.setDuracaoSegundos(Math.max(0L, duracaoSegundos));
+            sessao.setFimSessao(fim);
+
             sessaoRepository.save(sessao);
         });
 
@@ -301,6 +310,7 @@ public class SessaoService {
                 .fimSessao(sessao.getFimSessao())
                 .estadoFornoFinal(sessao.getEstadoFornoFinal())
                 .estadoSistemaFinal(sessao.getEstadoSistemaFinal())
+                .duracaoSegundos(sessao.getDuracaoSegundos() != null ? sessao.getDuracaoSegundos() : 0L)
                 .build();
     }
 

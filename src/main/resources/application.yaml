@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false # com telemetria a cada 1s, imprimir todo SQL deixa cada mensagem mais lenta
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -63,7 +63,8 @@ logging:
   level:
     org:
       springframework:
-        security: DEBUG
+        # Troque para DEBUG só quando estiver investigando algo (gera várias linhas por mensagem)
+        security: INFO
         web:
-          socket: DEBUG
-          cors: DEBUG
+          socket: INFO
+          cors: INFO
